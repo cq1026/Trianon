@@ -42,6 +42,13 @@ const chatView = (() => {
       if (S.settings.reasoningOpen) setRsn(n, true);
     }
     n.b = row.querySelector('.b'); n.tx = row.querySelector('.tx'); n.meta = row.querySelector('.meta');
+    /* 头像（外观里打开才显示）：角色用角色卡头像，人设用首字 */
+    const av = document.createElement('span'); av.className = 'av'; av.setAttribute('aria-hidden', 'true');
+    const src = m.role === 'assistant' ? S.char.avatar : '';
+    av.innerHTML = src ? `<img src="${esc(src)}" alt="">` : `<b>${esc([...((m.role === 'user' ? m.userName || m.name : m.charName || m.name || S.char.name) || '?')][0] || '?')}</b>`;
+    row.insertBefore(av, row.firstChild);
+    row.dataset.name = m.role === 'user' ? (m.userName || m.name || '') : (m.charName || m.name || '');
+    row.querySelector('.col').dataset.name = (row.dataset.name || '').toUpperCase().split('').join(' ');
     n.meta.addEventListener('click', e => {
       const a = e.target.closest('[data-act]'); if (!a) return;
       act(m, n, a.dataset.act, a);
@@ -94,10 +101,10 @@ const chatView = (() => {
       if (m.state === 'error') h += `<span class="err">${esc(m.error || '连接中断')}</span>` + L_('retry', '重试');
       else if (m.state === 'stopped') h += `<span>${m.text ? '已停止，保留已写的部分' : '已停止，还没有落笔'}</span>` + (m === last ? L_('regen', '重新生成') + (m.text ? L_('cont', '续写') : '') : '');
       else if (m.state === 'done') {
-        h += `<span>${hm(m.time)}${m.dur ? ' · 耗时 ' + m.dur.toFixed(1) + ' s' : ''}</span>` + L_('copy', '复制') + L_('edit', '编辑');
+        h += `<span class="tm">${hm(m.time)}</span>${m.dur ? `<span class="du">耗时 ${m.dur.toFixed(1)} s</span>` : ''}` + L_('copy', '复制') + L_('edit', '编辑');
         if (m === last && isLast && !m.greeting && idle) h += (S.caps.regenerate !== false ? L_('regen', '重新生成') : '') + L_('cont', '续写');
       }
-    } else h += `<span>${hm(m.time)}</span>` + L_('edit', '编辑');
+    } else h += `<span class="tm">${hm(m.time)}</span>` + L_('edit', '编辑');
     if (m.state === 'done' || m.state === 'stopped' || m.state === 'error' || m.role === 'user')
       h += `<span class="more">${L_('more', '⋯', 'mo')}<span class="mm">${L_('hide', m.hidden ? '取消隐藏' : '隐藏')}${L_('branch', '从这里分支')}${L_('ckpt', '存检查点')}${L_('prompt', '提示词')}${L_('del', '删除', 'dl')}</span></span>`;
     if (m.hidden) h += '<span class="hid-t">已隐藏 · 不发给模型</span>';

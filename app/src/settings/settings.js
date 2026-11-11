@@ -207,7 +207,8 @@ const V={appearance:Object.assign({theme:'light',fontSize:14.5,density:'standard
 const SECS=[
  {k:'persona',n:'i',em:'Persona',zh:'人设',sub:'你在故事里是谁'},
  {k:'appearance',n:'ii',em:'Parure',zh:'外观',sub:'字号 · 动效 · 输出方式'},
- {k:'connection',n:'iii',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
+ {k:'salon',n:'iii',em:'Salon',zh:'对话样式',sub:'气泡 · 头像 · 宽度 · CSS'},
+ {k:'connection',n:'iv',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
 const MODES=[
  {k:'manual',n:'i',zh:'始终询问',en:'Always Ask',was:'原 Manual · 默认',d:'只读操作自动放行；写文件、跑命令逐一向你确认。',risk:0},
  {k:'yolo',n:'ii',zh:'必要时询问',en:'Ask When Needed',was:'原 YOLO · /demo-ask',d:'普通调用自动批准；.env、私钥、rm -rf、退出 Plan 仍会问你。',risk:1},
@@ -346,7 +347,7 @@ const buildDesk=()=>{let h='';
   /* index: ruled note + label strips */
   h+=P('g',14,120,214,388,-2.2,'ruled',`<div class="ix-hd"><em>Index</em><b>目 录</b></div>`,{torn:'',y0:66,gap:22,mx:26,amp:2.4});
   h+=DC('g',176,108,10,starBadge(34));
-  SECS.forEach((s,i)=>{const x=[30,18,34][i],y=188+i*80,r=[-2.6,1.8,-1.4][i];const q=nd('g');const d=q.n*.055;q.n++;q.last=d;
+  SECS.forEach((s,i)=>{const x=[30,18,34,22][i],y=188+i*72,r=[-2.6,1.8,-1.4,2.2][i];const q=nd('g');const d=q.n*.055;q.n++;q.last=d;
     h+=`<button type="button" class="an st-tab${i?'':' on'}" data-sec="${s.k}" aria-current="${i?'false':'page'}" data-g="g" data-d="${d.toFixed(3)}" data-k="p" data-r="${r}" style="left:${x}px;top:${y}px">
       <i class="tb-bg"></i><span class="tn">${s.n}</span><span class="tz">${s.zh}</span><em class="te">${s.em.toUpperCase()}</em><i class="ey"></i>
       <i class="tb-tape">${tapeSVG(54,22,i*31+5,'milk')}</i></button>`});
@@ -466,7 +467,26 @@ const secAppearance=()=>{const P_=V.appearance,g='appearance';let h='';
 /* III · permission：已删除 */
 const tagShape=(W,H,c)=>`M${c},0 L${W-c},0 L${W},${c} L${W},${H} L0,${H} L0,${c} Z`;
 
-/* III · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
+/* iii · salon（新增）：对话样式、头像、配色、宽度、消息栏、自定义 CSS */
+const secSalon=()=>{const g='salon',U=Object.assign({style:'bubbles',avatar:'none',tint:'brume',width:'720',time:true,dur:true,swn:true,who:true,css:''},APP.S.settings.ui||{});let h='';
+  h+=P(g,250,110,470,250,-1.4,'vellum','',{torn:'rb',cls:'deco'});
+  h+=P(g,262,122,330,34,-2,null,dymo('对话样式 Salon · 气泡 · 头像 · 宽度','c2lt'),{cls:'c2-strip'});
+  h+=CD(g,256,166,452,318,1,`<div class="sf">
+    <div class="sf-r"><div class="sf-l"><b>对话样式</b><small>气泡 · 平铺 · 信笺</small></div>${seg('ui.style',[['bubbles','气泡'],['flat','平铺'],['document','信笺']],U.style)}</div>
+    <div class="sf-r"><div class="sf-l"><b>头像</b><small>角色卡头像 · 人设首字</small></div>${seg('ui.avatar',[['none','不显示'],['circle','圆形'],['square','方形']],U.avatar)}</div>
+    <div class="sf-r"><div class="sf-l"><b>配色</b><small>气泡的底色</small></div>${seg('ui.tint',[['brume','雾蓝'],['rose','藕粉'],['sauge','灰绿']],U.tint)}</div>
+    <div class="sf-r"><div class="sf-l"><b>对话宽度</b><small>聊天区和输入栏</small></div>${seg('ui.width',[['600','窄'],['720','标准'],['900','宽'],['full','全宽']],U.width)}</div></div>`,{staves:[42,124]});
+  h+=CD(g,256,506,452,252,-1,`<div class="sf cv"><div class="cv-hd"><em>Messages</em><b>消 息 栏</b></div>
+    <div class="sf-r"><div class="sf-l"><b>时间</b><small>每条消息下方</small></div>${tg('ui.time',U.time!==false)}</div>
+    <div class="sf-r"><div class="sf-l"><b>耗时</b><small>生成用了多久</small></div>${tg('ui.dur',U.dur!==false)}</div>
+    <div class="sf-r"><div class="sf-l"><b>候选编号</b><small>‹ 1 / 2 ›</small></div>${tg('ui.swn',U.swn!==false)}</div>
+    <div class="sf-r"><div class="sf-l"><b>角色名</b><small>气泡上方的名字</small></div>${tg('ui.who',U.who!==false)}</div></div>`,{tone:'silver'});
+  h+=OB(g,760,118,190,6,O.scroll,{dec:1});
+  h+=CD(g,728,300,246,470,1.4,`<div class="pn-ed css"><div class="pn-hd"><em>CSS</em><b>自 定 义 样 式</b></div>
+    <textarea id="stCss" spellcheck="false" placeholder=".in .b { font-size: 16px; }">${esc(U.css||'')}</textarea><small class="css-n">改完立即生效，只影响这台设备。</small></div>`,{tone:'milk'});
+  return h};
+
+/* IV · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
 const CONN={ready:['En ligne','已连接','后端在线，可以写信了'],connecting:['Connexion…','正在连接','正在等后端回应'],reconnecting:['Reconnexion','连接断开','正在重连'],failed:['Hors ligne','连接失败','后端没有回应']};
 const connHTML=()=>{const A=APP.S,c=CONN[A.conn.state]||[A.conn.state,A.conn.state,''];const mock=window.__trianon.usingMock;
   const cap=(k,t)=>`<span class="cn-cap${A.caps[k]===false?' no':''}">${A.caps[k]===false?'✕':'✓'} ${t}</span>`;
@@ -497,6 +517,7 @@ root.innerHTML=`<div class="st-sheet c2-desk" id="stSheet">${buildDesk()}
  <i class="st-charm" id="stCharm">${charmSVG()}</i>
  <section class="st-sec on" data-sec="persona">${secPersona()}</section>
  <section class="st-sec" data-sec="appearance">${secAppearance()}</section>
+ <section class="st-sec" data-sec="salon">${secSalon()}</section>
  <section class="st-sec" data-sec="connection">${secConnection()}</section></div>`;
 b.appendChild(root);
 const sheet=$('stSheet'),charm=$('stCharm'),cStrand=charm.querySelector('.ch-strand'),cNum=charm.querySelector('.ch-num');
@@ -522,6 +543,7 @@ const T_=[];const later=(s,f)=>{const id=setTimeout(f,s*1000);T_.push(id);return
 const save=(key,val)=>{const [grp,k]=key.split('.');
   if(grp==='appearance'){V.appearance[k]=val;APP.S.settings.appearance=Object.assign({},V.appearance)}
   else if(grp==='chat')APP.S.settings[k]=val;
+  else if(grp==='ui'){APP.S.settings.ui=Object.assign({},APP.S.settings.ui||{},{[k]:val})}
   APP.saveSettings();APP.bus.emit('ui:settings',key);showSaved()};
 
 /* ---------------------------------------------------------------- open / close / switch */
@@ -599,7 +621,8 @@ let bigW=null;const bigWatch=t=>{if(!bigW){const e=root.querySelector('.ew');if(
 const rebuild=sec=>{const keep=S.sec;const i=SECS.findIndex(x=>x.k===(sec||keep));
   if(!sec||sec==='persona')secs[0].innerHTML=secPersona();
   if(!sec||sec==='appearance'){secs[1].innerHTML=secAppearance();applyPreview()}
-  if(!sec||sec==='connection')secs[2].innerHTML=secConnection();
+  if(!sec||sec==='salon')secs[2].innerHTML=secSalon();
+  if(!sec||sec==='connection')secs[3].innerHTML=secConnection();
   refs();if(S.open){const t=sT();ANS.forEach(A=>{if(A.g===(sec||keep))A.d=-9});S.secT=Math.min(S.secT,t-1)}};
 APP.bus.on('ui:conn',()=>{if(S.open&&S.sec==='connection')drawConn()});
 APP.bus.on('ui:model',()=>{if(S.open&&S.sec==='connection')drawConn()});
@@ -629,7 +652,7 @@ root.addEventListener('pointerdown',e=>{const sl=e.target.closest('.st-sl');if(!
 root.addEventListener('pointermove',e=>{if(drag)setFont(slVal(drag,e.clientX))});
 root.addEventListener('pointerup',()=>{if(drag){drag=null;save('appearance.fontSize',V.appearance.fontSize)}});
 root.addEventListener('keydown',e=>{const sl=e.target.closest&&e.target.closest('.st-sl');if(sl&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();setFont(V.appearance.fontSize+(e.key==='ArrowRight'?.5:-.5),true)}});
-root.addEventListener('input',e=>{const id=e.target.id;if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
+root.addEventListener('input',e=>{const id=e.target.id;if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
   if(id==='stPnName'){p.name=e.target.value;const av=root.querySelector('.c3av .av-ph');if(av){av.querySelector('b').textContent=[...(p.name||'?').trim()][0]||'?';av.querySelector('em').textContent=p.name}}else p.desc=e.target.value;
   clearTimeout(S.pnT);S.pnT=setTimeout(()=>{APP.savePersonas();if(p.id===APP.S.personaId)APP.bus.emit('ui:persona');showSaved()},500)});
 root.addEventListener('change',e=>{const id=e.target.id;const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});

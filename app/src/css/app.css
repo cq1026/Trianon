@@ -306,3 +306,36 @@ body.st-open .rail-btn { display: none !important; }
 .lr-opts select { border: 1px solid rgba(76, 93, 136, .35); background: #fff; border-radius: 3px; padding: 2px 4px; font: 12.5px/1.2 var(--serif); color: #26305A; }
 .lr-ea .lnk { border: 0; background: none; padding: 0; font: italic 12.5px/1 CormI, Georgia, serif; color: #9A6474; text-decoration: underline; }
 @media (max-width: 760px) { .lr-wrap { grid-template-columns: 1fr; } .lr-books { border-right: 0; max-height: 34vh; } }
+
+/* ===== 对话样式（设置 · Salon） ===== */
+.thread, .wrap { width: min(var(--chatw, 720px), calc(100% - 120px)); }
+body.no-time .meta .tm, body.no-dur .meta .du, body.no-swn .meta .swn, body.no-who .row.in .who .nm { display: none; }
+.row > .av { display: none; flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; place-items: center; background: radial-gradient(circle at 40% 35%, #F3F5FA, #D9DFEE); border: 1.5px solid var(--frame); box-shadow: inset 0 0 0 2px var(--ring); margin-top: 18px; }
+.row > .av img { width: 100%; height: 100%; object-fit: cover; } .row > .av b { font-size: 16px; color: #2E3A63; }
+body:not([data-avatar="none"]) .row > .av { display: grid; }
+body[data-avatar="square"] .row > .av { border-radius: 8px; }
+body:not([data-avatar="none"]) .row.in { gap: 12px; } body:not([data-avatar="none"]) .row.out { gap: 12px; flex-direction: row-reverse; justify-content: flex-start; }
+body:not([data-avatar="none"]) .row.out .col { margin-left: auto; }
+/* 配色 */
+body[data-tint="rose"] .in .b { background: linear-gradient(#F6ECEF, #EEDFE5) !important; color: #4A3346 !important; }
+body[data-tint="rose"] .out .b { background: linear-gradient(#EEF1F7, #E3E8F2) !important; color: #2E3A63 !important; }
+body[data-tint="sauge"] .in .b { background: linear-gradient(#E9EEE8, #DDE5DC) !important; color: #2F3D35 !important; }
+body[data-tint="sauge"] .out .b { background: linear-gradient(#F4F1EA, #ECE7DD) !important; color: #3E3A30 !important; }
+/* 平铺：去掉气泡框，左对齐，用名字区分 */
+body[data-chatstyle="flat"] .row .col .b, body[data-chatstyle="document"] .row .col .b { border: 0 !important; box-shadow: none !important; background: none !important; border-radius: 0 !important; padding: 2px 0 !important; }
+body[data-chatstyle="flat"] .out .b::before, body[data-chatstyle="document"] .out .b::before { display: none; }
+body[data-chatstyle="flat"] .row, body[data-chatstyle="document"] .row { justify-content: flex-start !important; flex-direction: row !important; }
+body[data-chatstyle="flat"] .row .col, body[data-chatstyle="document"] .row .col { max-width: 100% !important; align-items: stretch !important; flex: 1; }
+body[data-chatstyle="flat"] .row { padding: 14px 0 6px; margin-top: 0 !important; border-bottom: 1px solid rgba(135, 150, 180, .25); }
+body[data-chatstyle="flat"] .row.out .col::before, body[data-chatstyle="document"] .row.out .col::before { content: attr(data-name); }
+body[data-chatstyle="flat"] .row.out .col::before { font-size: 10px; letter-spacing: .24em; color: rgba(22, 26, 36, .45); margin: 0 0 5px; text-transform: uppercase; }
+body[data-chatstyle="flat"] .meta, body[data-chatstyle="document"] .meta { margin-left: 0; }
+body[data-chatstyle="flat"] .rnd, body[data-chatstyle="document"] .rnd { display: none; }
+/* 信笺：像一封连续的信，名字用小号大写 */
+body[data-chatstyle="document"] .thread { padding: 30px 46px 40px; margin-top: 10px; background: linear-gradient(#FDFBF7, #F7F3EC); border: 1px solid var(--champ); box-shadow: 0 30px 50px -40px rgba(40, 50, 90, .5), inset 0 0 0 6px #FBF8F1; }
+body[data-chatstyle="document"] .row { margin-top: 18px !important; }
+body[data-chatstyle="document"] .dsep + .row { margin-top: 0 !important; }
+body[data-chatstyle="document"] .b { font-size: calc(var(--fs, 14.5px) + 1px) !important; line-height: 1.95 !important; }
+body[data-chatstyle="document"] .row.out .b { font-style: italic; color: #4A4560 !important; }
+body[data-chatstyle="document"] .row.out .col::before, body[data-chatstyle="document"] .who { font-size: 10px; letter-spacing: .32em; color: #8A6A3A; margin: 0 0 4px; }
+body[data-chatstyle="document"] .meta { opacity: 0 !important; } body[data-chatstyle="document"] .row:hover .meta { opacity: 1 !important; }

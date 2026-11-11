@@ -82,6 +82,13 @@
     b.classList.toggle('rm', RMQ.matches || A.motion === 'reduce');
     b.classList.toggle('soft', A.motion === 'soft');
     b.classList.toggle('nost', A.stickers === false);
+    const U = Object.assign({ style: 'bubbles', avatar: 'none', tint: 'brume', width: '720', time: true, dur: true, swn: true, who: true, css: '' }, S.settings.ui || {});
+    b.dataset.chatstyle = U.style; b.dataset.avatar = U.avatar; b.dataset.tint = U.tint;
+    root.style.setProperty('--chatw', U.width === 'full' ? '100vw' : U.width + 'px');
+    b.classList.toggle('no-time', U.time === false); b.classList.toggle('no-dur', U.dur === false);
+    b.classList.toggle('no-swn', U.swn === false); b.classList.toggle('no-who', U.who === false);
+    let st = $('userCss'); if (!st) { st = document.createElement('style'); st.id = 'userCss'; document.head.appendChild(st); }
+    if (st.textContent !== U.css) st.textContent = U.css || '';
   }
   const root = document.documentElement;
   bus.on('ui:settings', applySettings); applySettings();
