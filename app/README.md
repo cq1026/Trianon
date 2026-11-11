@@ -2,6 +2,16 @@
 
 把 Trianon 的洛可可界面改造成角色扮演聊天前端，准备放进 Meta Muse 的「空间」里用。只有前端；和后端的约定见 [`docs/BRIDGE.md`](../docs/BRIDGE.md)。
 
+| 空白信笺 | 等待：羽毛笔写 waiting | 出字：笔沿着行写过去 |
+|---|---|---|
+| ![](../docs/screenshots/st/empty.jpg) | ![](../docs/screenshots/st/waiting.jpg) | ![](../docs/screenshots/st/writing.jpg) |
+| **设置 · 人设** | **角色库** | **提示词编排** |
+| ![](../docs/screenshots/st/settings.jpg) | ![](../docs/screenshots/st/character.jpg) | ![](../docs/screenshots/st/prompts.jpg) |
+
+| 手机 · 对话 | 手机 · 设置 |
+|---|---|
+| <img src="../docs/screenshots/st/mobile_chat.jpg" width="260"> | <img src="../docs/screenshots/st/mobile_settings.jpg" width="260"> |
+
 - **打开**：`dist/trianon-st.html`，单文件，不联网。没接后端时自动用内置的模拟后端演示。
 - **开场动画**：每天第一次打开时播放（同原版）。地址末尾加 `#ouverture` 强制播放，`#noouverture` 跳过；按任意键或点击跳过。
 - **构建**：`python3 app/build.py`，只用 Python 标准库。
@@ -54,4 +64,9 @@
 - [x] 推理块设置（设置 · 推理与自动化）：自动展开、加入提示词、解析 `<think>` 标签
 - [x] 自动化：发送键（Enter / Ctrl+Enter）、启动时打开上次对话、自动滚动、回复过短自动续写、出现屏蔽词或过短自动换候选
 
-已知限制：手机上设置页目前是把整张桌面缩小显示，专门的手机排版放在第五阶段；夜间主题和跟随系统还没做。
+第五阶段（手机）：
+- [x] 设置页手机排版：卡片竖排、紧凑分页标签、隐藏纯装饰件
+- [x] 各面板、消息操作、弹层在手机上的全宽排版；修复收起的侧栏挡住点击
+- [x] 重截预览图（开场动画收尾改为缩放真实页面后，旧版的 m_v5 等截图已不再需要）
+
+已知限制：夜间主题和跟随系统还没做；群聊不在这一版里。
