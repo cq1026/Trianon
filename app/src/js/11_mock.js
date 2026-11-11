@@ -14,7 +14,16 @@
     set(k, v) { try { localStorage.setItem('trianon:mock:' + k, JSON.stringify(v)); } catch (e) { } },
     del(k) { try { localStorage.removeItem('trianon:mock:' + k); } catch (e) { } }
   };
-  const CHAR = { id: 'marguerite', name: 'Marguerite', greeting: '*把一封信压在镇纸下，抬眼看你。*\n你来了。今天想去花园走走，还是留在屋里喝茶？' };
+  const SEED = { id: 'marguerite', name: 'Marguerite', tags: ['示例', '小特里亚农'], creator: 'Trianon',
+    description: '小特里亚农宫的女官，二十出头，说话轻，记性好。熟悉宫里每一条小径和每一株玫瑰。',
+    personality: '温和、细心，偶尔狡黠', scenario: '十八世纪末的凡尔赛，{{user}} 是常来拜访的朋友。',
+    first_mes: '*把一封信压在镇纸下，抬眼看你。*\n你来了。今天想去花园走走，还是留在屋里喝茶？',
+    alternate_greetings: ['*正在窗边修剪一枝玫瑰，听见脚步声回过头。*\n是你啊，{{user}}。刚好，帮我扶一下花瓶。'],
+    mes_example: '', system_prompt: '', post_history_instructions: '', creator_notes: '内置示例角色。' };
+  const chars = () => { let c = db.get('chars', null); if (!c) { c = { [SEED.id]: SEED }; db.set('chars', c); } return c; };
+  const curChar = () => { const c = chars(); const id = db.get('charId', SEED.id); return c[id] || Object.values(c)[0] || SEED; };
+  const charEv = c => Object.assign({}, c, { greeting: c.first_mes || '' });
+  let CHAR = curChar();
   const REPLIES = [
     '*合上手里的书，指尖在书脊上停了一下。*\n“玫瑰园在宫殿东侧，沿着碎石小径一直走下去就到了。六月初开得最盛。”\n\n清晨常有薄雾，花瓣上带着水，香气比正午浓上一倍。若你愿意，明早我陪你去走一趟。',
     '*她把茶杯往你那边推了推，杯沿还冒着热气。*\n“先喝点热的。外头的风比看起来要冷。”\n\n你说的那件事，我想了一夜。也许答案不在信里，而在写信的人身上。',
@@ -57,7 +66,7 @@
         emit('conn.state', { state: 'ready' });
         emit('caps', { streaming: true, reasoning: true, stop: true, regenerate: true });
         emit('model', { name: 'Mock · 演示' });
-        emit('character', CHAR);
+        CHAR = curChar(); emit('character', charEv(CHAR));
       }, 350);
     },
     disconnect() { emit('conn.state', { state: 'reconnecting', attempt: 1, retryIn: 3 }); setTimeout(() => emit('conn.state', { state: 'ready' }), 3000); },
@@ -69,7 +78,8 @@
         case 'turn.impersonate': emit('turn.start', { turnId: p.turnId }); run(p.turnId, Object.assign({}, p, { textOverride: '*接过茶杯，指尖碰到她的手。*\n好啊，那就明早。我会早点起来。' })); return { ok: true };
         case 'turn.prompt': {
           const h = p.history || [], P = p.persona || {};
-          const prompt = [{ role: 'system', content: `你是 ${CHAR.name}。用中文进行角色扮演，动作写在 *星号* 里。\n用户扮演 ${P.name || 'User'}${P.desc ? '：' + P.desc : ''}。` }]
+          const sub = t => (t || '').replace(/\{\{char\}\}/gi, CHAR.name).replace(/\{\{user\}\}/gi, P.name || 'User');
+          const prompt = [{ role: 'system', content: sub(`${CHAR.system_prompt || `你是 ${CHAR.name}。用中文进行角色扮演，动作写在 *星号* 里。`}\n\n【角色】${CHAR.description || ''}\n【性格】${CHAR.personality || ''}\n【场景】${CHAR.scenario || ''}\n【用户】${P.name || 'User'}${P.desc ? '：' + P.desc : ''}`) }]
             .concat(h.map(x => ({ role: x.role, name: x.name, content: x.text })));
           return { ok: true, prompt, tokens: Math.round(JSON.stringify(prompt).length / 1.6) };
         }
@@ -81,6 +91,11 @@
             preview: last ? last.text.replace(/\s+/g, ' ').slice(0, 80) : '', branchOf: (p.meta || {}).branchOf, checkpointOf: (p.meta || {}).checkpointOf };
           db.set('chat:' + p.chatId, rec); db.set('index', ix); return { ok: true };
         }
+        case 'char.list': return { ok: true, chars: Object.values(chars()).map(c => ({ id: c.id, name: c.name, avatar: c.avatar || '', desc: c.description || '', tags: c.tags || [] })) };
+        case 'char.get': { const c = chars()[p.id]; return c ? { ok: true, char: c } : { ok: false, error: 'not found' }; }
+        case 'char.save': { const all = chars(); const c = Object.assign({}, p.char); if (!c.id) c.id = 'c_' + Date.now().toString(36); all[c.id] = c; db.set('chars', all); if (c.id === CHAR.id) CHAR = c; return { ok: true, id: c.id }; }
+        case 'char.delete': { const all = chars(); delete all[p.id]; db.set('chars', all); return { ok: true }; }
+        case 'char.select': { const c = chars()[p.id]; if (c) { db.set('charId', c.id); CHAR = c; } return { ok: true }; }
         case 'chat.list': { const ix = db.get('index', {}); return { ok: true, chats: Object.values(ix).filter(c => !p.characterId || c.characterId === p.characterId) }; }
         case 'chat.load': { const c = db.get('chat:' + p.chatId, null); return c ? { ok: true, chat: c } : { ok: false, error: 'not found' }; }
         case 'chat.rename': { const ix = db.get('index', {}); if (ix[p.chatId]) { ix[p.chatId].title = p.title; db.set('index', ix); } const c = db.get('chat:' + p.chatId, null); if (c) { c.title = p.title; db.set('chat:' + p.chatId, c); } return { ok: true }; }

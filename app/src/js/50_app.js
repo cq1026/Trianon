@@ -47,7 +47,7 @@
     el.hidden = !tx; el.dataset.state = c;
     $('tbConnTx').textContent = tx + (c === 'reconnecting' && S.conn.retryIn ? `（${S.conn.retryIn} 秒后重试）` : '');
   }
-  bus.on('ui:conn', topbar);
+  bus.on('ui:conn', topbar); bus.on('ui:char', topbar);
 
   /* 还没做的页面：一张小纸条 */
   const soon = $('soon'); let tSoon = 0;
@@ -67,7 +67,7 @@
   bus.on('nav', k => {
     const ST = T.settings;
     if (k === 'new') newChat();
-    else if (k === 'history') { /* 抽屉自己处理 */ }
+    else if (k === 'history' || k === 'chars') { /* 抽屉 / 角色库自己处理 */ }
     else if (k === 'persona' && ST) ST.open('persona');
     else if (k === 'look' && ST) ST.open('appearance');
     else if (k === 'settings' && ST) ST.open(ST.S.lastSec || 'persona');

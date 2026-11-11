@@ -42,8 +42,14 @@ const turn = (() => {
     if (S.chat.started) return;
     S.chat.started = true;
     /* 角色开场白就是这段对话的第一条消息 */
-    if (S.char.greeting) S.chat.messages.push({ id: uid('m'), role: 'assistant', name: S.char.name, charName: S.char.name, userName: persona().name,
-      text: macros(S.char.greeting, ctx()), time: Date.now(), state: 'done', greeting: true });
+    if (S.char.greeting) {
+      const g = { id: uid('m'), role: 'assistant', name: S.char.name, charName: S.char.name, userName: persona().name,
+        text: macros(S.char.greeting, ctx()), time: Date.now(), state: 'done', greeting: true };
+      /* 备用开场白 = 开场白的候选，可以左右切换 */
+      const alt = (S.char.alternate_greetings || []).filter(x => (x || '').trim());
+      if (alt.length) { g.swipes = [S.char.greeting].concat(alt).map(t => ({ text: macros(t, ctx()), reasoning: '', time: g.time, dur: 0, reasonDur: 0 })); g.sid = 0; }
+      S.chat.messages.push(g);
+    }
     bus.emit('ui:chat');
   }
 

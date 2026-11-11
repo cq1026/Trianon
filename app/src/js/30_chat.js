@@ -88,7 +88,8 @@ const chatView = (() => {
     const last = turn.lastAssistant(), isLast = turn.isLast(m), idle = !busy();
     let h = '';
     const sw = m.role === 'assistant' && m.swipes && m.swipes.length > 1 || (m.role === 'assistant' && isLast && !m.greeting && m.state === 'done');
-    if (sw && m.state !== 'pending') h += `<span class="swn">${L_('swl', '‹', 'sw')}<i>${(m.sid || 0) + 1} / ${m.swipes ? m.swipes.length : 1}</i>${L_('swr', '›', 'sw')}</span>`;
+    const greetSw = m.greeting && m.swipes && m.swipes.length > 1 && !S.chat.messages.some(x => x.role === 'user');
+    if ((sw && !m.greeting || greetSw) && m.state !== 'pending') h += `<span class="swn">${L_('swl', '‹', 'sw')}<i>${(m.sid || 0) + 1} / ${m.swipes ? m.swipes.length : 1}</i>${L_('swr', '›', 'sw')}</span>`;
     if (m.role === 'assistant') {
       if (m.state === 'error') h += `<span class="err">${esc(m.error || '连接中断')}</span>` + L_('retry', '重试');
       else if (m.state === 'stopped') h += `<span>${m.text ? '已停止，保留已写的部分' : '已停止，还没有落笔'}</span>` + (m === last ? L_('regen', '重新生成') + (m.text ? L_('cont', '续写') : '') : '');

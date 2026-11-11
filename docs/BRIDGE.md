@@ -57,7 +57,7 @@ async function handle(type, p) {
 | `conn.state` | `{ state, attempt?, retryIn?, message? }` | `state`：`connecting` / `ready` / `reconnecting` / `failed`。不是 `ready` 时顶栏会显示连接状态。`retryIn` 单位为秒。 |
 | `caps` | `{ streaming?, reasoning?, stop?, regenerate? }` | 后端支持哪些能力。`regenerate: false` 时不显示「重新生成」。 |
 | `model` | `{ name }` | 输入栏右侧显示的模型名。 |
-| `character` | `{ id, name, greeting? }` | 当前角色。`greeting` 是开场白，会作为对话的第一条消息；支持 `{{char}}` `{{user}}` 宏。 |
+| `character` | `{ id, name, greeting?, …角色卡字段 }` | 当前角色。`greeting`（或 `first_mes`）是开场白，会作为对话的第一条消息；`alternate_greetings` 会成为开场白的候选。支持 `{{char}}` `{{user}}` 宏。字段同下面的 Character。 |
 | `chat.load` | `{ chatId, messages: Message[] }` | 载入一段已有对话（替换当前对话）。 |
 | `turn.start` | `{ turnId }` | 后端已接受请求。可选，不发也可以。 |
 | `turn.reasoning` | `{ turnId, delta }` | 推理内容的增量。推理块默认折叠。 |
@@ -106,6 +106,21 @@ async function handle(type, p) {
 | `chat.load` | `{ chatId }` | `{ ok: true, chat: { chatId, title, meta, messages: Message[] } }`。 |
 | `chat.rename` | `{ chatId, title }` | 任意。 |
 | `chat.delete` | `{ chatId }` | 任意。 |
+
+| `char.list` | `{}` | `{ ok: true, chars: [{ id, name, avatar?, desc?, tags? }] }`。角色库卡片墙用，`desc` 是描述摘要。 |
+| `char.get` | `{ id }` | `{ ok: true, char: Character }`。 |
+| `char.save` | `{ char: Character }` | `{ ok: true, id }`。`char.id` 为空表示新角色，由后端分配 id。导入的角色卡也走这里。 |
+| `char.delete` | `{ id }` | 任意。 |
+| `char.select` | `{ id }` | 任意。用户选了这位角色开始对话；之后的请求里 `characterId` 就是它。 |
+
+`Character` 与 SillyTavern 角色卡 V2 的 `data` 字段一致，另加 `id` 和 `avatar`（data URL 或图片地址）：
+
+```ts
+{ id, name, avatar?, description, personality, scenario, first_mes, alternate_greetings: string[], mes_example,
+  system_prompt, post_history_instructions, creator_notes, tags: string[], creator, character_version, extensions?, character_book? }
+```
+
+导入（PNG 里的 `chara` / `ccv3` 文本块，或 V1/V2/V3 JSON）和导出（V2 JSON）都在前端完成，后端只负责存。
 
 **分支和检查点**由前端完成：先 `chat.new` 拿一个新 id，再用 `chat.save` 存一份截止到那条消息的副本（`meta.branchOf` 或 `meta.checkpointOf`）。分支会切到新对话；检查点留在原处，那条消息带上 `checkpoint: 新chatId`，点它可以打开。后端不需要额外实现。
 
@@ -157,4 +172,4 @@ async function handle(type, p) {
 
 ## 5. 之后会加的接口
 
-下面这些随后续功能加入，加入时更新本文档：角色库（列表、导入、编辑）、人设同步、世界书、生成参数与预设、Author's Note、Prompt Manager、总结。
+下面这些随后续功能加入，加入时更新本文档：人设同步、世界书、生成参数与预设、Author's Note、Prompt Manager、总结。

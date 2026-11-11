@@ -30,7 +30,7 @@ Object.defineProperty(bridge.api, 'state', { get: () => JSON.parse(JSON.stringif
 bus.on('be:conn.state', p => { S.conn = Object.assign({ state: 'connecting' }, p); bus.emit('ui:conn'); });
 bus.on('be:caps', p => { Object.assign(S.caps, p); bus.emit('ui:caps'); });
 bus.on('be:model', p => { S.model = p.name || ''; bus.emit('ui:model'); });
-bus.on('be:character', p => { S.char = Object.assign({ id: '', name: '', greeting: '' }, p); bus.emit('ui:char'); });
+bus.on('be:character', p => { S.char = Object.assign({ id: '', name: '', greeting: '' }, p); if (!S.char.greeting && p.first_mes) S.char.greeting = p.first_mes; bus.emit('ui:char'); });
 bus.on('be:chat.load', p => {
   S.chat = { id: p.chatId || uid('chat'), messages: (p.messages || []).map(m => Object.assign({ id: uid('m'), time: Date.now(), state: 'done' }, m)), started: true };
   S.turn = null; bus.emit('ui:chat');
