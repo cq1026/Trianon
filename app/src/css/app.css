@@ -20,6 +20,12 @@ body { font-family: var(--serif); color: var(--inktext); overflow: hidden; -webk
 .thread { width: min(720px, calc(100% - 120px)); margin: 0 auto; padding: 0 0 34px; }
 .wrap { width: min(720px, calc(100% - 120px)); }
 
+/* 外观设置 */
+.b { font-size: var(--fs, 14.5px) !important; }
+body[data-density="airy"] .row { margin-top: 34px; } body[data-density="compact"] .row { margin-top: 14px; }
+body[data-density="compact"] .b { line-height: 1.65 !important; }
+body.nost .rnd, body.nost .c5-stk { display: none !important; }
+
 /* 消息 */
 .row .col { display: flex; flex-direction: column; min-width: 0; }
 .row.out .col { align-items: flex-end; max-width: 78%; }
@@ -106,3 +112,4 @@ body { font-family: var(--serif); color: var(--inktext); overflow: hidden; -webk
 }
 
 .rm *, .rm *::before, .rm *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+body.st-open .rail-btn { display: none !important; }

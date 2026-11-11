@@ -2,7 +2,7 @@
 """构建 Trianon（SillyTavern 风格前端）：把 src/ 里的 HTML、CSS、JS 和 assets/ 里的图片字体合成一个自包含文件。
 用法：python3 app/build.py   →  dist/trianon-st.html
 只依赖 Python 3 标准库。"""
-import os, re, base64, glob
+import os, re, sys, base64, glob
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC, AS = os.path.join(HERE, 'src'), os.path.join(HERE, 'assets')
 OUT = os.environ.get('TRIANON_ST_OUT', os.path.join(HERE, '..', 'dist', 'trianon-st.html'))
@@ -15,8 +15,12 @@ def asset(m):
     assert os.path.exists(p), 'missing asset ' + rel
     used.add(rel)
     return f'data:{MIME[rel.rsplit(".", 1)[1]]};base64,' + base64.b64encode(open(p, 'rb').read()).decode()
+sys.path.insert(0, os.path.join(HERE, 'tools'))
+from cssscope import scope
+st_css, st_ff, _ = scope(rd(os.path.join(SRC, 'settings', 'settings.css')), 'st', ['st'], 'ly-st')
 css = '\n'.join(f'/* ---- {f} ---- */\n' + rd(os.path.join(SRC, 'css', f)) for f in CSS)
-js = '\n'.join(f'/* ---- {os.path.basename(f)} ---- */\n' + rd(f) for f in sorted(glob.glob(os.path.join(SRC, 'js', '*.js'))))
+css += '\n/* ---- settings（原版设置页，已加作用域）---- */\n' + '\n'.join(st_ff) + '\n' + st_css + '\n' + rd(os.path.join(SRC, 'settings', 'extra.css'))
+js = '\n'.join(f'/* ---- {os.path.basename(f)} ---- */\n' + rd(f) for f in sorted(glob.glob(os.path.join(SRC, 'js', '*.js'))) + [os.path.join(SRC, 'settings', 'settings.js')])
 js = '(()=>{"use strict";\n' + js + '\n})();'
 html = rd(os.path.join(SRC, 'index.html')).replace('{{EMPTY}}', rd(os.path.join(SRC, 'parts', 'empty.html'))).replace('{{CSS}}', css).replace('{{JS}}', js)
 assert '{{' not in re.sub(r'\{\{\s*(char|user)\s*\}\}', '', html.replace("'{{", '').replace('{{\\s*', '')), 'placeholder left'

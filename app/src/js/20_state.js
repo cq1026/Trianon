@@ -15,6 +15,10 @@ const persona = () => S.personas.find(p => p.id === S.personaId) || S.personas[0
 const ctx = () => ({ char: S.char.name || '', user: persona().name || '' });
 const busy = () => !!S.turn && ['pending', 'reasoning', 'streaming'].includes(S.turn.state);
 const saveSettings = () => store.set('settings', S.settings);
+const savePersonas = () => store.set('personas', S.personas);
+function setPersona(id) { if (!S.personas.find(p => p.id === id)) return; S.personaId = id; store.set('personaId', id); bus.emit('ui:persona'); }
+/* 给设置页等独立模块用 */
+T.app = { S, persona, saveSettings, savePersonas, setPersona, bus, store };
 
 /* 只读快照给外部调试 */
 Object.defineProperty(bridge.api, 'state', { get: () => JSON.parse(JSON.stringify({

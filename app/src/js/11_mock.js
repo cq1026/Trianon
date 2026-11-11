@@ -43,7 +43,9 @@
   const mock = {
     opt,
     set(o) { Object.assign(opt, o || {}); return opt; },
+    booted: false,
     boot() {
+      mock.booted = true;
       emit('conn.state', { state: 'connecting' });
       setTimeout(() => {
         emit('conn.state', { state: 'ready' });

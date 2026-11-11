@@ -64,11 +64,29 @@
     S.chat = { id, messages: [], started: false }; S.turn = null;
     bus.emit('ui:chat'); bus.emit('ui:turn'); $('ci').focus();
   }
-  bus.on('nav', k => { if (k === 'new') newChat(); else toastSoon(k); });
+  bus.on('nav', k => {
+    const ST = T.settings;
+    if (k === 'new') newChat();
+    else if (k === 'persona' && ST) ST.open('persona');
+    else if (k === 'look' && ST) ST.open('appearance');
+    else if (k === 'settings' && ST) ST.open(ST.S.lastSec || 'persona');
+    else toastSoon(k);
+  });
+
+  /* 设置生效：字号、密度、动效、贴纸 */
+  function applySettings() {
+    const A = S.settings.appearance || {};
+    root.style.setProperty('--fs', (A.fontSize || 14.5) + 'px');
+    b.dataset.density = A.density || 'standard';
+    b.classList.toggle('rm', RMQ.matches || A.motion === 'reduce');
+    b.classList.toggle('soft', A.motion === 'soft');
+    b.classList.toggle('nost', A.stickers === false);
+  }
+  const root = document.documentElement;
+  bus.on('ui:settings', applySettings); applySettings();
 
   /* 启动：给真实后端一个注册的机会；500ms 内没人接手就用模拟后端 */
   greet(); topbar();
-  b.classList.toggle('rm', RMQ.matches || S.settings.reducedMotion);
   let real = false;
   bus.on('bridge:handler', v => { real = v; if (v) bridge.request('frontend.hello', { version: bridge.api.version }).catch(() => {}); });
   setTimeout(() => { if (!real && !window.__trianonNoMock) bridge.api.mock.boot(); }, 500);

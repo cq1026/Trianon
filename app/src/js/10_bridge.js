@@ -12,7 +12,7 @@ const bridge = (() => {
       bus.emit('be:' + ev, payload || {});
     },
     onRequest(fn) { handler = typeof fn === 'function' ? fn : null; usingMock = false; bus.emit('bridge:handler', !!handler); },
-    get usingMock() { return usingMock; },
+    get usingMock() { return usingMock || (!handler && !!(api.mock && api.mock.booted)); },
     get log() { return log.slice(); },
     mock: null,          /* 由 mock 模块填入 */
     state: null          /* 由 app 模块填入：只读的当前状态快照 */
