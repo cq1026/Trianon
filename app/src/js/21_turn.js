@@ -11,7 +11,7 @@ const turn = (() => {
   const isLast = m => S.chat.messages[S.chat.messages.length - 1] === m;
 
   /* 显示用的文字：替换 {{char}} {{user}}，名字按消息发出时的快照 */
-  const disp = (m, t) => macros(t == null ? m.text : t, { char: m.charName || S.char.name || '', user: m.userName || persona().name || '' });
+  const disp = (m, t) => macros(t == null ? m.text : t, Object.assign(ctx(), { char: m.charName || S.char.name || '', user: m.userName || persona().name || '' }));
 
   /* 发给后端的历史：截止到某条消息（不含），隐藏的不发 */
   function history(uptoId, include) {
@@ -75,11 +75,14 @@ const turn = (() => {
     catch (e) { fail(req.turnId, e.message || String(e)); }
   }
 
-  async function send(text) {
+  async function send(text, opt) {
+    opt = opt || {};
     text = (text || '').trim();
     if (!text || busy()) return false;
     ensureStarted();
+    text = macros(text, ctx());          /* 同 SillyTavern：发送时就把宏换掉再存 */
     const u = { id: uid('m'), role: 'user', name: persona().name, userName: persona().name, personaId: persona().id, text, time: Date.now(), state: 'done' };
+    if (opt.noGen) { S.chat.messages.push(u); bus.emit('ui:chat'); save(); return true; }   /* /send：只发不生成 */
     const a = { id: uid('m'), role: 'assistant', name: S.char.name, charName: S.char.name, userName: persona().name, text: '', time: Date.now(), state: 'pending' };
     S.chat.messages.push(u, a);
     bus.emit('ui:chat');
@@ -111,6 +114,15 @@ const turn = (() => {
     const req = begin(m, 'continue', { history: history(m.id, true) });
     go('turn.continue', req);
   }
+  /* 旁白（/sys）：一条系统消息，进 history，角色是 system */
+  function narrate(text) { text = macros((text || '').trim(), ctx()); if (!text) return; ensureStarted(); S.chat.messages.push({ id: uid('m'), role: 'system', name: '', text, time: Date.now(), state: 'done' }); bus.emit('ui:chat'); save(); }
+  /* /trigger：不发新消息，直接让角色接着说 */
+  function trigger() {
+    if (busy()) return; ensureStarted();
+    const a = { id: uid('m'), role: 'assistant', name: S.char.name, charName: S.char.name, userName: persona().name, text: '', time: Date.now(), state: 'pending' };
+    S.chat.messages.push(a); bus.emit('ui:chat');
+    go('chat.send', begin(a, 'new', { text: '', history: history(a.id) }));
+  }
   function impersonate() {
     if (busy()) return;
     ensureStarted();
@@ -141,7 +153,7 @@ const turn = (() => {
   }
 
   /* 编辑 / 删除 / 隐藏 */
-  function edit(msgId, text) { const m = msg(msgId); if (!m || busy() && S.turn.msgId === msgId) return; m.text = text; if (m.swipes) m.swipes[m.sid] = snap(m); touch(m); save(); }
+  function edit(msgId, text) { const m = msg(msgId); if (!m || busy() && S.turn.msgId === msgId) return; m.text = macros(text, Object.assign(ctx(), { char: m.charName || S.char.name, user: m.userName || persona().name })); if (m.swipes) m.swipes[m.sid] = snap(m); touch(m); save(); }
   function remove(msgId) {
     if (busy() && S.turn.msgId === msgId) return;
     const i = S.chat.messages.findIndex(m => m.id === msgId); if (i < 0) return;
@@ -188,6 +200,6 @@ const turn = (() => {
 
   addEventListener('keydown', e => { if (e.key === 'Escape' && busy()) { e.preventDefault(); stop(); } });
 
-  return { send, regenerate, swipe, cont, impersonate, stop, edit, remove, hide, prompt, save, history, disp, ensureStarted, lastAssistant, isLast };
+  return { send, narrate, trigger, regenerate, swipe, cont, impersonate, stop, edit, remove, hide, prompt, save, history, disp, ensureStarted, lastAssistant, isLast };
 })();
 T.turn = turn;

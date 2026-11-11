@@ -36,6 +36,7 @@
     const v = ci.value;
     if (!v.trim()) { ci.focus(); return; }
     ci.value = ''; fit();
+    if (v.trim().startsWith('/') && await slash.run(v)) return;   /* / 命令 */
     await turn.send(v);
   }
   const click = () => busy() ? turn.stop() : quill.writing() ? quill.skip() : go();

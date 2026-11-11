@@ -16,7 +16,7 @@ const chatView = (() => {
   /* 贴纸：按消息 id 固定选一张，约六成消息有 */
   function sticker(m, b) {
     const h = hash(m.id);
-    if (h % 10 > 5 || m.state === 'pending') return;
+    if (h % 10 > 5 || m.state === 'pending' || m.role === 'system') return;
     const img = document.createElement('img');
     img.className = 'rnd v8pop'; img.alt = ''; img.src = STK[h % STK.length];
     const left = (h >> 4) & 1, w = 46 + (h >> 6) % 20;
@@ -28,7 +28,10 @@ const chatView = (() => {
     const row = document.createElement('div');
     row.dataset.id = m.id;
     const n = { row };
-    if (m.role === 'user') {
+    if (m.role === 'system') {
+      row.className = 'row sys';
+      row.innerHTML = '<div class="col"><div class="b"><div class="tx"></div></div><div class="meta"></div></div>';
+    } else if (m.role === 'user') {
       row.className = 'row out';
       row.innerHTML = '<div class="col"><div class="b"><div class="tx"></div></div><div class="meta"></div></div>';
     } else {

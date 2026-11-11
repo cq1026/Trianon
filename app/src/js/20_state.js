@@ -13,7 +13,13 @@ const S = {
   turn: null           /* 进行中的生成：{ id, msgId, state, t0, tFirst } */
 };
 const persona = () => S.personas.find(p => p.id === S.personaId) || S.personas[0];
-const ctx = () => ({ char: S.char.name || '', user: persona().name || '' });
+/* 宏的上下文：当前角色、人设、模型、最近的消息 */
+const ctx = () => {
+  const ms = S.chat.messages.filter(m => (m.text || '').trim() && !['pending', 'reasoning', 'streaming'].includes(m.state));
+  const last = r => { for (let i = ms.length - 1; i >= 0; i--) if (!r || ms[i].role === r) return ms[i].text; return ''; };
+  return { char: S.char.name || '', user: persona().name || '', persona: persona().desc || '', description: S.char.description || '', personality: S.char.personality || '',
+    scenario: S.char.scenario || '', mesExamples: S.char.mes_example || '', model: S.model || '', lastMessage: last(), lastCharMessage: last('assistant'), lastUserMessage: last('user') };
+};
 const busy = () => !!S.turn && ['pending', 'reasoning', 'streaming'].includes(S.turn.state);
 const saveSettings = () => store.set('settings', S.settings);
 const savePersonas = () => store.set('personas', S.personas);

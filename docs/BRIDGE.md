@@ -71,7 +71,7 @@ async function handle(type, p) {
 ```ts
 {
   id?: string,                 // 不给时前端生成
-  role: 'user' | 'assistant',
+  role: 'user' | 'assistant' | 'system',   // system = 旁白（/sys 命令插入）
   name?: string,               // 说话人显示名
   text: string,
   reasoning?: string,
@@ -145,7 +145,7 @@ Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: st
 - `lorebooks`：要启用的世界书 id 列表（全局启用的 + 本对话启用的）。关键词扫描、触发、按 `position` / `depth` / `order` 插入都由后端完成；角色卡自带的 `character_book` 也由后端处理。
 - `text`：用户刚输入的原文，没有经过宏替换。
 - `history`：截止到这次生成之前的对话，`[{ id, role, name, text }]`，**已去掉用户隐藏的消息**。当前对话以前端为准（用户可以编辑、删除、隐藏、切换候选），后端拼提示词时用它，不必自己维护对话状态。
-- **宏**：`text` 和 `history` 里的 `{{char}}` `{{user}}` 保持原样，后端拼提示词时自己替换。前端只在显示时替换（按每条消息发出时的人设和角色名）。
+- **宏**：同 SillyTavern，用户消息在**发送时**、任何消息在**编辑保存时**由前端替换宏（`{{char}}` `{{user}}` `{{time}}` `{{date}}` `{{random:…}}` `{{roll:…}}` 等），所以 `text` 和 `history` 里已经是替换后的文字。开场白在开始对话时就替换好了。后端只需替换它自己拼进提示词的内容（角色卡、世界书、系统提示词等）里的宏。
 
 ### 一次生成的时序
 
@@ -174,7 +174,11 @@ Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: st
 
 ---
 
-## 4. 调试
+## 4. `/` 命令
+
+`/` 命令全部在前端执行，不需要后端支持：`/sys` 旁白、`/send` 只发不生成、`/trigger` 让角色接着说（发一个 `text` 为空的 `chat.send`）、`/continue`、`/regen`、`/impersonate`、`/stop`、`/del`、`/hide`、`/unhide`、`/persona`、`/char`、`/newchat`、`/echo`、`/help`。
+
+## 5. 调试
 
 - `__trianon.state`：当前状态的只读快照（连接、角色、人设、设置、消息、进行中的生成）。
 - `__trianon.log`：最近 200 条进出记录。
@@ -185,6 +189,6 @@ Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: st
 
 ---
 
-## 5. 之后会加的接口
+## 6. 之后会加的接口
 
 下面这些随后续功能加入，加入时更新本文档：Prompt Manager、总结。
