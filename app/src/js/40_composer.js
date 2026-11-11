@@ -10,9 +10,23 @@
   ci.addEventListener('focus', () => field.classList.add('focus'));
   ci.addEventListener('blur', () => field.classList.remove('focus'));
   ci.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
-      e.preventDefault(); go();
-    }
+    if (e.isComposing || e.keyCode === 229) return;
+    const empty = !ci.value, la = turn.lastAssistant();
+    /* 快捷键（同 SillyTavern）：Ctrl+Enter 重新生成 · Alt+Enter 续写 · 输入框为空时 ←/→ 切换候选、↑ 编辑最后一条 */
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (la) turn.regenerate(la.id); return; }
+    if (e.key === 'Enter' && e.altKey) { e.preventDefault(); turn.cont(); return; }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); return; }
+    if (empty && la && turn.isLast(la) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); turn.swipe(la.id, e.key === 'ArrowLeft' ? -1 : 1); return; }
+    if (empty && e.key === 'ArrowUp') { const m = S.chat.messages[S.chat.messages.length - 1]; if (m) { e.preventDefault(); chatView.startEdit(m.id); } }
+  });
+  /* 代写：模型以当前人设写一段，写进输入框，由你决定发不发 */
+  $('pImp').addEventListener('click', () => { if (!busy()) turn.impersonate(); });
+  bus.on('ui:impersonate', p => {
+    if (p.reset) ci.value = '';
+    if (p.delta) ci.value += p.delta;
+    if (typeof p.text === 'string') ci.value = p.text;
+    if (p.error) { field.classList.add('err'); setTimeout(() => field.classList.remove('err'), 1500); }
+    fit(); ci.scrollTop = ci.scrollHeight;
   });
   field.addEventListener('mousedown', e => { if (e.target !== ci) { e.preventDefault(); ci.focus(); } });
 

@@ -44,9 +44,7 @@ const chatView = (() => {
     n.b = row.querySelector('.b'); n.tx = row.querySelector('.tx'); n.meta = row.querySelector('.meta');
     n.meta.addEventListener('click', e => {
       const a = e.target.closest('[data-act]'); if (!a) return;
-      const act = a.dataset.act;
-      if (act === 'retry' || act === 'regen') turn.regenerate(m.id);
-      else if (act === 'copy') navigator.clipboard && navigator.clipboard.writeText(m.text).then(() => { a.textContent = '已复制'; setTimeout(() => a.textContent = '复制', 1200); }, () => {});
+      act(m, n, a.dataset.act, a);
     });
     sticker(m, n.b);
     nodes.set(m.id, n);
@@ -60,6 +58,8 @@ const chatView = (() => {
     const live = ['pending', 'reasoning', 'streaming'].includes(m.state);
     n.row.classList.toggle('live', live);
     n.row.dataset.state = m.state || 'done';
+    n.row.classList.toggle('hid', !!m.hidden);
+    if (n.editing) return;
     if (m.role === 'assistant') {
       n.who.textContent = (m.name || S.char.name || '').toUpperCase().split('').join(' ');
       const lab = m.state === 'pending' && quill.enabled() ? '' : LIVE[m.state];   /* 有羽毛笔时，等待由笔写 waiting 表达 */
@@ -74,25 +74,87 @@ const chatView = (() => {
     if (m.role === 'assistant' && quill.sync(m, n)) { meta(m, n); return; }   /* 正文由羽毛笔逐字写 */
     if (m.role === 'assistant' && quill.sessions.size === 0 && n.rsn && !n.rsn.hidden && n.rsnB.querySelector('.ch')) n.rsnB.textContent = m.reasoning;
     const keep = [...n.b.querySelectorAll('.rnd')];
-    let t = m.text || '';
+    let t = turn.disp(m) || '';
     if (t.replace(/\*\*/g, '').split('*').length % 2 === 0) t += '*';   /* 没闭合的 *动作*（流式中途、被停止）按斜体显示 */
     n.tx.innerHTML = t ? fmt(t) : '';
     keep.forEach(k => n.b.appendChild(k));
     meta(m, n);
   }
+  /* 消息下方的一行操作。常用的直接露出，其余收在「⋯」里 */
+  const L_ = (act, t, cls) => `<button type="button" class="lnk${cls ? ' ' + cls : ''}" data-act="${act}">${t}</button>`;
   function meta(m, n) {
     if (quill.sessions.has(m.id)) { n.meta.innerHTML = ''; return; }   /* 笔还在写，先不显示操作 */
-    const last = S.chat.messages.filter(x => x.role === 'assistant').slice(-1)[0];
+    if (n.editing) return;
+    const last = turn.lastAssistant(), isLast = turn.isLast(m), idle = !busy();
     let h = '';
+    const sw = m.role === 'assistant' && m.swipes && m.swipes.length > 1 || (m.role === 'assistant' && isLast && !m.greeting && m.state === 'done');
+    if (sw && m.state !== 'pending') h += `<span class="swn">${L_('swl', '‹', 'sw')}<i>${(m.sid || 0) + 1} / ${m.swipes ? m.swipes.length : 1}</i>${L_('swr', '›', 'sw')}</span>`;
     if (m.role === 'assistant') {
-      if (m.state === 'error') h = `<span class="err">${esc(m.error || '连接中断')}</span><button type="button" class="lnk" data-act="retry">重试</button>`;
-      else if (m.state === 'stopped') h = `<span>${m.text ? '已停止，保留已写的部分' : '已停止，还没有落笔'}</span>` + (m === last ? '<button type="button" class="lnk" data-act="regen">重新生成</button>' : '');
+      if (m.state === 'error') h += `<span class="err">${esc(m.error || '连接中断')}</span>` + L_('retry', '重试');
+      else if (m.state === 'stopped') h += `<span>${m.text ? '已停止，保留已写的部分' : '已停止，还没有落笔'}</span>` + (m === last ? L_('regen', '重新生成') + (m.text ? L_('cont', '续写') : '') : '');
       else if (m.state === 'done') {
-        h = `<span>${hm(m.time)}${m.dur ? ' · 耗时 ' + m.dur.toFixed(1) + ' s' : ''}</span><button type="button" class="lnk" data-act="copy">复制</button>`;
-        if (m === last && !m.greeting && S.caps.regenerate !== false) h += '<button type="button" class="lnk" data-act="regen">重新生成</button>';
+        h += `<span>${hm(m.time)}${m.dur ? ' · 耗时 ' + m.dur.toFixed(1) + ' s' : ''}</span>` + L_('copy', '复制') + L_('edit', '编辑');
+        if (m === last && isLast && !m.greeting && idle) h += (S.caps.regenerate !== false ? L_('regen', '重新生成') : '') + L_('cont', '续写');
       }
-    } else h = `<span>${hm(m.time)}</span>`;
+    } else h += `<span>${hm(m.time)}</span>` + L_('edit', '编辑');
+    if (m.state === 'done' || m.state === 'stopped' || m.state === 'error' || m.role === 'user')
+      h += `<span class="more">${L_('more', '⋯', 'mo')}<span class="mm">${L_('hide', m.hidden ? '取消隐藏' : '隐藏')}${L_('prompt', '提示词')}${L_('del', '删除', 'dl')}</span></span>`;
+    if (m.hidden) h += '<span class="hid-t">已隐藏 · 不发给模型</span>';
     n.meta.innerHTML = h;
+  }
+
+  /* 操作 */
+  function act(m, n, a, el) {
+    if (a === 'retry' || a === 'regen') turn.regenerate(m.id);
+    else if (a === 'cont') turn.cont(m.id);
+    else if (a === 'swl') turn.swipe(m.id, -1);
+    else if (a === 'swr') turn.swipe(m.id, 1);
+    else if (a === 'copy') navigator.clipboard && navigator.clipboard.writeText(turn.disp(m)).then(() => { el.textContent = '已复制'; setTimeout(() => el.textContent = '复制', 1200); }, () => {});
+    else if (a === 'edit') startEdit(m, n);
+    else if (a === 'more') el.parentElement.classList.toggle('open');
+    else if (a === 'hide') turn.hide(m.id);
+    else if (a === 'del') {
+      if (el.classList.contains('sure')) { turn.remove(m.id); return; }
+      el.classList.add('sure'); el.textContent = '确认删除？'; setTimeout(() => { if (el.isConnected) { el.classList.remove('sure'); el.textContent = '删除'; } }, 2400);
+    }
+    else if (a === 'prompt') showPrompt(m);
+  }
+
+  /* 编辑：气泡里换成输入框；Ctrl+Enter 保存，Esc 取消 */
+  function startEdit(m, n) {
+    if (n.editing || (busy() && S.turn.msgId === m.id)) return;
+    n.editing = true; n.row.classList.add('editing');
+    const ta = document.createElement('textarea'); ta.className = 'edt'; ta.value = m.text || ''; ta.spellcheck = false;
+    n.tx.hidden = true; n.b.insertBefore(ta, n.tx);
+    n.meta.innerHTML = L_('esave', '保存', 'pri') + L_('ecancel', '取消') + '<span class="kb">Ctrl + Enter 保存 · Esc 取消</span>';
+    const fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, innerHeight * .5) + 'px'; };
+    const done = ok => {
+      if (!n.editing) return; n.editing = false; n.row.classList.remove('editing');
+      const v = ta.value; ta.remove(); n.tx.hidden = false;
+      if (ok && v !== m.text) turn.edit(m.id, v); else paint(m);
+    };
+    ta.addEventListener('input', fit);
+    ta.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { e.preventDefault(); done(false); } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); done(true); } });
+    n.meta.onclick = e => { const b = e.target.closest('[data-act]'); if (!b) return; e.stopPropagation(); if (b.dataset.act === 'esave') done(true); else if (b.dataset.act === 'ecancel') done(false); };
+    requestAnimationFrame(() => { fit(); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); });
+    n.endEdit = done;
+  }
+
+  /* 查看提示词：一张纸笺浮层 */
+  async function showPrompt(m) {
+    const box = document.createElement('div'); box.className = 'pvm'; box.setAttribute('role', 'dialog');
+    box.innerHTML = '<div class="pvm-in"><div class="pvm-hd"><em>Prompt</em><b>这一条用到的提示词</b><button type="button" class="pvm-x" aria-label="关闭">✕</button></div><pre class="pvm-b">正在向后端要…</pre><div class="pvm-ft"></div></div>';
+    document.body.appendChild(box);
+    const close = () => box.remove();
+    box.addEventListener('click', e => { if (e.target === box || e.target.closest('.pvm-x')) close(); });
+    box.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } });
+    box.tabIndex = -1; box.focus();
+    const r = await turn.prompt(m.id);
+    const pre = box.querySelector('.pvm-b'), ft = box.querySelector('.pvm-ft');
+    if (!r || r.error || r.ok === false) { pre.textContent = '后端没有提供提示词。' + (r && r.error ? '（' + r.error + '）' : ''); return; }
+    const p = r.prompt;
+    pre.textContent = typeof p === 'string' ? p : Array.isArray(p) ? p.map(x => `[${x.role}${x.name ? ' · ' + x.name : ''}]\n${x.content}`).join('\n\n') : JSON.stringify(p, null, 2);
+    ft.textContent = r.tokens != null ? `约 ${r.tokens} tokens` : '';
   }
 
   function renderAll() {
@@ -131,5 +193,6 @@ const chatView = (() => {
     requestAnimationFrame(loop);
   })();
 
-  return { renderAll, toBottom };
+  document.addEventListener('click', e => { if (!e.target.closest('.more')) document.querySelectorAll('.meta .more.open').forEach(x => x.classList.remove('open')); });
+  return { renderAll, toBottom, nodes, startEdit: id => { const m = S.chat.messages.find(x => x.id === id), n = nodes.get(id); if (m && n) startEdit(m, n); } };
 })();

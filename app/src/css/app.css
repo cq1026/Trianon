@@ -127,3 +127,36 @@ body.st-open .rail-btn { display: none !important; }
 .tx.fadein { animation: qfade .7s ease both; }
 @keyframes qfade { from { opacity: 0; filter: blur(1px); } to { opacity: 1; filter: none; } }
 .rm .qpen { display: none; }
+
+/* 去掉原版气泡右下角的签名水印 */
+.in .b::after { content: none !important; }
+.in .b { padding-bottom: 14px !important; }
+
+/* ===== 消息操作 ===== */
+.meta .swn { display: inline-flex; align-items: baseline; gap: 6px; margin-right: 4px; font-style: normal; }
+.meta .swn i { font: 400 11.5px/1 var(--serif); letter-spacing: .1em; color: rgba(46, 58, 99, .6); font-style: normal; }
+.meta .lnk.sw { text-decoration: none; font: 400 18px/1 Georgia, serif; padding: 0 3px; }
+.meta .more { position: relative; }
+.meta .lnk.mo { text-decoration: none; font-style: normal; letter-spacing: .1em; }
+.meta .mm { display: none; position: absolute; left: 0; top: 18px; z-index: 8; padding: 6px 4px; flex-direction: column; gap: 2px; min-width: 96px; background: #FBF8F1; border: 1px solid var(--champ); border-radius: 4px; box-shadow: 0 10px 22px -12px rgba(40, 50, 90, .5); }
+.meta .more.open .mm { display: flex; }
+.meta .mm .lnk { text-decoration: none; padding: 5px 12px; text-align: left; border-radius: 3px; }
+.meta .mm .lnk:hover { background: rgba(214, 222, 240, .6); }
+.meta .mm .dl { color: #9A6474; } .meta .mm .dl.sure { background: rgba(154, 100, 116, .12); }
+.meta .hid-t { font-style: italic; color: rgba(154, 100, 116, .8); }
+.meta .kb { color: rgba(70, 82, 120, .45); }
+.meta .lnk.pri { color: #26305A; font-weight: 600; }
+.row.hid .b { opacity: .45; filter: saturate(.6); }
+.row.editing .meta { opacity: 1; }
+.b .edt { display: block; width: min(560px, 70vw); min-height: 60px; border: 0; outline: 0; resize: none; background: rgba(255, 255, 255, .55); border-radius: 10px; padding: 8px 10px; font: inherit; color: inherit; line-height: 1.8; }
+.row.out .b .edt { width: min(420px, 64vw); }
+.pill.imp { border: .5px solid rgba(22, 26, 36, .14); background: rgba(255, 255, 255, .5); font: inherit; font-size: 11.5px; color: rgba(46, 58, 99, .7); cursor: var(--cu-pointer); }
+.pill.imp:hover { background: rgba(255, 255, 255, .85); color: #26305A; }
+.field.err { box-shadow: 0 0 0 2px rgba(154, 100, 116, .45) !important; }
+.pvm { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(214, 222, 240, .45); backdrop-filter: blur(4px); outline: 0; }
+.pvm-in { width: min(720px, 92vw); max-height: 80vh; display: flex; flex-direction: column; background: #FBF8F1; border: 1px solid var(--champ); border-radius: 6px; box-shadow: 0 24px 50px -24px rgba(40, 50, 90, .6); }
+.pvm-hd { display: flex; align-items: baseline; gap: 12px; padding: 16px 22px 10px; border-bottom: 1px dashed rgba(76, 93, 136, .35); }
+.pvm-hd em { font: 400 22px/1 Pinyon, serif; color: #6E84AF; } .pvm-hd b { font-size: 12px; letter-spacing: .3em; color: #26305A; }
+.pvm-x { margin-left: auto; border: 0; background: none; font-size: 16px; color: #5B6C93; }
+.pvm-b { margin: 0; padding: 16px 22px; overflow: auto; white-space: pre-wrap; font: 12.5px/1.75 "DejaVu Sans Mono", monospace; color: #2E3A63; }
+.pvm-ft { padding: 8px 22px 14px; font: italic 13px/1 CormI, Georgia, serif; color: #6A7AA0; }

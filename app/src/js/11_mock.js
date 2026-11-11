@@ -19,7 +19,7 @@
 
   function run(turnId, payload) {
     if (opt.failNext) { opt.failNext = false; later(turnId, opt.delay + .6, () => emit('turn.error', { turnId, message: '连接中断（模拟）' })); return; }
-    const text = payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length];
+    const text = payload.textOverride || (payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length]);
     const stream = payload.stream !== false;
     let t = opt.delay;
     if (opt.reasoning && stream) {
@@ -59,6 +59,15 @@
       switch (type) {
         case 'chat.send': emit('turn.start', { turnId: p.turnId }); run(p.turnId, p); return { ok: true };
         case 'turn.regenerate': emit('turn.start', { turnId: p.turnId }); run(p.turnId, Object.assign({}, p, { regenerate: true })); return { ok: true };
+        case 'turn.continue': emit('turn.start', { turnId: p.turnId }); run(p.turnId, Object.assign({}, p, { textOverride: '\n\n*她顿了顿，又补上一句。*\n“不过，得等雾散了再走。”' })); return { ok: true };
+        case 'turn.impersonate': emit('turn.start', { turnId: p.turnId }); run(p.turnId, Object.assign({}, p, { textOverride: '*接过茶杯，指尖碰到她的手。*\n好啊，那就明早。我会早点起来。' })); return { ok: true };
+        case 'turn.prompt': {
+          const h = p.history || [], P = p.persona || {};
+          const prompt = [{ role: 'system', content: `你是 ${CHAR.name}。用中文进行角色扮演，动作写在 *星号* 里。\n用户扮演 ${P.name || 'User'}${P.desc ? '：' + P.desc : ''}。` }]
+            .concat(h.map(x => ({ role: x.role, name: x.name, content: x.text })));
+          return { ok: true, prompt, tokens: Math.round(JSON.stringify(prompt).length / 1.6) };
+        }
+        case 'chat.save': try { localStorage.setItem('trianon:mock:chat:' + p.chatId, JSON.stringify(p)); } catch (e) { } return { ok: true };
         case 'turn.stop': clear(p.turnId); setTimeout(() => emit('turn.stopped', { turnId: p.turnId }), 60); return { ok: true };
         case 'chat.new': return { ok: true, chatId: uid('chat') };
         case 'settings.update': return { ok: true };

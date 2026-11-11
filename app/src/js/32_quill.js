@@ -116,6 +116,9 @@ const quill = (() => {
       rw: new Writer(n.rsnB, { fs: 14, v: 14 * 5, plain: true }),
       wait: new Writer(wait, { fs: 22, v: 58, plain: true }), waitEl: wait };
     s.wait.feed('waiting');
+    if (m.contBase) {            /* 续写：已有的字直接显示，笔停在末尾等，不写 waiting */
+      s.main.feed(turn.disp(m, m.text.slice(0, m.contBase))); s.main.flush(); s.cont = true; s.wph = 'gone'; wait.classList.add('fade');
+    }
     L.set(m.id, s); cur = s;
     return s;
   }
@@ -137,7 +140,7 @@ const quill = (() => {
     if (s.n !== n) { s.n = n; }
     /* 非流式：一次到齐的全文不写，直接整段淡入 */
     if (!live && !s.main.spans.length && m.text && (m.state === 'done')) { end(s); n.tx.classList.add('fadein'); return false; }
-    if (m.state === 'streaming' || m.state === 'done' || m.state === 'stopped' || m.state === 'error') s.main.feed(m.text || '');
+    if (m.state === 'streaming' || m.state === 'done' || m.state === 'stopped' || m.state === 'error') s.main.feed(turn.disp(m));
     if (m.reasoning) { s.rw.feed(m.reasoning); if (!n.rsn.classList.contains('open') || m.state !== 'reasoning') s.rw.flush(); }
     if (m.state === 'stopped' && !s.stopped) { s.stopped = true; if (s.main.idle()) s.main.halt(); else s.main.wind = true; }
     if (m.state === 'error' && !s.err) { s.err = true; s.main.halt(); }
@@ -146,7 +149,7 @@ const quill = (() => {
   /* 写完（或被停住）之后：把截断后的文字写回消息，交还给聊天区按普通方式显示 */
   function finished(s) {
     const m = s.m;
-    if (s.main.halted || m.state === 'stopped' || m.state === 'error') m.text = s.main.revealedText(m.text);
+    if (s.main.halted || m.state === 'stopped' || m.state === 'error') { m.text = s.main.revealedText(turn.disp(m)); if (m.swipes) m.swipes[m.sid].text = m.text; turn.save(); }
     end(s); bus.emit('ui:msg', m); bus.emit('ui:turn');
   }
   const writing = () => [...L.values()].some(s => !s.main.idle() || ['pending', 'reasoning', 'streaming'].includes(s.m.state));
@@ -163,7 +166,7 @@ const quill = (() => {
     const s = cur && L.has(cur.m.id) ? cur : [...L.values()].pop() || null;
     if (on && s) {
       const m = s.m, live = ['pending', 'reasoning', 'streaming'].includes(m.state);
-      const hasMain = s.main.spans.length > 0;
+      const hasMain = s.main.spans.length > (s.cont ? s.main.ri : 0) || (s.cont && m.state === 'streaming');
       const rsnOpen = s.n.rsn && s.n.rsn.classList.contains('open') && m.reasoning;
       if (hasMain || m.state === 'streaming') {
         /* 写正文：先让 waiting 淡掉 */
@@ -176,6 +179,7 @@ const quill = (() => {
         if (s.wph !== 'gone') { s.waitEl.classList.add('fade'); s.wph = 'gone'; s.gone = t; }
         if (t - (s.gone || 0) > .3) pose = s.rw.step(dt, mult(s.rw), P);
         if (!pose) target = s.rw.hover();
+      } else if (live && s.cont) { target = s.main.hover(); hT = .45;
       } else if (live) {
         /* waiting 循环：写 → 停一下 → 淡出 → 再写 */
         if (s.wph === 'gone') { s.wph = 'write'; s.wait.reset(); s.waitEl.classList.remove('fade'); s.wait.feed('waiting'); }

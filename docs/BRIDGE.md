@@ -76,6 +76,12 @@ async function handle(type, p) {
   text: string,
   reasoning?: string,
   time?: number,               // 毫秒时间戳
+  hidden?: boolean,            // 用户隐藏：显示变淡，不进 history
+  greeting?: boolean,          // 角色开场白
+  userName?: string,           // 发出时的人设名（显示 {{user}} 用）
+  charName?: string,           // 发出时的角色名（显示 {{char}} 用）
+  swipes?: { text, reasoning, time, dur }[],   // 候选；text 是当前那个
+  sid?: number,                // 当前候选的序号
 }
 ```
 
@@ -88,16 +94,22 @@ async function handle(type, p) {
 | 请求 | 数据 | 期望返回 |
 |---|---|---|
 | `frontend.hello` | `{ version }` | 任意；随后推送初始状态（见第 1 节）。 |
-| `chat.send` | `{ turnId, chatId, msgId, text, stream, persona, characterId }` | `{ ok: true }`，然后用事件推送生成过程。 |
-| `turn.regenerate` | `{ turnId, chatId, msgId, stream, persona, characterId }` | 同上。`msgId` 是要重写的那条助手消息。 |
+| `chat.send` | `{ turnId, chatId, msgId, text, history, stream, persona, characterId }` | `{ ok: true }`，然后用事件推送生成过程。 |
+| `turn.regenerate` | `{ turnId, chatId, msgId, history, stream, persona, characterId }` | 同上。给 `msgId` 这条助手消息生成一个**新候选**（前端保留旧的，可左右切换）。 |
+| `turn.continue` | `{ turnId, chatId, msgId, history, stream, persona, characterId }` | 同上。接着 `msgId` 这条消息往下写：`turn.delta` 的内容会**追加**到它后面；`history` 的最后一条就是这条消息本身。 |
+| `turn.impersonate` | `{ turnId, chatId, history, stream, persona, characterId }` | 同上。以用户人设代写一段：`turn.delta` / `turn.done` 的文字写进输入框，不生成消息。事件里 `msgId` 为空。 |
 | `turn.stop` | `{ turnId }` | 任意；可以再发 `turn.stopped` 确认。 |
+| `turn.prompt` | `{ chatId, msgId, history, persona, characterId }` | `{ ok: true, prompt, tokens? }`。「查看提示词」用。`prompt` 可以是字符串，或 `[{ role, name?, content }]` 数组。 |
 | `chat.new` | `{ characterId }` | `{ ok: true, chatId }`。不返回 `chatId` 时前端自己生成。 |
+| `chat.save` | `{ chatId, characterId, title, messages: Message[] }` | 任意。对话有改动（新消息、编辑、删除、隐藏、切换候选）后 0.6 秒合并发一次，后端负责存。 |
 
 字段说明：
 
 - `stream`：用户在设置里选的输出方式。`true` 时用 `turn.delta` 逐段推送；`false` 时只发一个带全文的 `turn.done`。后端不支持流式时，即使收到 `true`，也可以直接发 `turn.done` 带全文，前端照样能显示。
 - `persona`：当前用户人设 `{ id, name, desc }`，用于替换提示词里的 `{{user}}`。
 - `text`：用户刚输入的原文，没有经过宏替换。
+- `history`：截止到这次生成之前的对话，`[{ id, role, name, text }]`，**已去掉用户隐藏的消息**。当前对话以前端为准（用户可以编辑、删除、隐藏、切换候选），后端拼提示词时用它，不必自己维护对话状态。
+- **宏**：`text` 和 `history` 里的 `{{char}}` `{{user}}` 保持原样，后端拼提示词时自己替换。前端只在显示时替换（按每条消息发出时的人设和角色名）。
 
 ### 一次生成的时序
 
@@ -139,4 +151,4 @@ async function handle(type, p) {
 
 ## 5. 之后会加的接口
 
-下面这些随后续功能加入，加入时更新本文档：角色库（列表、导入、编辑）、聊天记录（列表、切换、分支、检查点）、消息操作（编辑、删除、滑动切换候选、续写、代写、隐藏）、人设同步、世界书、生成参数与预设、Author's Note、Prompt Manager、总结。
+下面这些随后续功能加入，加入时更新本文档：角色库（列表、导入、编辑）、聊天记录（列表、切换、分支、检查点）、人设同步、世界书、生成参数与预设、Author's Note、Prompt Manager、总结。
