@@ -49,7 +49,7 @@
 第四阶段（P1）：
 - [x] 宏：发送 / 编辑保存时直接替换（同 SillyTavern），补全常用宏（时间日期、随机、掷骰、最近消息、角色卡字段等）；输入 `{{` 弹出宏列表
 - [x] `/` 命令：输入 `/` 弹出补全，`/sys` 旁白、`/send`、`/trigger`、`/continue`、`/regen`、`/impersonate`、`/del`、`/hide`、`/persona`、`/char`、`/newchat` 等
-- [ ] Prompt Manager
+- [x] Prompt Manager（吊牌 Plume · 提示词编排）：提示词块拖动 / ↑↓ 排序、开关、编辑、新建，随预设保存；可导入 SillyTavern Chat Completion 预设的 prompts 与 prompt_order
 - [ ] 总结、推理块设置、自动化设置
 
 已知限制：手机上设置页目前是把整张桌面缩小显示，专门的手机排版放在第五阶段；夜间主题和跟随系统还没做。

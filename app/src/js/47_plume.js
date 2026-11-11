@@ -14,9 +14,29 @@ const plume = (() => {
     ['context_size', '上下文长度', 1024, 200000, 1024, 8192, 'tokens']
   ];
   const DEF = Object.fromEntries(P.map(p => [p[0], p[5]])); DEF.seed = -1; DEF.stop = [];
+  /* Prompt Manager：提示词块的默认顺序（同 SillyTavern 的 identifier）。marker = 由后端按内容填充的占位块 */
+  const PM_DEF = [
+    { id: 'main', name: '主提示词', role: 'system', content: '在 {{char}} 与 {{user}} 之间的虚构对话里，写出 {{char}} 的下一条回复。', enabled: true },
+    { id: 'worldInfoBefore', name: '世界书（角色定义前）', marker: true, enabled: true },
+    { id: 'personaDescription', name: '人设描述', marker: true, enabled: true },
+    { id: 'charDescription', name: '角色描述', marker: true, enabled: true },
+    { id: 'charPersonality', name: '角色性格', marker: true, enabled: true },
+    { id: 'scenario', name: '场景', marker: true, enabled: true },
+    { id: 'enhanceDefinitions', name: '强化设定', role: 'system', content: '如果你对 {{char}} 有更多了解，可以补充进来，但不要与已有设定冲突。', enabled: false },
+    { id: 'nsfw', name: '辅助提示词', role: 'system', content: '', enabled: true },
+    { id: 'worldInfoAfter', name: '世界书（角色定义后）', marker: true, enabled: true },
+    { id: 'dialogueExamples', name: '示例对话', marker: true, enabled: true },
+    { id: 'chatHistory', name: '对话历史', marker: true, enabled: true },
+    { id: 'jailbreak', name: '历史后指令', role: 'system', content: '', enabled: true }
+  ];
+  const pmDef = () => PM_DEF.map(x => Object.assign({ role: 'system', content: '' }, x));
   S.gen = store.get('gen', { preset: '默认', params: Object.assign({}, DEF) });
   S.gen.params = Object.assign({}, DEF, S.gen.params);
-  const presets = () => Object.assign({ '默认': DEF }, store.get('presets', {}));
+  if (!Array.isArray(S.gen.prompts) || !S.gen.prompts.length) S.gen.prompts = pmDef();
+  let tab = 'params', pmOpen = null;
+  const presets = () => Object.assign({ '默认': Object.assign({}, DEF, { prompts: pmDef() }) }, store.get('presets', {}));
+  const snapshot = () => Object.assign({}, S.gen.params, { prompts: JSON.parse(JSON.stringify(S.gen.prompts)) });
+  const applyPreset = p => { S.gen.params = Object.assign({}, DEF, p); delete S.gen.params.prompts; S.gen.prompts = p.prompts ? JSON.parse(JSON.stringify(p.prompts)) : pmDef(); };
   const saveGen = () => store.set('gen', S.gen);
   const note = () => (S.chat.meta = S.chat.meta || {}, S.chat.meta.note = Object.assign({ text: '', depth: 4, position: 'chat', role: 'system', freq: 1 }, S.chat.meta.note || {}));
 
@@ -32,7 +52,9 @@ const plume = (() => {
   function render() {
     const g = S.gen.params, N = note(), ps = presets();
     $('plCrumb').textContent = '· ' + S.gen.preset + (dirty() ? ' （已改动）' : '');
-    body.innerHTML = `<div class="pl-grid">
+    const tabs = `<div class="pl-tabs">${[['params', '采样 · 预设 · 作者注释'], ['prompts', '提示词编排']].map(([k, t]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>`;
+    if (tab === 'prompts') { body.innerHTML = tabs + pmHTML(); return; }
+    body.innerHTML = tabs + `<div class="pl-grid">
       <div class="pl-col"><div class="pl-cap"><em>Échantillonnage</em><b>采样</b><button type="button" class="lnk" data-a="reset">恢复这个预设</button></div>
         ${P.map(([k, t, mn, mx, st, , tip]) => `<label class="pl-row"><span class="pl-l"><b>${t}</b><small>${tip}</small></span>
           <input type="range" min="${mn}" max="${mx}" step="${st}" value="${g[k]}" data-k="${k}"><input class="pl-n" type="number" min="${mn}" max="${mx}" step="${st}" value="${fmtv(g[k], st)}" data-n="${k}"></label>`).join('')}
@@ -53,7 +75,21 @@ const plume = (() => {
         <p class="lb-saved" id="plSaved"></p>
       </div></div>`;
   }
-  const dirty = () => { const p = presets()[S.gen.preset]; if (!p) return true; return Object.keys(DEF).some(k => JSON.stringify(p[k] ?? DEF[k]) !== JSON.stringify(S.gen.params[k])); };
+  const dirty = () => { const p = presets()[S.gen.preset]; if (!p) return true; return Object.keys(DEF).some(k => JSON.stringify(p[k] ?? DEF[k]) !== JSON.stringify(S.gen.params[k])) || JSON.stringify(p.prompts || pmDef()) !== JSON.stringify(S.gen.prompts); };
+  /* 提示词编排 */
+  function pmHTML() {
+    const R = { system: '系统', user: '用户', assistant: '角色' };
+    return `<div class="pm"><div class="pl-cap"><em>Prompts</em><b>提示词编排</b><small>从上到下就是发给模型的顺序；拖动或用 ↑↓ 调整，「占位」块由后端按角色卡、世界书和对话填进去</small>
+      <button type="button" class="lnk" data-a="pmAdd">＋ 新的提示词</button><button type="button" class="lnk" data-a="pmReset">恢复默认</button></div>
+      <div class="pm-list" id="pmList">${S.gen.prompts.map((x, i) => `<div class="pm-it${x.enabled ? '' : ' off'}${pmOpen === x.id ? ' open' : ''}" draggable="true" data-i="${i}">
+        <div class="pm-h"><i class="pm-grip" title="拖动排序">⋮⋮</i><input type="checkbox" data-pm="enabled"${x.enabled ? ' checked' : ''} title="启用"><button type="button" class="pm-n" data-a="pmToggle"><b>${esc(x.name || x.id)}</b>${x.marker ? '<i class="pm-mk">占位</i>' : `<i class="pm-r">${R[x.role] || x.role}</i><span>${esc((x.content || '').replace(/\s+/g, ' ').slice(0, 50) || '（空）')}</span>`}</button>
+          <span class="pm-mv"><button type="button" data-a="pmUp" title="上移">↑</button><button type="button" data-a="pmDown" title="下移">↓</button>${x.custom ? '<button type="button" class="dl" data-a="pmDel" title="删除">✕</button>' : ''}</span></div>
+        ${pmOpen === x.id ? (x.marker ? '<div class="pm-b"><p class="pm-note">这是占位块：后端在这里插入对应的内容（角色卡字段、世界书条目、示例对话或对话历史），这里不能编辑内容，只能调整位置和开关。</p></div>'
+          : `<div class="pm-b"><div class="pm-row"><label class="lb-f"><span>名字</span><input data-pm="name" value="${esc(x.name || '')}"></label><label class="lb-f"><span>身份</span><select data-pm="role">${Object.entries(R).map(([v, t]) => `<option value="${v}"${x.role === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label></div>
+            <label class="lb-f"><span>内容 <small>可用宏，如 {{char}} {{user}}</small></span><textarea data-pm="content" rows="5" spellcheck="false">${esc(x.content || '')}</textarea></label></div>`) : ''}</div>`).join('')}</div>
+      <div class="pl-pa"><button type="button" class="lb-btn" data-a="save"${S.gen.preset === '默认' ? ' disabled' : ''}>保存到「${esc(S.gen.preset)}」</button><button type="button" class="lb-btn" data-a="saveas">另存为…</button><span class="lb-saved" id="plSaved"></span></div></div>`;
+  }
+  const pmMove = (i, j) => { const L = S.gen.prompts; if (j < 0 || j >= L.length || i === j) return; const [x] = L.splice(i, 1); L.splice(j, 0, x); saveGen(); render(); };
   const flash = t => { const n = $('plSaved'); if (n) { n.textContent = t; clearTimeout(flash.t); flash.t = setTimeout(() => { if (n.isConnected) n.textContent = ''; }, 1800); } };
   const crumb = () => { $('plCrumb').textContent = '· ' + S.gen.preset + (dirty() ? ' （已改动）' : ''); };
 
@@ -63,27 +99,34 @@ const plume = (() => {
     else if (t.dataset.n) { const v = +t.value; if (!isNaN(v)) { g[t.dataset.n] = v; const r = body.querySelector(`[data-k="${t.dataset.n}"]`); if (r) r.value = v; } }
     else if (t.hasAttribute('data-stop')) g.stop = t.value.split('\n').map(x => x).filter(x => x.length);
     else if (t.dataset.note) { const N = note(); N[t.dataset.note] = t.dataset.note === 'text' ? t.value : +t.value; turn.save(); return; }
+    else if (t.dataset.pm) { const it = t.closest('.pm-it'), x = S.gen.prompts[+it.dataset.i]; if (!x) return; x[t.dataset.pm] = t.type === 'checkbox' ? t.checked : t.value; if (t.type === 'checkbox') it.classList.toggle('off', !t.checked); if (t.dataset.pm === 'name') it.querySelector('.pm-n b').textContent = t.value || x.id; }
     saveGen(); crumb();
   });
   box.addEventListener('click', e => {
     if (e.target.closest('.lb-x') || e.target.classList.contains('lb-scrim')) { show(false); return; }
+    const tb = e.target.closest('[data-tab]'); if (tb) { tab = tb.dataset.tab; render(); return; }
     const sb = e.target.closest('[data-note-seg] button');
     if (sb) { const k = sb.parentElement.dataset.noteSeg; note()[k] = sb.dataset.v; sb.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === sb)); turn.save(); return; }
     const a = e.target.closest('[data-a]'); if (!a) return;
     const k = a.dataset.a, all = store.get('presets', {});
-    if (k === 'pick') { S.gen.preset = a.dataset.n; S.gen.params = Object.assign({}, DEF, presets()[a.dataset.n]); saveGen(); render(); }
-    else if (k === 'reset') { S.gen.params = Object.assign({}, DEF, presets()[S.gen.preset]); saveGen(); render(); }
-    else if (k === 'save') { if (S.gen.preset === '默认') return; all[S.gen.preset] = Object.assign({}, S.gen.params); store.set('presets', all); render(); flash('已保存'); }
+    if (k === 'pick') { S.gen.preset = a.dataset.n; applyPreset(presets()[a.dataset.n]); saveGen(); render(); }
+    else if (k === 'reset') { applyPreset(presets()[S.gen.preset]); saveGen(); render(); }
+    else if (k === 'save') { if (S.gen.preset === '默认') return; all[S.gen.preset] = snapshot(); store.set('presets', all); render(); flash('已保存'); }
+    else if (k === 'pmToggle') { const x = S.gen.prompts[+a.closest('.pm-it').dataset.i]; pmOpen = pmOpen === x.id ? null : x.id; render(); }
+    else if (k === 'pmUp' || k === 'pmDown') { const i = +a.closest('.pm-it').dataset.i; pmMove(i, i + (k === 'pmUp' ? -1 : 1)); }
+    else if (k === 'pmDel') { const i = +a.closest('.pm-it').dataset.i; S.gen.prompts.splice(i, 1); saveGen(); render(); }
+    else if (k === 'pmAdd') { const x = { id: 'c_' + Date.now().toString(36), name: '新的提示词', role: 'system', content: '', enabled: true, custom: true }; const h = S.gen.prompts.findIndex(y => y.id === 'chatHistory'); S.gen.prompts.splice(h < 0 ? S.gen.prompts.length : h, 0, x); pmOpen = x.id; saveGen(); render(); }
+    else if (k === 'pmReset') { S.gen.prompts = pmDef(); pmOpen = null; saveGen(); render(); }
     else if (k === 'saveas') {
       const inp = document.createElement('input'); inp.className = 'pl-name'; inp.placeholder = '预设名字，回车保存'; a.replaceWith(inp); inp.focus();
       inp.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Escape') render(); if (ev.key !== 'Enter') return; const n = inp.value.trim(); if (!n || n === '默认') return;
-        all[n] = Object.assign({}, S.gen.params); store.set('presets', all); S.gen.preset = n; saveGen(); render(); flash('已另存为「' + n + '」'); });
+        all[n] = snapshot(); store.set('presets', all); S.gen.preset = n; saveGen(); render(); flash('已另存为「' + n + '」'); });
     }
     else if (k === 'pdel') {
       if (!a.classList.contains('sure')) { a.classList.add('sure'); a.textContent = '确认删除？'; return; }
-      delete all[S.gen.preset]; store.set('presets', all); S.gen.preset = '默认'; S.gen.params = Object.assign({}, DEF); saveGen(); render();
+      delete all[S.gen.preset]; store.set('presets', all); S.gen.preset = '默认'; applyPreset(presets()['默认']); saveGen(); render();
     }
-    else if (k === 'export') { const blob = new Blob([JSON.stringify(Object.assign({ name: S.gen.preset }, S.gen.params), null, 2)], { type: 'application/json' }); const x = document.createElement('a'); x.href = URL.createObjectURL(blob); x.download = S.gen.preset + '.json'; x.click(); }
+    else if (k === 'export') { const blob = new Blob([JSON.stringify(Object.assign({ name: S.gen.preset }, snapshot()), null, 2)], { type: 'application/json' }); const x = document.createElement('a'); x.href = URL.createObjectURL(blob); x.download = S.gen.preset + '.json'; x.click(); }
     else if (k === 'import') file.click();
   });
   /* 导入：兼容 SillyTavern 预设的常用字段名 */
@@ -96,11 +139,24 @@ const plume = (() => {
       const o = JSON.parse(await f.text()), p = Object.assign({}, DEF);
       for (const k in o) if (MAP[k] && typeof o[k] === 'number') p[MAP[k]] = o[k];
       if (Array.isArray(o.stop)) p.stop = o.stop; else if (Array.isArray(o.stopping_strings)) p.stop = o.stopping_strings;
+      if (Array.isArray(o.prompts) && o.prompts.length && o.prompts[0].identifier !== undefined) {      /* SillyTavern Chat Completion 预设 */
+        const byId = Object.fromEntries(o.prompts.map(x => [x.identifier, x]));
+        const ord = (o.prompt_order || []).find(x => x.character_id === 100001) || (o.prompt_order || [])[0];
+        const ids = ord ? ord.order : o.prompts.map(x => ({ identifier: x.identifier, enabled: x.enabled !== false }));
+        const nameOf = id => (PM_DEF.find(d => d.id === id) || {}).name;
+        p.prompts = ids.filter(x => byId[x.identifier]).map(x => { const q = byId[x.identifier]; return { id: q.identifier, name: nameOf(q.identifier) || q.name || q.identifier, role: q.role || 'system',
+          content: q.content || '', marker: !!q.marker, enabled: x.enabled !== false, custom: !PM_DEF.some(d => d.id === q.identifier) }; });
+      } else if (Array.isArray(o.prompts)) p.prompts = o.prompts;
       const n = (o.name || f.name.replace(/\.json$/i, '')).trim() || '导入的预设';
       const all = store.get('presets', {}); all[n] = p; store.set('presets', all);
-      S.gen.preset = n; S.gen.params = Object.assign({}, p); saveGen(); render(); flash('已导入「' + n + '」');
+      S.gen.preset = n; applyPreset(p); saveGen(); render(); flash('已导入「' + n + '」');
     } catch (e) { flash('导入失败：' + (e.message || e)); }
   });
+  let dragI = -1;
+  body.addEventListener('dragstart', e => { const it = e.target.closest('.pm-it'); if (!it || e.target.closest('textarea,input,select')) return; dragI = +it.dataset.i; it.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; });
+  body.addEventListener('dragover', e => { const it = e.target.closest('.pm-it'); if (dragI < 0 || !it) return; e.preventDefault(); body.querySelectorAll('.pm-it.over').forEach(x => x.classList.remove('over')); it.classList.add('over'); });
+  body.addEventListener('drop', e => { const it = e.target.closest('.pm-it'); if (dragI < 0 || !it) return; e.preventDefault(); const j = +it.dataset.i; const i = dragI; dragI = -1; pmMove(i, j); });
+  body.addEventListener('dragend', () => { dragI = -1; body.querySelectorAll('.pm-it.drag,.pm-it.over').forEach(x => x.classList.remove('drag', 'over')); });
   addEventListener('keydown', e => { if (open && e.key === 'Escape' && !e.target.closest('textarea,input')) { e.preventDefault(); e.stopImmediatePropagation(); show(false); } }, true);
 
   function show(v) { open = v; box.classList.toggle('on', v); box.setAttribute('aria-hidden', String(!v)); if (v) render(); }
@@ -109,7 +165,7 @@ const plume = (() => {
   /* 请求里带的内容 */
   const payload = () => {
     const N = (S.chat.meta || {}).note;
-    return { params: Object.assign({}, S.gen.params), preset: S.gen.preset, authorsNote: N && N.text && N.text.trim() ? Object.assign({}, N) : null };
+    return { params: Object.assign({}, S.gen.params), preset: S.gen.preset, prompts: S.gen.prompts.map(x => ({ id: x.id, name: x.name, role: x.role, content: x.marker ? undefined : macros(x.content || '', ctx()), marker: !!x.marker, enabled: !!x.enabled })), authorsNote: N && N.text && N.text.trim() ? Object.assign({}, N) : null };
   };
   return { show, payload, get open() { return open; } };
 })();

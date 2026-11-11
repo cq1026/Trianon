@@ -142,6 +142,7 @@ Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: st
 - `persona`：当前用户人设 `{ id, name, desc }`，用于替换提示词里的 `{{user}}`。人设锁定（对话 > 角色 > 默认）在前端解析，后端收到的就是这次该用的人设。
 - `params`：生成参数 `{ temperature, top_p, top_k, min_p, repetition_penalty, frequency_penalty, presence_penalty, max_tokens, context_size, seed, stop: string[] }`；`preset` 是预设名。后端按模型支持的部分使用，不支持的忽略。
 - `authorsNote`：作者注释 `{ text, position: 'before' | 'after' | 'chat', depth, freq, role: 'system' | 'user' | 'assistant' }`，没写时为 `null`。`position` 为 `chat` 时插在倒数第 `depth` 条消息前；`freq` 是每隔几条插入一次（0 = 不插入）。
+- `prompts`：Prompt Manager 的提示词块，按发给模型的顺序排列：`[{ id, name, role, content?, marker, enabled }]`。`id` 沿用 SillyTavern 的 identifier（`main`、`worldInfoBefore`、`personaDescription`、`charDescription`、`charPersonality`、`scenario`、`enhanceDefinitions`、`nsfw`、`worldInfoAfter`、`dialogueExamples`、`chatHistory`、`jailbreak`，以及用户自建的 `c_…`）。`marker: true` 的是占位块，后端在那个位置填入对应内容（`chatHistory` 就是 `history`，作者注释也插在这里面）；其余块的 `content` 已由前端替换过宏。`enabled: false` 的跳过。角色卡的 `system_prompt` / `post_history_instructions` 不为空时，按 SillyTavern 的习惯覆盖 `main` / `jailbreak`。
 - `lorebooks`：要启用的世界书 id 列表（全局启用的 + 本对话启用的）。关键词扫描、触发、按 `position` / `depth` / `order` 插入都由后端完成；角色卡自带的 `character_book` 也由后端处理。
 - `text`：用户刚输入的原文，没有经过宏替换。
 - `history`：截止到这次生成之前的对话，`[{ id, role, name, text }]`，**已去掉用户隐藏的消息**。当前对话以前端为准（用户可以编辑、删除、隐藏、切换候选），后端拼提示词时用它，不必自己维护对话状态。

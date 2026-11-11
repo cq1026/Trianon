@@ -77,17 +77,32 @@
         case 'turn.continue': emit('turn.start', { turnId: p.turnId }); run(p.turnId, Object.assign({}, p, { textOverride: '\n\n*她顿了顿，又补上一句。*\n“不过，得等雾散了再走。”' })); return { ok: true };
         case 'turn.impersonate': emit('turn.start', { turnId: p.turnId }); run(p.turnId, Object.assign({}, p, { textOverride: '*接过茶杯，指尖碰到她的手。*\n好啊，那就明早。我会早点起来。' })); return { ok: true };
         case 'turn.prompt': {
+          /* 演示：按 Prompt Manager 的顺序拼提示词（真实后端照此实现即可） */
           const h = p.history || [], P = p.persona || {};
           const sub = t => (t || '').replace(/\{\{char\}\}/gi, CHAR.name).replace(/\{\{user\}\}/gi, P.name || 'User');
-          const prompt = [{ role: 'system', content: sub(`${CHAR.system_prompt || `你是 ${CHAR.name}。用中文进行角色扮演，动作写在 *星号* 里。`}\n\n【角色】${CHAR.description || ''}\n【性格】${CHAR.personality || ''}\n【场景】${CHAR.scenario || ''}\n【用户】${P.name || 'User'}${P.desc ? '：' + P.desc : ''}`) }]
-            .concat(h.map(x => ({ role: x.role, name: x.name, content: x.text })));
           const text = h.slice(-4).map(x => x.text).join('\n').toLowerCase(), all = db.get('lore', {});
           const hits = (p.lorebooks || []).flatMap(id => ((all[id] || {}).entries || [])).filter(e => !e.disable && (e.constant || (e.key || []).some(k => k && text.includes(k.toLowerCase()))));
-          if (hits.length) prompt.splice(1, 0, { role: 'system', content: '【世界书】\n' + hits.map(e => sub(e.content)).join('\n') });
-          const N = p.authorsNote;
-          if (N && N.text) { const at = N.position === 'chat' ? Math.max(1, prompt.length - (N.depth || 0)) : N.position === 'before' ? 0 : 1; prompt.splice(at, 0, { role: N.role || 'system', content: '【作者注释】' + sub(N.text) }); }
-          if (p.params) prompt.push({ role: 'system', name: '参数（演示）', content: JSON.stringify(p.params) });
-          return { ok: true, prompt, tokens: Math.round(JSON.stringify(prompt).length / 1.6) };
+          const wi = pos => hits.filter(e => (e.position || 'after') === pos).map(e => sub(e.content)).join('\n');
+          const order = (p.prompts && p.prompts.length) ? p.prompts : [{ id: 'main', role: 'system', content: `你是 ${CHAR.name}。`, enabled: true }, { id: 'charDescription', marker: true, enabled: true }, { id: 'chatHistory', marker: true, enabled: true }];
+          const out = [], sys = (name, c) => { if (c && c.trim()) out.push({ role: 'system', name, content: c }); };
+          for (const x of order) {
+            if (!x.enabled) continue;
+            if (!x.marker) { if (x.id === 'main' && CHAR.system_prompt) sys('主提示词（角色卡覆盖）', sub(CHAR.system_prompt)); else if (x.id === 'jailbreak' && CHAR.post_history_instructions) sys('历史后指令（角色卡）', sub(CHAR.post_history_instructions)); else if ((x.content || '').trim()) out.push({ role: x.role || 'system', name: x.name, content: sub(x.content) }); continue; }
+            if (x.id === 'worldInfoBefore') sys('世界书', wi('before'));
+            else if (x.id === 'worldInfoAfter') sys('世界书', wi('after'));
+            else if (x.id === 'personaDescription') sys('人设', P.desc ? `${P.name}：${P.desc}` : '');
+            else if (x.id === 'charDescription') sys('角色描述', sub(CHAR.description));
+            else if (x.id === 'charPersonality') sys('角色性格', sub(CHAR.personality));
+            else if (x.id === 'scenario') sys('场景', sub(CHAR.scenario));
+            else if (x.id === 'dialogueExamples') sys('示例对话', sub(CHAR.mes_example));
+            else if (x.id === 'chatHistory') {
+              const hist = h.map(m => ({ role: m.role, name: m.name, content: m.text }));
+              const N = p.authorsNote; if (N && N.text) { const at = N.position === 'chat' ? Math.max(0, hist.length - (N.depth || 0)) : -1; const nm = { role: N.role || 'system', name: '作者注释', content: sub(N.text) }; if (at >= 0) hist.splice(at, 0, nm); else if (N.position === 'before') out.unshift(nm); else out.push(nm); }
+              out.push(...hist);
+            }
+          }
+          if (p.params) out.push({ role: 'system', name: '参数（演示）', content: JSON.stringify(p.params) });
+          return { ok: true, prompt: out, tokens: Math.round(JSON.stringify(out).length / 1.6) };
         }
         case 'chat.save': {
           const ms = p.messages || [], last = ms.filter(m => (m.text || '').trim()).slice(-1)[0];
