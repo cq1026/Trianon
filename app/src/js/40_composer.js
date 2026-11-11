@@ -18,21 +18,24 @@
 
   async function go() {
     if (busy()) return;
+    if (quill.writing()) quill.skip();
     const v = ci.value;
     if (!v.trim()) { ci.focus(); return; }
     ci.value = ''; fit();
     await turn.send(v);
   }
-  const click = () => busy() ? turn.stop() : go();
+  const click = () => busy() ? turn.stop() : quill.writing() ? quill.skip() : go();
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !busy() && quill.writing()) { e.preventDefault(); quill.skip(); } });
   send.addEventListener('click', click);
   send.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); click(); } });
 
   function sync() {
-    const b = busy();
+    const b = busy() || quill.writing();
     send.classList.toggle('busy', b);
     send.setAttribute('aria-label', b ? '停止' : '发送');
   }
-  bus.on('ui:turn', sync);
+  bus.on('ui:turn', sync); bus.on('ui:quill-end', sync);
+  setInterval(sync, 250);   /* 写完积压的字时也要把停止环换回发送 */
 
   /* 人设与模型标签 */
   const pP = $('pPersona'), pM = $('pModel');

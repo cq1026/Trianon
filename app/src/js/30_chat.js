@@ -62,14 +62,17 @@ const chatView = (() => {
     n.row.dataset.state = m.state || 'done';
     if (m.role === 'assistant') {
       n.who.textContent = (m.name || S.char.name || '').toUpperCase().split('').join(' ');
-      n.st.innerHTML = LIVE[m.state] ? `<em>—</em>${LIVE[m.state]}${live ? '<i class="dots"><b>·</b><b>·</b><b>·</b></i>' : ''}` : '';
+      const lab = m.state === 'pending' && quill.enabled() ? '' : LIVE[m.state];   /* 有羽毛笔时，等待由笔写 waiting 表达 */
+      n.st.innerHTML = lab ? `<em>—</em>${lab}${live ? '<i class="dots"><b>·</b><b>·</b><b>·</b></i>' : ''}` : '';
       if (m.reasoning) {
-        n.rsn.hidden = false; n.rsnB.textContent = m.reasoning;
+        n.rsn.hidden = false; if (!quill.sessions.has(m.id)) n.rsnB.textContent = m.reasoning;
         n.rsn.classList.toggle('live', m.state === 'reasoning');
         n.rsnT.textContent = m.reasonDur ? m.reasonDur.toFixed(1) + ' s' : '';
       } else n.rsn.hidden = true;
       n.b.classList.toggle('empty', !m.text);
     }
+    if (m.role === 'assistant' && quill.sync(m, n)) { meta(m, n); return; }   /* 正文由羽毛笔逐字写 */
+    if (m.role === 'assistant' && quill.sessions.size === 0 && n.rsn && !n.rsn.hidden && n.rsnB.querySelector('.ch')) n.rsnB.textContent = m.reasoning;
     const keep = [...n.b.querySelectorAll('.rnd')];
     let t = m.text || '';
     if (t.replace(/\*\*/g, '').split('*').length % 2 === 0) t += '*';   /* 没闭合的 *动作*（流式中途、被停止）按斜体显示 */
@@ -78,6 +81,7 @@ const chatView = (() => {
     meta(m, n);
   }
   function meta(m, n) {
+    if (quill.sessions.has(m.id)) { n.meta.innerHTML = ''; return; }   /* 笔还在写，先不显示操作 */
     const last = S.chat.messages.filter(x => x.role === 'assistant').slice(-1)[0];
     let h = '';
     if (m.role === 'assistant') {

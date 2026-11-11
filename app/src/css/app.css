@@ -113,3 +113,17 @@ body.nost .rnd, body.nost .c5-stk { display: none !important; }
 
 .rm *, .rm *::before, .rm *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 body.st-open .rail-btn { display: none !important; }
+
+/* ===== 羽毛笔与逐字洇出 ===== */
+.qpen { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 29; pointer-events: none; transform-origin: 0 0; opacity: 0; will-change: transform, opacity; }
+.qpen img { position: absolute; left: calc(var(--qw, 150px) * -.0017); top: calc(var(--qw, 150px) * -.1833); width: var(--qw, 150px); height: auto; max-width: none; user-select: none; }
+.qpen.sh { z-index: 28; }
+.qpen.sh img { filter: brightness(0) blur(2px); opacity: .2; }
+.b .tx .ch, .rsn-b .ch, .qwait .ch { opacity: 0; }
+.b .tx .ch.on, .rsn-b .ch.on, .qwait .ch.on { animation: qink .55s cubic-bezier(.2, .7, .2, 1) forwards; }
+@keyframes qink { 0% { opacity: 0; filter: blur(1.3px); color: #070A18; } 30% { opacity: .9; } 100% { opacity: 1; filter: blur(0); } }
+.qwait { position: absolute; left: 24px; top: 9px; margin: 0; font: italic 400 25px/1.5 CormI, Georgia, serif; color: rgba(46, 58, 99, .6); white-space: nowrap; pointer-events: none; transition: opacity .5s ease; }
+.qwait.fade { opacity: 0; }
+.tx.fadein { animation: qfade .7s ease both; }
+@keyframes qfade { from { opacity: 0; filter: blur(1px); } to { opacity: 1; filter: none; } }
+.rm .qpen { display: none; }
