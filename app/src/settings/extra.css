@@ -53,47 +53,47 @@
 /* ===== 手机：拼贴桌面改成竖排卡片，顶部是可横向滑动的分页标签 ===== */
 @media (max-width: 760px) {
   #stSet.on { pointer-events: auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; background: linear-gradient(#BAC2E6, #A9B3DC); }
-  #stSet .c2-desk { position: relative !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; zoom: 1 !important;
+  #stSet.on .c2-desk { position: relative !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; zoom: 1 !important;
     display: flex; flex-wrap: wrap; align-content: flex-start; gap: 0; padding: 10px 10px calc(30px + env(safe-area-inset-bottom)); }
-  #stSet .c2-desk > .an { display: none !important; }
+  #stSet.on .c2-desk > .an { display: none !important; }
   /* 留下：报头（设置）、合上按钮、分页标签 */
-  #stSet .c2-desk > .c2pc:has(.mh) { display: block !important; order: 0; position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important; width: calc(100% - 70px) !important; height: 74px !important; margin: 0 0 8px; }
-  #stSet .c2-desk > .c2pc:has(#stX) { display: block !important; order: 0; position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important; width: 62px !important; height: 62px !important; margin: 4px 0 0 8px; }
-  #stSet .c2-desk > .c2pc:has(#stX) svg.x-r { width: 62px; height: 62px; }
-  #stSet .c2-desk > .st-tab { display: grid !important; order: 1; position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important; margin: 0 6px 10px 0; flex: none; }
-  #stSet .c2-desk > .st-tab .tb-tape, #stSet .c2-desk > .st-tab .te, #stSet .c2-desk > .st-tab .ey { display: none !important; }
-  #stSet .c2-desk > .st-tab { width: auto !important; min-width: 0 !important; padding: 6px 12px 6px 8px !important; grid-template-columns: auto auto !important; gap: 0 6px !important; }
-  #stSet .c2-desk > .st-tab .tz { font-size: 13px !important; letter-spacing: .12em !important; }
-  #stSet .c2-desk > .st-tab .tn { grid-row: auto !important; font-size: 14px !important; }
-  #stSet .c2-desk > .st-tab:not(.on) { opacity: .72 !important; }
-  #stSet #stCharm, #stSet .st-saved { position: fixed !important; }
-  #stSet #stCharm { display: none; }
-  #stSet .st-saved { right: 16px !important; left: auto !important; top: 16px !important; z-index: 5; }
+  #stSet.on .c2-desk > .c2pc:has(.mh) { display: block !important; order: 0; position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important; width: calc(100% - 70px) !important; height: 74px !important; margin: 0 0 8px; }
+  #stSet.on .c2-desk > .c2pc:has(#stX) { display: block !important; order: 0; position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important; width: 62px !important; height: 62px !important; margin: 4px 0 0 8px; }
+  #stSet.on .c2-desk > .c2pc:has(#stX) svg.x-r { width: 62px; height: 62px; }
+  #stSet.on .c2-desk > .st-tab { display: grid !important; order: 1; position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important; margin: 0 6px 10px 0; flex: none; }
+  #stSet.on .c2-desk > .st-tab .tb-tape, #stSet.on .c2-desk > .st-tab .te, #stSet.on .c2-desk > .st-tab .ey { display: none !important; }
+  #stSet.on .c2-desk > .st-tab { width: auto !important; min-width: 0 !important; padding: 6px 12px 6px 8px !important; grid-template-columns: auto auto !important; gap: 0 6px !important; }
+  #stSet.on .c2-desk > .st-tab .tz { font-size: 13px !important; letter-spacing: .12em !important; }
+  #stSet.on .c2-desk > .st-tab .tn { grid-row: auto !important; font-size: 14px !important; }
+  #stSet.on .c2-desk > .st-tab:not(.on) { opacity: .72 !important; }
+  #stSet.on #stCharm, #stSet.on .st-saved { position: fixed !important; }
+  #stSet.on #stCharm { display: none; }
+  #stSet.on .st-saved { right: 16px !important; left: auto !important; top: 16px !important; z-index: 5; }
   /* 当前分页：卡片竖着排 */
-  #stSet .st-sec { position: relative !important; inset: auto !important; order: 2; width: 100%; display: none; }
-  #stSet .st-sec.on { display: flex; flex-direction: column; gap: 12px; pointer-events: auto !important; }
-  #stSet .st-sec > .an { position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important;
+  #stSet.on .st-sec { position: relative !important; inset: auto !important; order: 2; width: 100%; display: none; }
+  #stSet.on .st-sec.on { display: flex; flex-direction: column; gap: 12px; pointer-events: auto !important; }
+  #stSet.on .st-sec > .an { position: relative !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; visibility: visible !important;
     width: 100% !important; height: auto !important; min-height: 64px; z-index: auto !important; }
-  #stSet .st-sec > .c2pc > .pp { position: absolute; left: 0; top: 0; width: 100% !important; height: 100% !important; }
-  #stSet .st-sec > .c2pc > .ct { height: auto !important; min-height: 64px; }
+  #stSet.on .st-sec > .c2pc > .pp { position: absolute; left: 0; top: 0; width: 100% !important; height: 100% !important; }
+  #stSet.on .st-sec > .c2pc > .ct { height: auto !important; min-height: 64px; }
   /* 纯装饰：撕纸底、标签条、胶带、贴纸、摆件、提示小纸条里的长说明 */
-  #stSet .st-sec > .deco, #stSet .st-sec > .c2-strip, #stSet .st-sec > .tp, #stSet .st-sec > .c2dc, #stSet .st-sec > .c3ob, #stSet .st-sec > .c3sh { display: none !important; }
+  #stSet.on .st-sec > .deco, #stSet.on .st-sec > .c2-strip, #stSet.on .st-sec > .tp, #stSet.on .st-sec > .c2dc, #stSet.on .st-sec > .c3ob, #stSet.on .st-sec > .c3sh { display: none !important; }
   /* 外观：三张主题卡并排 */
-  #stSet .st-sec[data-sec="appearance"] > .st-sw { width: calc((100% - 24px) / 3) !important; min-height: 190px; display: inline-block; }
-  #stSet .st-sec[data-sec="appearance"].on { flex-direction: row; flex-wrap: wrap; }
-  #stSet .st-sec[data-sec="appearance"] > .an:not(.st-sw) { width: 100% !important; }
-  #stSet .st-sec[data-sec="appearance"] > .c2-tape { height: 100px !important; }
+  #stSet.on .st-sec[data-sec="appearance"] > .st-sw { width: calc((100% - 24px) / 3) !important; min-height: 190px; display: inline-block; }
+  #stSet.on .st-sec[data-sec="appearance"].on { flex-direction: row; flex-wrap: wrap; }
+  #stSet.on .st-sec[data-sec="appearance"] > .an:not(.st-sw) { width: 100% !important; }
+  #stSet.on .st-sec[data-sec="appearance"] > .c2-tape { height: 100px !important; }
   /* 人设页：相框和名牌并排在编辑卡上面 */
-  #stSet .st-sec[data-sec="persona"] > .c3av { display: block !important; width: 120px !important; align-self: center; }
-  #stSet .st-sec[data-sec="persona"] > .c3av img { width: 120px !important; }
-  #stSet .st-sec[data-sec="persona"] > .c3av .av-ph { left: 18px !important; top: 36px !important; width: 82px !important; height: 102px !important; }
-  #stSet .st-sec[data-sec="persona"] > .c3av .av-ph b { font-size: 32px; }
-  #stSet .pn-ed { height: auto; padding: 12px 18px 16px; }
-  #stSet .pn-ls { height: auto; padding: 14px 18px; }
-  #stSet .cn-acts { position: static; padding: 0 26px 18px; }
-  #stSet .sf { padding: 14px 16px !important; }
-  #stSet .sf-r { flex-wrap: wrap; }
-  #stSet .st-seg { flex-wrap: wrap; }
-  #stSet .pn-ed.css textarea { min-height: 180px; }
-  #stSet .c2nt { position: relative; }
+  #stSet.on .st-sec[data-sec="persona"] > .c3av { display: block !important; width: 120px !important; align-self: center; }
+  #stSet.on .st-sec[data-sec="persona"] > .c3av img { width: 120px !important; }
+  #stSet.on .st-sec[data-sec="persona"] > .c3av .av-ph { left: 18px !important; top: 36px !important; width: 82px !important; height: 102px !important; }
+  #stSet.on .st-sec[data-sec="persona"] > .c3av .av-ph b { font-size: 32px; }
+  #stSet.on .pn-ed { height: auto; padding: 12px 18px 16px; }
+  #stSet.on .pn-ls { height: auto; padding: 14px 18px; }
+  #stSet.on .cn-acts { position: static; padding: 0 26px 18px; }
+  #stSet.on .sf { padding: 14px 16px !important; }
+  #stSet.on .sf-r { flex-wrap: wrap; }
+  #stSet.on .st-seg { flex-wrap: wrap; }
+  #stSet.on .pn-ed.css textarea { min-height: 180px; }
+  #stSet.on .c2nt { position: relative; }
 }
