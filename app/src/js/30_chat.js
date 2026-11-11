@@ -98,8 +98,9 @@ const chatView = (() => {
       }
     } else h += `<span>${hm(m.time)}</span>` + L_('edit', '编辑');
     if (m.state === 'done' || m.state === 'stopped' || m.state === 'error' || m.role === 'user')
-      h += `<span class="more">${L_('more', '⋯', 'mo')}<span class="mm">${L_('hide', m.hidden ? '取消隐藏' : '隐藏')}${L_('prompt', '提示词')}${L_('del', '删除', 'dl')}</span></span>`;
+      h += `<span class="more">${L_('more', '⋯', 'mo')}<span class="mm">${L_('hide', m.hidden ? '取消隐藏' : '隐藏')}${L_('branch', '从这里分支')}${L_('ckpt', '存检查点')}${L_('prompt', '提示词')}${L_('del', '删除', 'dl')}</span></span>`;
     if (m.hidden) h += '<span class="hid-t">已隐藏 · 不发给模型</span>';
+    if (m.checkpoint) h += '<button type="button" class="lnk ckm" data-act="ckopen">✦ 检查点</button>';
     n.meta.innerHTML = h;
   }
 
@@ -118,6 +119,9 @@ const chatView = (() => {
       el.classList.add('sure'); el.textContent = '确认删除？'; setTimeout(() => { if (el.isConnected) { el.classList.remove('sure'); el.textContent = '删除'; } }, 2400);
     }
     else if (a === 'prompt') showPrompt(m);
+    else if (a === 'branch') T.history.fork(m.id, 'branch');
+    else if (a === 'ckpt') T.history.fork(m.id, 'checkpoint');
+    else if (a === 'ckopen') T.history.load(m.checkpoint);
   }
 
   /* 编辑：气泡里换成输入框；Ctrl+Enter 保存，Esc 取消 */

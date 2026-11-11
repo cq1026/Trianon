@@ -67,6 +67,7 @@
   bus.on('nav', k => {
     const ST = T.settings;
     if (k === 'new') newChat();
+    else if (k === 'history') { /* 抽屉自己处理 */ }
     else if (k === 'persona' && ST) ST.open('persona');
     else if (k === 'look' && ST) ST.open('appearance');
     else if (k === 'settings' && ST) ST.open(ST.S.lastSec || 'persona');

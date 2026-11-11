@@ -101,7 +101,13 @@ async function handle(type, p) {
 | `turn.stop` | `{ turnId }` | 任意；可以再发 `turn.stopped` 确认。 |
 | `turn.prompt` | `{ chatId, msgId, history, persona, characterId }` | `{ ok: true, prompt, tokens? }`。「查看提示词」用。`prompt` 可以是字符串，或 `[{ role, name?, content }]` 数组。 |
 | `chat.new` | `{ characterId }` | `{ ok: true, chatId }`。不返回 `chatId` 时前端自己生成。 |
-| `chat.save` | `{ chatId, characterId, title, messages: Message[] }` | 任意。对话有改动（新消息、编辑、删除、隐藏、切换候选）后 0.6 秒合并发一次，后端负责存。 |
+| `chat.save` | `{ chatId, characterId, title, meta, messages: Message[] }` | 任意。对话有改动（新消息、编辑、删除、隐藏、切换候选）后 0.6 秒合并发一次，后端负责存。只有开场白、还没写过一句的对话不会存。`meta` 里可能有 `branchOf` / `checkpointOf: { chatId, msgId }`。 |
+| `chat.list` | `{ characterId }` | `{ ok: true, chats: [{ chatId, title, updated, count, preview, branchOf?, checkpointOf? }] }`。聊天记录抽屉用；`updated` 为毫秒时间戳。 |
+| `chat.load` | `{ chatId }` | `{ ok: true, chat: { chatId, title, meta, messages: Message[] } }`。 |
+| `chat.rename` | `{ chatId, title }` | 任意。 |
+| `chat.delete` | `{ chatId }` | 任意。 |
+
+**分支和检查点**由前端完成：先 `chat.new` 拿一个新 id，再用 `chat.save` 存一份截止到那条消息的副本（`meta.branchOf` 或 `meta.checkpointOf`）。分支会切到新对话；检查点留在原处，那条消息带上 `checkpoint: 新chatId`，点它可以打开。后端不需要额外实现。
 
 字段说明：
 
@@ -151,4 +157,4 @@ async function handle(type, p) {
 
 ## 5. 之后会加的接口
 
-下面这些随后续功能加入，加入时更新本文档：角色库（列表、导入、编辑）、聊天记录（列表、切换、分支、检查点）、人设同步、世界书、生成参数与预设、Author's Note、Prompt Manager、总结。
+下面这些随后续功能加入，加入时更新本文档：角色库（列表、导入、编辑）、人设同步、世界书、生成参数与预设、Author's Note、Prompt Manager、总结。

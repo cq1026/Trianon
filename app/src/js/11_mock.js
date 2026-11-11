@@ -8,6 +8,12 @@
   const later = (id, s, fn) => { const h = setTimeout(fn, s * 1000); (timers.get(id) || timers.set(id, []).get(id)).push(h); };
   const clear = id => { (timers.get(id) || []).forEach(clearTimeout); timers.delete(id); };
 
+  /* 模拟后端的存储：浏览器 localStorage（仅演示） */
+  const db = {
+    get(k, d) { try { const v = localStorage.getItem('trianon:mock:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('trianon:mock:' + k, JSON.stringify(v)); } catch (e) { } },
+    del(k) { try { localStorage.removeItem('trianon:mock:' + k); } catch (e) { } }
+  };
   const CHAR = { id: 'marguerite', name: 'Marguerite', greeting: '*把一封信压在镇纸下，抬眼看你。*\n你来了。今天想去花园走走，还是留在屋里喝茶？' };
   const REPLIES = [
     '*合上手里的书，指尖在书脊上停了一下。*\n“玫瑰园在宫殿东侧，沿着碎石小径一直走下去就到了。六月初开得最盛。”\n\n清晨常有薄雾，花瓣上带着水，香气比正午浓上一倍。若你愿意，明早我陪你去走一趟。',
@@ -67,7 +73,18 @@
             .concat(h.map(x => ({ role: x.role, name: x.name, content: x.text })));
           return { ok: true, prompt, tokens: Math.round(JSON.stringify(prompt).length / 1.6) };
         }
-        case 'chat.save': try { localStorage.setItem('trianon:mock:chat:' + p.chatId, JSON.stringify(p)); } catch (e) { } return { ok: true };
+        case 'chat.save': {
+          const ms = p.messages || [], last = ms.filter(m => (m.text || '').trim()).slice(-1)[0];
+          const rec = { chatId: p.chatId, characterId: p.characterId, title: p.title || '', meta: p.meta || {}, messages: ms };
+          const ix = db.get('index', {}); const old = ix[p.chatId] || {};
+          ix[p.chatId] = { chatId: p.chatId, characterId: p.characterId, title: p.title || old.title || '', updated: Date.now(), count: ms.length,
+            preview: last ? last.text.replace(/\s+/g, ' ').slice(0, 80) : '', branchOf: (p.meta || {}).branchOf, checkpointOf: (p.meta || {}).checkpointOf };
+          db.set('chat:' + p.chatId, rec); db.set('index', ix); return { ok: true };
+        }
+        case 'chat.list': { const ix = db.get('index', {}); return { ok: true, chats: Object.values(ix).filter(c => !p.characterId || c.characterId === p.characterId) }; }
+        case 'chat.load': { const c = db.get('chat:' + p.chatId, null); return c ? { ok: true, chat: c } : { ok: false, error: 'not found' }; }
+        case 'chat.rename': { const ix = db.get('index', {}); if (ix[p.chatId]) { ix[p.chatId].title = p.title; db.set('index', ix); } const c = db.get('chat:' + p.chatId, null); if (c) { c.title = p.title; db.set('chat:' + p.chatId, c); } return { ok: true }; }
+        case 'chat.delete': { const ix = db.get('index', {}); delete ix[p.chatId]; db.set('index', ix); db.del('chat:' + p.chatId); return { ok: true }; }
         case 'turn.stop': clear(p.turnId); setTimeout(() => emit('turn.stopped', { turnId: p.turnId }), 60); return { ok: true };
         case 'chat.new': return { ok: true, chatId: uid('chat') };
         case 'settings.update': return { ok: true };

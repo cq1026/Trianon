@@ -32,8 +32,9 @@ const turn = (() => {
       const messages = S.chat.messages.filter(m => !['pending', 'reasoning', 'streaming'].includes(m.state)).map(m => ({
         id: m.id, role: m.role, name: m.name, text: m.text, reasoning: m.reasoning || '', time: m.time, hidden: !!m.hidden,
         greeting: !!m.greeting, userName: m.userName, charName: m.charName, personaId: m.personaId,
-        swipes: m.swipes, sid: m.sid }));
-      bridge.request('chat.save', { chatId: S.chat.id, characterId: S.char.id, title: S.chat.title || '', messages }).catch(() => {});
+        swipes: m.swipes, sid: m.sid, checkpoint: m.checkpoint }));
+      if (!messages.some(m => m.role === 'user')) return;   /* 只有开场白时不存 */
+      bridge.request('chat.save', { chatId: S.chat.id, characterId: S.char.id, title: S.chat.title || T.history.titleOf(messages), meta: S.chat.meta || {}, messages }).catch(() => {});
     }, 600);
   }
 
