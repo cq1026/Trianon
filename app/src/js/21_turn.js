@@ -68,7 +68,7 @@ const turn = (() => {
     }
     bus.emit('ui:turn');
     return Object.assign({ turnId: id, chatId: S.chat.id, msgId: m ? m.id : null, stream: S.settings.stream,
-      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, characterId: S.char.id }, extra || {});
+      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, characterId: S.char.id }, T.plume ? T.plume.payload() : {}, T.lore ? T.lore.payload() : {}, extra || {});
   }
   async function go(type, req) {
     try { await bridge.request(type, req); }
@@ -151,7 +151,7 @@ const turn = (() => {
   async function prompt(msgId) {
     const m = msg(msgId);
     try { return await bridge.request('turn.prompt', { chatId: S.chat.id, msgId, characterId: S.char.id, history: history(m && m.role === 'assistant' ? msgId : null, m && m.role !== 'assistant'),
-      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' } }); }
+      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, ...(T.plume ? T.plume.payload() : {}), ...(T.lore ? T.lore.payload() : {}) }); }
     catch (e) { return { error: e.message || String(e) }; }
   }
 

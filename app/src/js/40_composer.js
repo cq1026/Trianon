@@ -56,6 +56,35 @@
   const tags = () => { pP.textContent = '✦ ' + (persona().name || ''); pM.textContent = S.model; pM.hidden = !S.model; };
   bus.on('ui:model', tags); bus.on('ui:persona', tags); tags();
 
+  /* 点人设标签：快速切换人设，并锁定到这段对话 / 这位角色，或设为默认 */
+  const pop = document.createElement('div'); pop.className = 'ppop'; pop.hidden = true; document.body.appendChild(pop);
+  pP.setAttribute('role', 'button'); pP.tabIndex = 0; pP.style.cursor = 'var(--cu-pointer)';
+  function drawPop() {
+    const L = T.app.locks();
+    pop.innerHTML = `<div class="pp-hd"><em>Persona</em><b>以谁的身份写信</b></div>
+      ${S.personas.map(p => `<button type="button" class="pp-it${p.id === S.personaId ? ' on' : ''}" data-id="${esc(p.id)}"><b>${esc(p.name || '未命名')}</b>${p.id === S.defaultPersonaId ? '<i>默认</i>' : ''}</button>`).join('')}
+      <div class="pp-lk"><label><input type="checkbox" data-lk="chat"${L.chat ? ' checked' : ''}> 锁定到这段对话</label>
+      <label><input type="checkbox" data-lk="char"${L.char ? ' checked' : ''}${S.char.id ? '' : ' disabled'}> 锁定到 ${esc(S.char.name || '这位角色')}</label>
+      <label><input type="checkbox" data-lk="def"${L.isDefault ? ' checked disabled' : ''}> 设为默认</label></div>
+      <button type="button" class="pp-more" data-a="manage">管理人设…</button>`;
+  }
+  function placePop() { const r = pP.getBoundingClientRect(); pop.style.left = Math.max(8, r.left) + 'px'; pop.style.bottom = (innerHeight - r.top + 10) + 'px'; }
+  const togglePop = v => { pop.hidden = !v; if (v) { drawPop(); placePop(); } };
+  pP.addEventListener('click', e => { e.stopPropagation(); togglePop(pop.hidden); });
+  pP.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePop(pop.hidden); } });
+  pop.addEventListener('click', e => {
+    e.stopPropagation();
+    const it = e.target.closest('.pp-it'); if (it) { T.app.setPersona(it.dataset.id); drawPop(); return; }
+    if (e.target.closest('[data-a=manage]')) { togglePop(false); bus.emit('nav', 'persona'); }
+  });
+  pop.addEventListener('change', e => {
+    const k = e.target.dataset.lk; if (!k) return;
+    if (k === 'chat') T.app.lockChat(e.target.checked); else if (k === 'char') T.app.lockChar(e.target.checked); else if (k === 'def' && e.target.checked) T.app.setDefaultPersona(S.personaId);
+    drawPop();
+  });
+  document.addEventListener('click', () => togglePop(false));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) togglePop(false); });
+
   /* 输入栏高度变化时，聊天区底边跟着走 */
   new ResizeObserver(() => stage.style.setProperty('--cH', comp.offsetHeight + 'px')).observe(comp);
 

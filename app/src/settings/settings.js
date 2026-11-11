@@ -416,7 +416,7 @@ const secPersona=()=>{const g='persona';let h='';const L=pList();if(!PE||!L.find
      <div class="pn-hd"><em>Carte de visite</em><b>${E.id===pCur().id?'当 前 人 设':'编 辑 人 设'}</b></div>
      <label class="pn-f"><span>名字 <small>替换 {{user}}</small></span><input id="stPnName" type="text" maxlength="40" value="${esc(E.name)}" autocomplete="off" spellcheck="false"></label>
      <label class="pn-f"><span>描述 <small>交给后端拼进提示词</small></span><textarea id="stPnDesc" rows="4" maxlength="2000" spellcheck="false" placeholder="外貌、身份、和角色的关系……">${esc(E.desc||'')}</textarea></label>
-     <div class="pn-acts">${E.id===pCur().id?'<span class="pn-on">✦ 正在使用</span>':tagBtn('设为当前','pnUse')}${tagBtn('新建','pnNew')}${L.length>1?tagBtn('删除','pnDel'):''}</div></div>`,{tone:'milk',band:40});
+     <div class="pn-acts">${E.id===pCur().id?'<span class="pn-on">✦ 正在使用</span>':tagBtn('设为当前','pnUse')}${APP.S.defaultPersonaId===E.id?'<span class="pn-on">默认</span>':tagBtn('设为默认','pnDef')}${tagBtn('新建','pnNew')}${L.length>1?tagBtn('删除','pnDel'):''}</div></div>`,{tone:'milk',band:40});
   h+=TP(g,560,152,74,22,6,'blue');
   h+=CD(g,262,484,520,286,-.8,`<div class="pn-ls"><div class="pn-lh"><em>Tous</em><b>全部人设</b><small>${L.length} 位 · 点一下编辑</small></div>
      ${L.map(p=>`<button type="button" class="pn-row${p.id===PE?' sel':''}${p.id===pCur().id?' cur':''}" data-a="pnPick" data-id="${esc(p.id)}"><b>${esc(p.name||'未命名')}</b><span>${esc((p.desc||'还没有描述').slice(0,46))}</span>${p.id===pCur().id?'<i>当前</i>':''}</button>`).join('')}</div>`,{tone:'cream',rule:{y0:58,gap:34}});
@@ -619,6 +619,7 @@ root.addEventListener('click',e=>{const t=e.target;
   const L=APP.S.personas;
   if(act==='pnPick'){PE=a.dataset.id;rebuild('persona')}
   else if(act==='pnUse'){APP.setPersona(PE);rebuild('persona');showSaved()}
+  else if(act==='pnDef'){APP.setDefaultPersona(PE);rebuild('persona');showSaved()}
   else if(act==='pnNew'){const p={id:'p_'+Date.now().toString(36),name:'新的人设',desc:''};L.push(p);PE=p.id;APP.savePersonas();rebuild('persona');setTimeout(()=>{const i=$('stPnName');if(i){i.focus();i.select()}},60)}
   else if(act==='pnDel'){if(L.length<2)return;const i=L.findIndex(p=>p.id===PE);if(i<0)return;const was=L[i].id;L.splice(i,1);if(APP.S.personaId===was)APP.setPersona(L[0].id);PE=APP.S.personaId;APP.savePersonas();rebuild('persona');showSaved()}
   else if(act==='cnRefresh')drawConn();

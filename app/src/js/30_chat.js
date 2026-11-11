@@ -107,6 +107,7 @@ const chatView = (() => {
 
   /* 操作 */
   function act(m, n, a, el) {
+    if (a !== 'more' && a !== 'del') document.querySelectorAll('.meta .more.open').forEach(x => x.classList.remove('open'));
     if (a === 'retry' || a === 'regen') turn.regenerate(m.id);
     else if (a === 'cont') turn.cont(m.id);
     else if (a === 'swl') turn.swipe(m.id, -1);

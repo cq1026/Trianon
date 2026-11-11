@@ -81,6 +81,12 @@
           const sub = t => (t || '').replace(/\{\{char\}\}/gi, CHAR.name).replace(/\{\{user\}\}/gi, P.name || 'User');
           const prompt = [{ role: 'system', content: sub(`${CHAR.system_prompt || `你是 ${CHAR.name}。用中文进行角色扮演，动作写在 *星号* 里。`}\n\n【角色】${CHAR.description || ''}\n【性格】${CHAR.personality || ''}\n【场景】${CHAR.scenario || ''}\n【用户】${P.name || 'User'}${P.desc ? '：' + P.desc : ''}`) }]
             .concat(h.map(x => ({ role: x.role, name: x.name, content: x.text })));
+          const text = h.slice(-4).map(x => x.text).join('\n').toLowerCase(), all = db.get('lore', {});
+          const hits = (p.lorebooks || []).flatMap(id => ((all[id] || {}).entries || [])).filter(e => !e.disable && (e.constant || (e.key || []).some(k => k && text.includes(k.toLowerCase()))));
+          if (hits.length) prompt.splice(1, 0, { role: 'system', content: '【世界书】\n' + hits.map(e => sub(e.content)).join('\n') });
+          const N = p.authorsNote;
+          if (N && N.text) { const at = N.position === 'chat' ? Math.max(1, prompt.length - (N.depth || 0)) : N.position === 'before' ? 0 : 1; prompt.splice(at, 0, { role: N.role || 'system', content: '【作者注释】' + sub(N.text) }); }
+          if (p.params) prompt.push({ role: 'system', name: '参数（演示）', content: JSON.stringify(p.params) });
           return { ok: true, prompt, tokens: Math.round(JSON.stringify(prompt).length / 1.6) };
         }
         case 'chat.save': {
@@ -91,6 +97,10 @@
             preview: last ? last.text.replace(/\s+/g, ' ').slice(0, 80) : '', branchOf: (p.meta || {}).branchOf, checkpointOf: (p.meta || {}).checkpointOf };
           db.set('chat:' + p.chatId, rec); db.set('index', ix); return { ok: true };
         }
+        case 'lore.list': return { ok: true, books: Object.values(db.get('lore', {})).map(b => ({ id: b.id, name: b.name, count: (b.entries || []).length })) };
+        case 'lore.get': { const b = db.get('lore', {})[p.id]; return b ? { ok: true, book: b } : { ok: false, error: 'not found' }; }
+        case 'lore.save': { const all = db.get('lore', {}); const b = Object.assign({}, p.book); if (!b.id) b.id = 'wi_' + Date.now().toString(36); all[b.id] = b; db.set('lore', all); return { ok: true, id: b.id }; }
+        case 'lore.delete': { const all = db.get('lore', {}); delete all[p.id]; db.set('lore', all); return { ok: true }; }
         case 'char.list': return { ok: true, chars: Object.values(chars()).map(c => ({ id: c.id, name: c.name, avatar: c.avatar || '', desc: c.description || '', tags: c.tags || [] })) };
         case 'char.get': { const c = chars()[p.id]; return c ? { ok: true, char: c } : { ok: false, error: 'not found' }; }
         case 'char.save': { const all = chars(); const c = Object.assign({}, p.char); if (!c.id) c.id = 'c_' + Date.now().toString(36); all[c.id] = c; db.set('chars', all); if (c.id === CHAR.id) CHAR = c; return { ok: true, id: c.id }; }

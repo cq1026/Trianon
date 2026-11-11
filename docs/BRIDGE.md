@@ -122,12 +122,27 @@ async function handle(type, p) {
 
 导入（PNG 里的 `chara` / `ccv3` 文本块，或 V1/V2/V3 JSON）和导出（V2 JSON）都在前端完成，后端只负责存。
 
+| `lore.list` | `{}` | `{ ok: true, books: [{ id, name, count }] }`。 |
+| `lore.get` | `{ id }` | `{ ok: true, book: Lorebook }`。 |
+| `lore.save` | `{ book: Lorebook }` | `{ ok: true, id }`。`book.id` 为空表示新书。 |
+| `lore.delete` | `{ id }` | 任意。 |
+
+```ts
+Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: string[], content, constant, selective,
+  logic: 'and_any' | 'and_all' | 'not_any' | 'not_all', order, position: 'before' | 'after' | 'an_top' | 'an_bottom' | 'depth', depth, probability, disable }] }
+```
+
+世界书的导入导出（SillyTavern 世界书 JSON）在前端完成。生成参数的预设存在前端本机，不走接口。
+
 **分支和检查点**由前端完成：先 `chat.new` 拿一个新 id，再用 `chat.save` 存一份截止到那条消息的副本（`meta.branchOf` 或 `meta.checkpointOf`）。分支会切到新对话；检查点留在原处，那条消息带上 `checkpoint: 新chatId`，点它可以打开。后端不需要额外实现。
 
 字段说明：
 
 - `stream`：用户在设置里选的输出方式。`true` 时用 `turn.delta` 逐段推送；`false` 时只发一个带全文的 `turn.done`。后端不支持流式时，即使收到 `true`，也可以直接发 `turn.done` 带全文，前端照样能显示。
-- `persona`：当前用户人设 `{ id, name, desc }`，用于替换提示词里的 `{{user}}`。
+- `persona`：当前用户人设 `{ id, name, desc }`，用于替换提示词里的 `{{user}}`。人设锁定（对话 > 角色 > 默认）在前端解析，后端收到的就是这次该用的人设。
+- `params`：生成参数 `{ temperature, top_p, top_k, min_p, repetition_penalty, frequency_penalty, presence_penalty, max_tokens, context_size, seed, stop: string[] }`；`preset` 是预设名。后端按模型支持的部分使用，不支持的忽略。
+- `authorsNote`：作者注释 `{ text, position: 'before' | 'after' | 'chat', depth, freq, role: 'system' | 'user' | 'assistant' }`，没写时为 `null`。`position` 为 `chat` 时插在倒数第 `depth` 条消息前；`freq` 是每隔几条插入一次（0 = 不插入）。
+- `lorebooks`：要启用的世界书 id 列表（全局启用的 + 本对话启用的）。关键词扫描、触发、按 `position` / `depth` / `order` 插入都由后端完成；角色卡自带的 `character_book` 也由后端处理。
 - `text`：用户刚输入的原文，没有经过宏替换。
 - `history`：截止到这次生成之前的对话，`[{ id, role, name, text }]`，**已去掉用户隐藏的消息**。当前对话以前端为准（用户可以编辑、删除、隐藏、切换候选），后端拼提示词时用它，不必自己维护对话状态。
 - **宏**：`text` 和 `history` 里的 `{{char}}` `{{user}}` 保持原样，后端拼提示词时自己替换。前端只在显示时替换（按每条消息发出时的人设和角色名）。
@@ -172,4 +187,4 @@ async function handle(type, p) {
 
 ## 5. 之后会加的接口
 
-下面这些随后续功能加入，加入时更新本文档：人设同步、世界书、生成参数与预设、Author's Note、Prompt Manager、总结。
+下面这些随后续功能加入，加入时更新本文档：Prompt Manager、总结。

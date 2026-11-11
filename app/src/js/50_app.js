@@ -67,7 +67,7 @@
   bus.on('nav', k => {
     const ST = T.settings;
     if (k === 'new') newChat();
-    else if (k === 'history' || k === 'chars') { /* 抽屉 / 角色库自己处理 */ }
+    else if (['history', 'chars', 'gen', 'lore'].includes(k)) { /* 各自的面板自己处理 */ }
     else if (k === 'persona' && ST) ST.open('persona');
     else if (k === 'look' && ST) ST.open('appearance');
     else if (k === 'settings' && ST) ST.open(ST.S.lastSec || 'persona');
