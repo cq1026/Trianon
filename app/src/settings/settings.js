@@ -208,7 +208,8 @@ const SECS=[
  {k:'persona',n:'i',em:'Persona',zh:'人设',sub:'你在故事里是谁'},
  {k:'appearance',n:'ii',em:'Parure',zh:'外观',sub:'字号 · 动效 · 输出方式'},
  {k:'salon',n:'iii',em:'Salon',zh:'对话样式',sub:'气泡 · 头像 · 宽度 · CSS'},
- {k:'connection',n:'iv',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
+ {k:'auto',n:'iv',em:'Automates',zh:'推理与自动化',sub:'推理块 · 回车 · 自动续写'},
+ {k:'connection',n:'v',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
 const MODES=[
  {k:'manual',n:'i',zh:'始终询问',en:'Always Ask',was:'原 Manual · 默认',d:'只读操作自动放行；写文件、跑命令逐一向你确认。',risk:0},
  {k:'yolo',n:'ii',zh:'必要时询问',en:'Ask When Needed',was:'原 YOLO · /demo-ask',d:'普通调用自动批准；.env、私钥、rm -rf、退出 Plan 仍会问你。',risk:1},
@@ -347,7 +348,7 @@ const buildDesk=()=>{let h='';
   /* index: ruled note + label strips */
   h+=P('g',14,120,214,388,-2.2,'ruled',`<div class="ix-hd"><em>Index</em><b>目 录</b></div>`,{torn:'',y0:66,gap:22,mx:26,amp:2.4});
   h+=DC('g',176,108,10,starBadge(34));
-  SECS.forEach((s,i)=>{const x=[30,18,34,22][i],y=188+i*72,r=[-2.6,1.8,-1.4,2.2][i];const q=nd('g');const d=q.n*.055;q.n++;q.last=d;
+  SECS.forEach((s,i)=>{const x=[30,18,34,22,28][i],y=180+i*64,r=[-2.6,1.8,-1.4,2.2,-1.8][i];const q=nd('g');const d=q.n*.055;q.n++;q.last=d;
     h+=`<button type="button" class="an st-tab${i?'':' on'}" data-sec="${s.k}" aria-current="${i?'false':'page'}" data-g="g" data-d="${d.toFixed(3)}" data-k="p" data-r="${r}" style="left:${x}px;top:${y}px">
       <i class="tb-bg"></i><span class="tn">${s.n}</span><span class="tz">${s.zh}</span><em class="te">${s.em.toUpperCase()}</em><i class="ey"></i>
       <i class="tb-tape">${tapeSVG(54,22,i*31+5,'milk')}</i></button>`});
@@ -486,7 +487,28 @@ const secSalon=()=>{const g='salon',U=Object.assign({style:'bubbles',avatar:'non
     <textarea id="stCss" spellcheck="false" placeholder=".in .b { font-size: 16px; }">${esc(U.css||'')}</textarea><small class="css-n">改完立即生效，只影响这台设备。</small></div>`,{tone:'milk'});
   return h};
 
-/* IV · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
+/* iv · auto（新增）：推理块与自动化 */
+const AUTODEF={enterSend:'enter',loadLast:false,autoCont:0,swipeWords:'',swipeMin:0,swipeMax:2,autoScroll:true,rsnPrompt:false,think:false,thinkPre:'<think>',thinkSuf:'</think>'};
+const secAuto=()=>{const g='auto',A=Object.assign({},AUTODEF,APP.S.settings.auto||{}),C=APP.S.settings;let h='';
+  h+=P(g,250,110,470,250,-1.4,'vellum','',{torn:'rb',cls:'deco'});
+  h+=P(g,262,122,330,34,-2,null,dymo('推理与自动化 Automates · 同 SillyTavern','c2lt'),{cls:'c2-strip'});
+  h+=CD(g,256,166,452,290,1,`<div class="sf cv"><div class="cv-hd"><em>Raisonnement</em><b>推 理 块</b></div>
+    <div class="sf-r"><div class="sf-l"><b>自动展开</b><small>生成时推理块默认打开</small></div>${tg('chat.reasoningOpen',!!C.reasoningOpen)}</div>
+    <div class="sf-r"><div class="sf-l"><b>加入提示词</b><small>把推理一起放进 history 发回去</small></div>${tg('auto.rsnPrompt',!!A.rsnPrompt)}</div>
+    <div class="sf-r"><div class="sf-l"><b>解析标签</b><small>正文开头的推理标签拆成推理块</small></div>${tg('auto.think',!!A.think)}</div>
+    <div class="sf-r au-in"><span>开头</span><input data-auto="thinkPre" value="${esc(A.thinkPre)}"><span>结尾</span><input data-auto="thinkSuf" value="${esc(A.thinkSuf)}"></div></div>`,{tone:'silver'});
+  h+=CD(g,256,472,452,360,-1,`<div class="sf cv"><div class="cv-hd"><em>Automatismes</em><b>自 动 化</b></div>
+    <div class="sf-r"><div class="sf-l"><b>发送键</b><small>另一个组合用来换行</small></div>${seg('auto.enterSend',[['enter','Enter'],['ctrl','Ctrl + Enter']],A.enterSend)}</div>
+    <div class="sf-r"><div class="sf-l"><b>打开上次的对话</b><small>启动时直接回到最近一段</small></div>${tg('auto.loadLast',!!A.loadLast)}</div>
+    <div class="sf-r"><div class="sf-l"><b>自动滚动</b><small>新内容出现时滚到底</small></div>${tg('auto.autoScroll',A.autoScroll!==false)}</div>
+    <div class="sf-r au-in"><span>回复不足</span><input type="number" min="0" data-auto="autoCont" value="${A.autoCont}"><span>字时自动续写一次（0 = 关）</span></div>
+    <div class="sf-r au-in"><span>出现这些词就换候选</span><input class="w" data-auto="swipeWords" value="${esc(A.swipeWords)}" placeholder="逗号分开"></div>
+    <div class="sf-r au-in"><span>或少于</span><input type="number" min="0" data-auto="swipeMin" value="${A.swipeMin}"><span>字；最多换</span><input type="number" min="0" max="5" data-auto="swipeMax" value="${A.swipeMax}"><span>次</span></div></div>`,{tone:'milk'});
+  h+=OB(g,760,150,170,-4,O.hg,{sh:[14,72,2,10],cls:'au-hg'});
+  h+=CD(g,736,560,232,190,1.6,`<div class="c2nt s">自动续写和自动换候选在回复写完之后才判断；手动停止的回复不会触发。<br><br>「解析标签」用于把推理和正文混在一起发回来的模型，比如开头是 &lt;think&gt; 的回复。</div>`,{tone:'silver',stitch:false});
+  return h};
+
+/* V · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
 const CONN={ready:['En ligne','已连接','后端在线，可以写信了'],connecting:['Connexion…','正在连接','正在等后端回应'],reconnecting:['Reconnexion','连接断开','正在重连'],failed:['Hors ligne','连接失败','后端没有回应']};
 const connHTML=()=>{const A=APP.S,c=CONN[A.conn.state]||[A.conn.state,A.conn.state,''];const mock=window.__trianon.usingMock;
   const cap=(k,t)=>`<span class="cn-cap${A.caps[k]===false?' no':''}">${A.caps[k]===false?'✕':'✓'} ${t}</span>`;
@@ -518,6 +540,7 @@ root.innerHTML=`<div class="st-sheet c2-desk" id="stSheet">${buildDesk()}
  <section class="st-sec on" data-sec="persona">${secPersona()}</section>
  <section class="st-sec" data-sec="appearance">${secAppearance()}</section>
  <section class="st-sec" data-sec="salon">${secSalon()}</section>
+ <section class="st-sec" data-sec="auto">${secAuto()}</section>
  <section class="st-sec" data-sec="connection">${secConnection()}</section></div>`;
 b.appendChild(root);
 const sheet=$('stSheet'),charm=$('stCharm'),cStrand=charm.querySelector('.ch-strand'),cNum=charm.querySelector('.ch-num');
@@ -544,6 +567,7 @@ const save=(key,val)=>{const [grp,k]=key.split('.');
   if(grp==='appearance'){V.appearance[k]=val;APP.S.settings.appearance=Object.assign({},V.appearance)}
   else if(grp==='chat')APP.S.settings[k]=val;
   else if(grp==='ui'){APP.S.settings.ui=Object.assign({},APP.S.settings.ui||{},{[k]:val})}
+  else if(grp==='auto'){APP.S.settings.auto=Object.assign({},APP.S.settings.auto||{},{[k]:val})}
   APP.saveSettings();APP.bus.emit('ui:settings',key);showSaved()};
 
 /* ---------------------------------------------------------------- open / close / switch */
@@ -622,7 +646,8 @@ const rebuild=sec=>{const keep=S.sec;const i=SECS.findIndex(x=>x.k===(sec||keep)
   if(!sec||sec==='persona')secs[0].innerHTML=secPersona();
   if(!sec||sec==='appearance'){secs[1].innerHTML=secAppearance();applyPreview()}
   if(!sec||sec==='salon')secs[2].innerHTML=secSalon();
-  if(!sec||sec==='connection')secs[3].innerHTML=secConnection();
+  if(!sec||sec==='auto')secs[3].innerHTML=secAuto();
+  if(!sec||sec==='connection')secs[4].innerHTML=secConnection();
   refs();if(S.open){const t=sT();ANS.forEach(A=>{if(A.g===(sec||keep))A.d=-9});S.secT=Math.min(S.secT,t-1)}};
 APP.bus.on('ui:conn',()=>{if(S.open&&S.sec==='connection')drawConn()});
 APP.bus.on('ui:model',()=>{if(S.open&&S.sec==='connection')drawConn()});
@@ -652,7 +677,7 @@ root.addEventListener('pointerdown',e=>{const sl=e.target.closest('.st-sl');if(!
 root.addEventListener('pointermove',e=>{if(drag)setFont(slVal(drag,e.clientX))});
 root.addEventListener('pointerup',()=>{if(drag){drag=null;save('appearance.fontSize',V.appearance.fontSize)}});
 root.addEventListener('keydown',e=>{const sl=e.target.closest&&e.target.closest('.st-sl');if(sl&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();setFont(V.appearance.fontSize+(e.key==='ArrowRight'?.5:-.5),true)}});
-root.addEventListener('input',e=>{const id=e.target.id;if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
+root.addEventListener('input',e=>{const id=e.target.id;const ak=e.target.dataset&&e.target.dataset.auto;if(ak){clearTimeout(S.auT);const v=e.target.type==='number'?(+e.target.value||0):e.target.value;S.auT=setTimeout(()=>save('auto.'+ak,v),300);return}if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
   if(id==='stPnName'){p.name=e.target.value;const av=root.querySelector('.c3av .av-ph');if(av){av.querySelector('b').textContent=[...(p.name||'?').trim()][0]||'?';av.querySelector('em').textContent=p.name}}else p.desc=e.target.value;
   clearTimeout(S.pnT);S.pnT=setTimeout(()=>{APP.savePersonas();if(p.id===APP.S.personaId)APP.bus.emit('ui:persona');showSaved()},500)});
 root.addEventListener('change',e=>{const id=e.target.id;const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});

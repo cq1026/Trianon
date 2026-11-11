@@ -11,7 +11,7 @@ const chatView = (() => {
   let stick = true;                 /* 用户没往上翻时，新内容自动滚到底 */
 
   SC.addEventListener('scroll', () => { stick = SC.scrollHeight - SC.scrollTop - SC.clientHeight < 60; }, { passive: true });
-  const toBottom = (force) => { if (force || stick) SC.scrollTop = SC.scrollHeight; };
+  const toBottom = (force) => { if (force || (stick && (S.settings.auto || {}).autoScroll !== false)) SC.scrollTop = SC.scrollHeight; };
 
   /* 贴纸：按消息 id 固定选一张，约六成消息有 */
   function sticker(m, b) {

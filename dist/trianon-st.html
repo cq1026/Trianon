@@ -1879,6 +1879,9 @@ body[data-chatstyle="document"] .meta { opacity: 0 !important; } body[data-chats
 #stSet .c2-desk { left: var(--stl, 124px); top: var(--stt, 18px); }
 #stSet .pn-ed.css textarea { flex: 1; width: 100%; border: 1px solid rgba(76, 93, 136, .3); background: rgba(255, 255, 255, .7); padding: 8px; font: 11.5px/1.6 "DejaVu Sans Mono", monospace; color: #232A44; outline: 0; resize: none; border-radius: 3px; }
 #stSet .css-n { font: italic 12px/1.3 CormI, Georgia, serif; color: #6A7AA0; }
+#stSet .au-in { min-height: 34px !important; justify-content: flex-start !important; gap: 8px !important; font-size: 12px; color: #3C4A75; flex-wrap: wrap; }
+#stSet .au-in input { width: 64px; border: 0; border-bottom: 1px solid rgba(76, 93, 136, .45); background: rgba(255, 255, 255, .7); padding: 3px 6px; font: 12.5px/1.3 var(--serif); color: #232A44; outline: 0; text-align: center; }
+#stSet .au-in input.w { flex: 1; min-width: 140px; text-align: left; }
 
 </style>
 </head>
@@ -2120,7 +2123,9 @@ T.bridge = bridge;
 
   function run(turnId, payload) {
     if (opt.failNext) { opt.failNext = false; later(turnId, opt.delay + .6, () => emit('turn.error', { turnId, message: '连接中断（模拟）' })); return; }
-    const text = payload.textOverride || (payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length]);
+    let text = payload.textOverride || (payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length]);
+    if (opt.thinkTags) text = '<think>先回应对方，再带一点花园的意象。</think>\n' + text;
+    if (opt.short) text = '嗯。';
     const stream = payload.stream !== false;
     let t = opt.delay;
     if (opt.reasoning && stream) {
@@ -2141,6 +2146,7 @@ T.bridge = bridge;
     later(turnId, t, step);
   }
 
+  const P0 = p => (p.persona && p.persona.name) || '用户';
   const mock = {
     opt,
     set(o) { Object.assign(opt, o || {}); return opt; },
@@ -2190,6 +2196,7 @@ T.bridge = bridge;
           if (p.params) out.push({ role: 'system', name: '参数（演示）', content: JSON.stringify(p.params) });
           return { ok: true, prompt: out, tokens: Math.round(JSON.stringify(out).length / 1.6) };
         }
+        case 'turn.summarize': { const h = p.history || []; await new Promise(r => setTimeout(r, 900)); return { ok: true, text: `${P0(p)}与 ${CHAR.name} 聊了 ${h.length} 条：从玫瑰园说到清晨的雾，约好了一起去散步。（模拟后端的示例总结）` }; }
         case 'chat.save': {
           const ms = p.messages || [], last = ms.filter(m => (m.text || '').trim()).slice(-1)[0];
           const rec = { chatId: p.chatId, characterId: p.characterId, title: p.title || '', meta: p.meta || {}, messages: ms };
@@ -2294,6 +2301,16 @@ const turn = (() => {
   const isLast = m => S.chat.messages[S.chat.messages.length - 1] === m;
 
   /* 显示用的文字：替换 {{char}} {{user}}，名字按消息发出时的快照 */
+  const auto = () => Object.assign({ think: false, thinkPre: '<think>', thinkSuf: '</think>', rsnPrompt: false }, S.settings.auto || {});
+  /* 解析推理标签：正文以 <think> 开头时，把标签里的内容拆进推理块 */
+  function splitThink(m) {
+    const A = auto(); if (!A.think || !A.thinkPre) return;
+    const raw = m._raw, t = raw.replace(/^\s+/, '');
+    if (!t.startsWith(A.thinkPre)) { if (t.length >= A.thinkPre.length || !A.thinkPre.startsWith(t)) { m.text = (m._base || '') + raw; } else m.text = m._base || ''; return; }
+    const body = t.slice(A.thinkPre.length), j = A.thinkSuf ? body.indexOf(A.thinkSuf) : -1;
+    if (j < 0) { m.reasoning = body.trim(); m.text = m._base || ''; m._thinking = true; }
+    else { m.reasoning = body.slice(0, j).trim(); m.text = (m._base || '') + body.slice(j + A.thinkSuf.length).replace(/^\s+/, ''); m._thinking = false; }
+  }
   const disp = (m, t) => macros(t == null ? m.text : t, Object.assign(ctx(), { char: m.charName || S.char.name || '', user: m.userName || persona().name || '' }));
 
   /* 发给后端的历史：截止到某条消息（不含），隐藏的不发 */
@@ -2301,7 +2318,7 @@ const turn = (() => {
     const out = [];
     for (const m of S.chat.messages) {
       if (m.id === uptoId && !include) break;
-      if (!m.hidden && m.state !== 'error' && (m.text || '').trim()) out.push({ id: m.id, role: m.role, name: m.role === 'user' ? (m.userName || m.name) : (m.charName || m.name), text: m.text });
+      if (!m.hidden && m.state !== 'error' && (m.text || '').trim()) { const it = { id: m.id, role: m.role, name: m.role === 'user' ? (m.userName || m.name) : (m.charName || m.name), text: m.text }; if (auto().rsnPrompt && m.reasoning) it.reasoning = m.reasoning; out.push(it); }
       if (m.id === uptoId) break;
     }
     return out;
@@ -2347,6 +2364,7 @@ const turn = (() => {
     if (m) {
       if (kind === 'continue') Object.assign(m, { state: 'pending', error: '', tStart: S.turn.t0, contBase: (m.text || '').length });
       else Object.assign(m, { state: 'pending', text: '', reasoning: '', error: '', tStart: S.turn.t0, dur: 0, reasonDur: 0, contBase: 0, time: Date.now() });
+      m._raw = ''; m._base = kind === 'continue' ? (m.text || '') : ''; m._thinking = false;
       touch(m);
     }
     bus.emit('ui:turn');
@@ -2462,17 +2480,23 @@ const turn = (() => {
     const t = cur(p.turnId); if (!t || !busy()) return;
     if (!t.msgId) { t.state = 'streaming'; bus.emit('ui:impersonate', { delta: p.delta || '' }); return; }
     const m = msg(t.msgId); if (!m) return;
+    if (auto().think) {
+      m._raw = (m._raw || '') + (p.delta || ''); splitThink(m);
+      if (m._thinking) { if (t.state === 'pending') { t.state = 'reasoning'; m.state = 'reasoning'; m.tReason = now(); } touch(m); return; }
+      if (!m.text && t.state !== 'streaming') { touch(m); return; }
+    }
     if (t.state !== 'streaming') {
       if (t.state === 'reasoning') m.reasonDur = now() - (m.tReason || now());
       t.state = 'streaming'; m.state = 'streaming'; t.tFirst = now();
     }
-    m.text = (m.text || '') + (p.delta || ''); touch(m);
+    if (!auto().think) m.text = (m.text || '') + (p.delta || '');
+    touch(m);
   });
   bus.on('be:turn.done', p => {
     const t = cur(p.turnId); if (!t || !busy()) return;
     if (!t.msgId) { if (typeof p.text === 'string') bus.emit('ui:impersonate', { text: p.text }); t.state = 'done'; bus.emit('ui:turn'); return; }
     const m = msg(t.msgId); if (!m) return;
-    if (typeof p.text === 'string') m.text = t.kind === 'continue' && !t.tFirst ? (m.text || '') + p.text : p.text;
+    if (typeof p.text === 'string') { if (auto().think) { m._raw = p.text; splitThink(m); } else m.text = t.kind === 'continue' && !t.tFirst ? (m.text || '') + p.text : p.text; }
     if (typeof p.reasoning === 'string' && p.reasoning) m.reasoning = p.reasoning;
     if (t.state === 'reasoning') m.reasonDur = now() - (m.tReason || now());
     if (p.usage) m.usage = p.usage;
@@ -2501,7 +2525,7 @@ const chatView = (() => {
   let stick = true;                 /* 用户没往上翻时，新内容自动滚到底 */
 
   SC.addEventListener('scroll', () => { stick = SC.scrollHeight - SC.scrollTop - SC.clientHeight < 60; }, { passive: true });
-  const toBottom = (force) => { if (force || stick) SC.scrollTop = SC.scrollHeight; };
+  const toBottom = (force) => { if (force || (stick && (S.settings.auto || {}).autoScroll !== false)) SC.scrollTop = SC.scrollHeight; };
 
   /* 贴纸：按消息 id 固定选一张，约六成消息有 */
   function sticker(m, b) {
@@ -3119,9 +3143,15 @@ const run=()=>{tod='';t0=performance.now()-(window.__emptyAtRest?5700:0);
     if (e.isComposing || e.keyCode === 229) return;
     const empty = !ci.value, la = turn.lastAssistant();
     /* 快捷键（同 SillyTavern）：Ctrl+Enter 重新生成 · Alt+Enter 续写 · 输入框为空时 ←/→ 切换候选、↑ 编辑最后一条 */
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (la) turn.regenerate(la.id); return; }
+    const ctrlMode = (S.settings.auto || {}).enterSend === 'ctrl';
+    if (ctrlMode) {      /* 设置为 Ctrl+Enter 发送：Enter 换行，Ctrl+Shift+Enter 重新生成 */
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.shiftKey) { e.preventDefault(); if (la) turn.regenerate(la.id); return; }
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); return; }
+    } else {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (la) turn.regenerate(la.id); return; }
+      if (e.key === 'Enter' && !e.shiftKey && !e.altKey) { e.preventDefault(); go(); return; }
+    }
     if (e.key === 'Enter' && e.altKey) { e.preventDefault(); turn.cont(); return; }
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); return; }
     if (empty && la && turn.isLast(la) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); turn.swipe(la.id, e.key === 'ArrowLeft' ? -1 : 1); return; }
     if (empty && e.key === 'ArrowUp') { const m = S.chat.messages[S.chat.messages.length - 1]; if (m) { e.preventDefault(); chatView.startEdit(m.id); } }
   });
@@ -3289,6 +3319,7 @@ const slash = (() => {
       try { const r = await bridge.request('char.list', {}); const L = (r && r.chars) || []; const c = L.find(x => x.name === a.trim()) || L.find(x => (x.name || '').includes(a.trim()));
         if (!c) { toast('没有找到角色：' + a); return; } const g = await bridge.request('char.get', { id: c.id }); T.chars.select((g && g.char) || c, true); } catch (e) { toast('切换失败'); } }],
     ['newchat', '', '开始一段新对话', () => bus.emit('nav', 'new')],
+    ['summarize', '', '让模型总结这段对话（写进作者注释旁的「总结」）', () => T.plume.summarize(false)],
     ['echo', '<文字>', '弹一张小纸条（测试用）', a => toast(macros(a, ctx()))],
     ['help', '', '列出全部命令', () => toast(CMDS.map(c => '/' + c[0]).join('  '))]
   ];
@@ -3689,6 +3720,36 @@ const plume = (() => {
   const applyPreset = p => { S.gen.params = Object.assign({}, DEF, p); delete S.gen.params.prompts; S.gen.prompts = p.prompts ? JSON.parse(JSON.stringify(p.prompts)) : pmDef(); };
   const saveGen = () => store.set('gen', S.gen);
   const note = () => (S.chat.meta = S.chat.meta || {}, S.chat.meta.note = Object.assign({ text: '', depth: 4, position: 'chat', role: 'system', freq: 1 }, S.chat.meta.note || {}));
+  /* 总结：内容跟着对话（meta.summary）；怎么总结、多久总结一次存在本机 */
+  const SUMDEF = { every: 0, position: 'after', depth: 4, role: 'system', template: '[故事到目前为止的总结：{{summary}}]',
+    prompt: '暂停角色扮演。用不超过 200 字总结到目前为止的故事：重要的事件、人物关系的变化、还没解决的事。只输出总结本身。' };
+  const sumCfg = () => Object.assign({}, SUMDEF, store.get('summaryCfg', {}));
+  const summ = () => (S.chat.meta = S.chat.meta || {}, S.chat.meta.summary = Object.assign({ text: '', at: 0 }, S.chat.meta.summary || {}));
+  let sumBusy = false;
+  async function summarize(auto) {
+    if (sumBusy) return; sumBusy = true; if (open && tab === 'summary') render();
+    const C = sumCfg();
+    try {
+      const r = await bridge.request('turn.summarize', { chatId: S.chat.id, characterId: S.char.id, history: turn.history(null, true), prompt: macros(C.prompt, ctx()), previous: summ().text,
+        persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, params: Object.assign({}, S.gen.params) });
+      if (r && typeof r.text === 'string' && r.text.trim()) { const Sm = summ(); Sm.text = r.text.trim(); Sm.at = S.chat.messages.length; turn.save(); if (!auto) flash('总结好了'); }
+      else if (!auto) flash('后端没有返回总结' + (r && r.error ? '：' + r.error : ''));
+    } catch (e) { if (!auto) flash('总结失败：' + (e.message || e)); }
+    sumBusy = false; if (open && tab === 'summary') render();
+  }
+  function sumHTML() {
+    const Sm = summ(), C = sumCfg(), since = S.chat.messages.length - (Sm.at || 0);
+    return `<div class="pl-grid"><div class="pl-col"><div class="pl-cap"><em>Résumé</em><b>这段对话的总结</b><small>${Sm.text ? '上次总结后又有 ' + since + ' 条' : '还没有总结'}</small></div>
+      <label class="lb-f"><textarea rows="12" data-sum="text" placeholder="点「现在总结」让模型写，也可以自己写或修改" spellcheck="false">${esc(Sm.text)}</textarea></label>
+      <div class="pl-pa" style="margin-top:12px"><button type="button" class="lb-btn pri" data-a="sumNow"${sumBusy ? ' disabled' : ''}>${sumBusy ? '正在总结…' : '现在总结'}</button><button type="button" class="lb-btn" data-a="sumClear">清空</button><span class="lb-saved" id="plSaved"></span></div></div>
+      <div class="pl-col"><div class="pl-card"><div class="pl-cap"><em>Automate</em><b>自动总结</b></div>
+        <div class="pl-nr"><span>每隔</span><input class="pl-n" type="number" min="0" max="500" step="1" value="${C.every}" data-cfg="every"><span>条消息自动总结一次（0 = 不自动）</span></div></div>
+        <div class="pl-card"><div class="pl-cap"><em>Insertion</em><b>插进提示词</b></div>
+          <label class="lb-f"><span>模板 <small>{{summary}} 会换成总结</small></span><input data-cfg="template" value="${esc(C.template)}"></label>
+          <div class="pl-nr"><span>位置</span><span class="st-segx" data-cfg-seg="position">${[['before', '主提示词前'], ['after', '主提示词后'], ['chat', '聊天中按深度']].map(([v, t]) => `<button type="button" data-v="${v}" class="${C.position === v ? 'on' : ''}">${t}</button>`).join('')}</span>
+            <span>深度</span><input class="pl-n" type="number" min="0" max="100" value="${C.depth}" data-cfg="depth"></div></div>
+        <div class="pl-card"><div class="pl-cap"><em>Consigne</em><b>让模型怎么总结</b></div><label class="lb-f"><textarea rows="4" data-cfg="prompt" spellcheck="false">${esc(C.prompt)}</textarea></label></div></div></div>`;
+  }
 
   const box = document.createElement('div');
   box.className = 'lib pl'; box.id = 'plume'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '生成参数'); box.setAttribute('aria-hidden', 'true');
@@ -3702,8 +3763,9 @@ const plume = (() => {
   function render() {
     const g = S.gen.params, N = note(), ps = presets();
     $('plCrumb').textContent = '· ' + S.gen.preset + (dirty() ? ' （已改动）' : '');
-    const tabs = `<div class="pl-tabs">${[['params', '采样 · 预设 · 作者注释'], ['prompts', '提示词编排']].map(([k, t]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>`;
+    const tabs = `<div class="pl-tabs">${[['params', '采样 · 预设 · 作者注释'], ['prompts', '提示词编排'], ['summary', '总结']].map(([k, t]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>`;
     if (tab === 'prompts') { body.innerHTML = tabs + pmHTML(); return; }
+    if (tab === 'summary') { body.innerHTML = tabs + sumHTML(); return; }
     body.innerHTML = tabs + `<div class="pl-grid">
       <div class="pl-col"><div class="pl-cap"><em>Échantillonnage</em><b>采样</b><button type="button" class="lnk" data-a="reset">恢复这个预设</button></div>
         ${P.map(([k, t, mn, mx, st, , tip]) => `<label class="pl-row"><span class="pl-l"><b>${t}</b><small>${tip}</small></span>
@@ -3749,12 +3811,15 @@ const plume = (() => {
     else if (t.dataset.n) { const v = +t.value; if (!isNaN(v)) { g[t.dataset.n] = v; const r = body.querySelector(`[data-k="${t.dataset.n}"]`); if (r) r.value = v; } }
     else if (t.hasAttribute('data-stop')) g.stop = t.value.split('\n').map(x => x).filter(x => x.length);
     else if (t.dataset.note) { const N = note(); N[t.dataset.note] = t.dataset.note === 'text' ? t.value : +t.value; turn.save(); return; }
+    else if (t.dataset.sum) { summ().text = t.value; turn.save(); return; }
+    else if (t.dataset.cfg) { const c = store.get('summaryCfg', {}); c[t.dataset.cfg] = t.type === 'number' ? +t.value : t.value; store.set('summaryCfg', c); return; }
     else if (t.dataset.pm) { const it = t.closest('.pm-it'), x = S.gen.prompts[+it.dataset.i]; if (!x) return; x[t.dataset.pm] = t.type === 'checkbox' ? t.checked : t.value; if (t.type === 'checkbox') it.classList.toggle('off', !t.checked); if (t.dataset.pm === 'name') it.querySelector('.pm-n b').textContent = t.value || x.id; }
     saveGen(); crumb();
   });
   box.addEventListener('click', e => {
     if (e.target.closest('.lb-x') || e.target.classList.contains('lb-scrim')) { show(false); return; }
     const tb = e.target.closest('[data-tab]'); if (tb) { tab = tb.dataset.tab; render(); return; }
+    const cb = e.target.closest('[data-cfg-seg] button'); if (cb) { const c = store.get('summaryCfg', {}); c[cb.parentElement.dataset.cfgSeg] = cb.dataset.v; store.set('summaryCfg', c); cb.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === cb)); return; }
     const sb = e.target.closest('[data-note-seg] button');
     if (sb) { const k = sb.parentElement.dataset.noteSeg; note()[k] = sb.dataset.v; sb.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === sb)); turn.save(); return; }
     const a = e.target.closest('[data-a]'); if (!a) return;
@@ -3762,6 +3827,8 @@ const plume = (() => {
     if (k === 'pick') { S.gen.preset = a.dataset.n; applyPreset(presets()[a.dataset.n]); saveGen(); render(); }
     else if (k === 'reset') { applyPreset(presets()[S.gen.preset]); saveGen(); render(); }
     else if (k === 'save') { if (S.gen.preset === '默认') return; all[S.gen.preset] = snapshot(); store.set('presets', all); render(); flash('已保存'); }
+    else if (k === 'sumNow') summarize(false);
+    else if (k === 'sumClear') { const Sm = summ(); Sm.text = ''; Sm.at = 0; turn.save(); render(); }
     else if (k === 'pmToggle') { const x = S.gen.prompts[+a.closest('.pm-it').dataset.i]; pmOpen = pmOpen === x.id ? null : x.id; render(); }
     else if (k === 'pmUp' || k === 'pmDown') { const i = +a.closest('.pm-it').dataset.i; pmMove(i, i + (k === 'pmUp' ? -1 : 1)); }
     else if (k === 'pmDel') { const i = +a.closest('.pm-it').dataset.i; S.gen.prompts.splice(i, 1); saveGen(); render(); }
@@ -3815,9 +3882,14 @@ const plume = (() => {
   /* 请求里带的内容 */
   const payload = () => {
     const N = (S.chat.meta || {}).note;
-    return { params: Object.assign({}, S.gen.params), preset: S.gen.preset, prompts: S.gen.prompts.map(x => ({ id: x.id, name: x.name, role: x.role, content: x.marker ? undefined : macros(x.content || '', ctx()), marker: !!x.marker, enabled: !!x.enabled })), authorsNote: N && N.text && N.text.trim() ? Object.assign({}, N) : null };
+    const Sm = (S.chat.meta || {}).summary, C = sumCfg();
+    return { summary: Sm && Sm.text && Sm.text.trim() ? { text: Sm.text, content: macros(C.template.replace(/\{\{summary\}\}/g, Sm.text), ctx()), position: C.position, depth: C.depth, role: C.role } : null,
+      params: Object.assign({}, S.gen.params), preset: S.gen.preset, prompts: S.gen.prompts.map(x => ({ id: x.id, name: x.name, role: x.role, content: x.marker ? undefined : macros(x.content || '', ctx()), marker: !!x.marker, enabled: !!x.enabled })), authorsNote: N && N.text && N.text.trim() ? Object.assign({}, N) : null };
   };
-  return { show, payload, get open() { return open; } };
+  /* 自动总结：每生成完一条检查一次 */
+  bus.on('ui:turn', () => { const t = S.turn; if (!t || t.state !== 'done' || t._sumChecked) return; t._sumChecked = true;
+    const C = sumCfg(); if (!C.every) return; const Sm = summ(); if (S.chat.messages.length - (Sm.at || 0) >= C.every) setTimeout(() => summarize(true), 400); });
+  return { show, payload, summarize, get open() { return open; } };
 })();
 T.plume = plume;
 
@@ -3971,6 +4043,40 @@ const lore = (() => {
   return { show, payload, get open() { return open; } };
 })();
 T.lore = lore;
+
+/* ---- 49_auto.js ---- */
+/* ===== 自动化：自动续写、自动换候选、启动时打开上次的对话 =====
+   都在回复写完（笔也放下）之后才判断；手动停止、出错的回复不触发。 */
+(() => {
+  const A = () => Object.assign({ loadLast: false, autoCont: 0, swipeWords: '', swipeMin: 0, swipeMax: 2 }, S.settings.auto || {});
+  const tries = new Map();      /* msgId -> 已自动换候选的次数 */
+  let watching = null;
+  bus.on('ui:turn', () => {
+    const t = S.turn; if (!t || t.state !== 'done' || t._autoChecked || t.kind === 'impersonate') return;
+    t._autoChecked = true; watching = t;
+    const wait = () => {
+      if (watching !== t || S.turn !== t) return;
+      if (quill.writing()) { setTimeout(wait, 250); return; }
+      const m = S.chat.messages.find(x => x.id === t.msgId); if (!m || m.state !== 'done') return;
+      const C = A(), text = (m.text || '').trim();
+      const words = C.swipeWords.split(/[,，]/).map(w => w.trim()).filter(Boolean);
+      const bad = (words.length && words.some(w => text.includes(w))) || (C.swipeMin > 0 && text.length < C.swipeMin);
+      const n = tries.get(m.id) || 0;
+      if (bad && n < C.swipeMax && turn.isLast(m)) { tries.set(m.id, n + 1); flash(`自动换候选（第 ${n + 1} 次）`); turn.regenerate(m.id); return; }
+      if (C.autoCont > 0 && text.length < C.autoCont && t.kind !== 'continue' && turn.isLast(m)) { flash('回复有点短，自动续写'); turn.cont(m.id); }
+    };
+    setTimeout(wait, 300);
+  });
+  function flash(t) { const s = $('soon'); $('soonFr').textContent = 'Automate'; $('soonTx').textContent = t; s.classList.add('on'); clearTimeout(flash.t); flash.t = setTimeout(() => s.classList.remove('on'), 1600); }
+
+  /* 启动时打开上次的对话：拿到角色之后查一次聊天记录 */
+  let done = false;
+  bus.on('ui:char', async () => {
+    if (done || !A().loadLast || S.chat.messages.length) return; done = true;
+    try { const r = await bridge.request('chat.list', { characterId: S.char.id }); const L = ((r && r.chats) || []).sort((a, b) => (b.updated || 0) - (a.updated || 0));
+      if (L[0]) T.history.load(L[0].chatId); } catch (e) { }
+  });
+})();
 
 /* ---- 50_app.js ---- */
 /* ===== 页面切换、顶栏、空白页、启动 ===== */
@@ -4290,7 +4396,8 @@ const SECS=[
  {k:'persona',n:'i',em:'Persona',zh:'人设',sub:'你在故事里是谁'},
  {k:'appearance',n:'ii',em:'Parure',zh:'外观',sub:'字号 · 动效 · 输出方式'},
  {k:'salon',n:'iii',em:'Salon',zh:'对话样式',sub:'气泡 · 头像 · 宽度 · CSS'},
- {k:'connection',n:'iv',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
+ {k:'auto',n:'iv',em:'Automates',zh:'推理与自动化',sub:'推理块 · 回车 · 自动续写'},
+ {k:'connection',n:'v',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
 const MODES=[
  {k:'manual',n:'i',zh:'始终询问',en:'Always Ask',was:'原 Manual · 默认',d:'只读操作自动放行；写文件、跑命令逐一向你确认。',risk:0},
  {k:'yolo',n:'ii',zh:'必要时询问',en:'Ask When Needed',was:'原 YOLO · /demo-ask',d:'普通调用自动批准；.env、私钥、rm -rf、退出 Plan 仍会问你。',risk:1},
@@ -4429,7 +4536,7 @@ const buildDesk=()=>{let h='';
   /* index: ruled note + label strips */
   h+=P('g',14,120,214,388,-2.2,'ruled',`<div class="ix-hd"><em>Index</em><b>目 录</b></div>`,{torn:'',y0:66,gap:22,mx:26,amp:2.4});
   h+=DC('g',176,108,10,starBadge(34));
-  SECS.forEach((s,i)=>{const x=[30,18,34,22][i],y=188+i*72,r=[-2.6,1.8,-1.4,2.2][i];const q=nd('g');const d=q.n*.055;q.n++;q.last=d;
+  SECS.forEach((s,i)=>{const x=[30,18,34,22,28][i],y=180+i*64,r=[-2.6,1.8,-1.4,2.2,-1.8][i];const q=nd('g');const d=q.n*.055;q.n++;q.last=d;
     h+=`<button type="button" class="an st-tab${i?'':' on'}" data-sec="${s.k}" aria-current="${i?'false':'page'}" data-g="g" data-d="${d.toFixed(3)}" data-k="p" data-r="${r}" style="left:${x}px;top:${y}px">
       <i class="tb-bg"></i><span class="tn">${s.n}</span><span class="tz">${s.zh}</span><em class="te">${s.em.toUpperCase()}</em><i class="ey"></i>
       <i class="tb-tape">${tapeSVG(54,22,i*31+5,'milk')}</i></button>`});
@@ -4568,7 +4675,28 @@ const secSalon=()=>{const g='salon',U=Object.assign({style:'bubbles',avatar:'non
     <textarea id="stCss" spellcheck="false" placeholder=".in .b { font-size: 16px; }">${esc(U.css||'')}</textarea><small class="css-n">改完立即生效，只影响这台设备。</small></div>`,{tone:'milk'});
   return h};
 
-/* IV · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
+/* iv · auto（新增）：推理块与自动化 */
+const AUTODEF={enterSend:'enter',loadLast:false,autoCont:0,swipeWords:'',swipeMin:0,swipeMax:2,autoScroll:true,rsnPrompt:false,think:false,thinkPre:'<think>',thinkSuf:'</think>'};
+const secAuto=()=>{const g='auto',A=Object.assign({},AUTODEF,APP.S.settings.auto||{}),C=APP.S.settings;let h='';
+  h+=P(g,250,110,470,250,-1.4,'vellum','',{torn:'rb',cls:'deco'});
+  h+=P(g,262,122,330,34,-2,null,dymo('推理与自动化 Automates · 同 SillyTavern','c2lt'),{cls:'c2-strip'});
+  h+=CD(g,256,166,452,290,1,`<div class="sf cv"><div class="cv-hd"><em>Raisonnement</em><b>推 理 块</b></div>
+    <div class="sf-r"><div class="sf-l"><b>自动展开</b><small>生成时推理块默认打开</small></div>${tg('chat.reasoningOpen',!!C.reasoningOpen)}</div>
+    <div class="sf-r"><div class="sf-l"><b>加入提示词</b><small>把推理一起放进 history 发回去</small></div>${tg('auto.rsnPrompt',!!A.rsnPrompt)}</div>
+    <div class="sf-r"><div class="sf-l"><b>解析标签</b><small>正文开头的推理标签拆成推理块</small></div>${tg('auto.think',!!A.think)}</div>
+    <div class="sf-r au-in"><span>开头</span><input data-auto="thinkPre" value="${esc(A.thinkPre)}"><span>结尾</span><input data-auto="thinkSuf" value="${esc(A.thinkSuf)}"></div></div>`,{tone:'silver'});
+  h+=CD(g,256,472,452,360,-1,`<div class="sf cv"><div class="cv-hd"><em>Automatismes</em><b>自 动 化</b></div>
+    <div class="sf-r"><div class="sf-l"><b>发送键</b><small>另一个组合用来换行</small></div>${seg('auto.enterSend',[['enter','Enter'],['ctrl','Ctrl + Enter']],A.enterSend)}</div>
+    <div class="sf-r"><div class="sf-l"><b>打开上次的对话</b><small>启动时直接回到最近一段</small></div>${tg('auto.loadLast',!!A.loadLast)}</div>
+    <div class="sf-r"><div class="sf-l"><b>自动滚动</b><small>新内容出现时滚到底</small></div>${tg('auto.autoScroll',A.autoScroll!==false)}</div>
+    <div class="sf-r au-in"><span>回复不足</span><input type="number" min="0" data-auto="autoCont" value="${A.autoCont}"><span>字时自动续写一次（0 = 关）</span></div>
+    <div class="sf-r au-in"><span>出现这些词就换候选</span><input class="w" data-auto="swipeWords" value="${esc(A.swipeWords)}" placeholder="逗号分开"></div>
+    <div class="sf-r au-in"><span>或少于</span><input type="number" min="0" data-auto="swipeMin" value="${A.swipeMin}"><span>字；最多换</span><input type="number" min="0" max="5" data-auto="swipeMax" value="${A.swipeMax}"><span>次</span></div></div>`,{tone:'milk'});
+  h+=OB(g,760,150,170,-4,O.hg,{sh:[14,72,2,10],cls:'au-hg'});
+  h+=CD(g,736,560,232,190,1.6,`<div class="c2nt s">自动续写和自动换候选在回复写完之后才判断；手动停止的回复不会触发。<br><br>「解析标签」用于把推理和正文混在一起发回来的模型，比如开头是 &lt;think&gt; 的回复。</div>`,{tone:'silver',stitch:false});
+  return h};
+
+/* V · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
 const CONN={ready:['En ligne','已连接','后端在线，可以写信了'],connecting:['Connexion…','正在连接','正在等后端回应'],reconnecting:['Reconnexion','连接断开','正在重连'],failed:['Hors ligne','连接失败','后端没有回应']};
 const connHTML=()=>{const A=APP.S,c=CONN[A.conn.state]||[A.conn.state,A.conn.state,''];const mock=window.__trianon.usingMock;
   const cap=(k,t)=>`<span class="cn-cap${A.caps[k]===false?' no':''}">${A.caps[k]===false?'✕':'✓'} ${t}</span>`;
@@ -4600,6 +4728,7 @@ root.innerHTML=`<div class="st-sheet c2-desk" id="stSheet">${buildDesk()}
  <section class="st-sec on" data-sec="persona">${secPersona()}</section>
  <section class="st-sec" data-sec="appearance">${secAppearance()}</section>
  <section class="st-sec" data-sec="salon">${secSalon()}</section>
+ <section class="st-sec" data-sec="auto">${secAuto()}</section>
  <section class="st-sec" data-sec="connection">${secConnection()}</section></div>`;
 b.appendChild(root);
 const sheet=$('stSheet'),charm=$('stCharm'),cStrand=charm.querySelector('.ch-strand'),cNum=charm.querySelector('.ch-num');
@@ -4626,6 +4755,7 @@ const save=(key,val)=>{const [grp,k]=key.split('.');
   if(grp==='appearance'){V.appearance[k]=val;APP.S.settings.appearance=Object.assign({},V.appearance)}
   else if(grp==='chat')APP.S.settings[k]=val;
   else if(grp==='ui'){APP.S.settings.ui=Object.assign({},APP.S.settings.ui||{},{[k]:val})}
+  else if(grp==='auto'){APP.S.settings.auto=Object.assign({},APP.S.settings.auto||{},{[k]:val})}
   APP.saveSettings();APP.bus.emit('ui:settings',key);showSaved()};
 
 /* ---------------------------------------------------------------- open / close / switch */
@@ -4704,7 +4834,8 @@ const rebuild=sec=>{const keep=S.sec;const i=SECS.findIndex(x=>x.k===(sec||keep)
   if(!sec||sec==='persona')secs[0].innerHTML=secPersona();
   if(!sec||sec==='appearance'){secs[1].innerHTML=secAppearance();applyPreview()}
   if(!sec||sec==='salon')secs[2].innerHTML=secSalon();
-  if(!sec||sec==='connection')secs[3].innerHTML=secConnection();
+  if(!sec||sec==='auto')secs[3].innerHTML=secAuto();
+  if(!sec||sec==='connection')secs[4].innerHTML=secConnection();
   refs();if(S.open){const t=sT();ANS.forEach(A=>{if(A.g===(sec||keep))A.d=-9});S.secT=Math.min(S.secT,t-1)}};
 APP.bus.on('ui:conn',()=>{if(S.open&&S.sec==='connection')drawConn()});
 APP.bus.on('ui:model',()=>{if(S.open&&S.sec==='connection')drawConn()});
@@ -4734,7 +4865,7 @@ root.addEventListener('pointerdown',e=>{const sl=e.target.closest('.st-sl');if(!
 root.addEventListener('pointermove',e=>{if(drag)setFont(slVal(drag,e.clientX))});
 root.addEventListener('pointerup',()=>{if(drag){drag=null;save('appearance.fontSize',V.appearance.fontSize)}});
 root.addEventListener('keydown',e=>{const sl=e.target.closest&&e.target.closest('.st-sl');if(sl&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();setFont(V.appearance.fontSize+(e.key==='ArrowRight'?.5:-.5),true)}});
-root.addEventListener('input',e=>{const id=e.target.id;if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
+root.addEventListener('input',e=>{const id=e.target.id;const ak=e.target.dataset&&e.target.dataset.auto;if(ak){clearTimeout(S.auT);const v=e.target.type==='number'?(+e.target.value||0):e.target.value;S.auT=setTimeout(()=>save('auto.'+ak,v),300);return}if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
   if(id==='stPnName'){p.name=e.target.value;const av=root.querySelector('.c3av .av-ph');if(av){av.querySelector('b').textContent=[...(p.name||'?').trim()][0]||'?';av.querySelector('em').textContent=p.name}}else p.desc=e.target.value;
   clearTimeout(S.pnT);S.pnT=setTimeout(()=>{APP.savePersonas();if(p.id===APP.S.personaId)APP.bus.emit('ui:persona');showSaved()},500)});
 root.addEventListener('change',e=>{const id=e.target.id;const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});

@@ -50,6 +50,8 @@
 - [x] 宏：发送 / 编辑保存时直接替换（同 SillyTavern），补全常用宏（时间日期、随机、掷骰、最近消息、角色卡字段等）；输入 `{{` 弹出宏列表
 - [x] `/` 命令：输入 `/` 弹出补全，`/sys` 旁白、`/send`、`/trigger`、`/continue`、`/regen`、`/impersonate`、`/del`、`/hide`、`/persona`、`/char`、`/newchat` 等
 - [x] Prompt Manager（吊牌 Plume · 提示词编排）：提示词块拖动 / ↑↓ 排序、开关、编辑、新建，随预设保存；可导入 SillyTavern Chat Completion 预设的 prompts 与 prompt_order
-- [ ] 总结、推理块设置、自动化设置
+- [x] 总结（吊牌 Plume · 总结）：手动 / 每 N 条自动、模板与插入位置、总结要求；`/summarize`
+- [x] 推理块设置（设置 · 推理与自动化）：自动展开、加入提示词、解析 `<think>` 标签
+- [x] 自动化：发送键（Enter / Ctrl+Enter）、启动时打开上次对话、自动滚动、回复过短自动续写、出现屏蔽词或过短自动换候选
 
 已知限制：手机上设置页目前是把整张桌面缩小显示，专门的手机排版放在第五阶段；夜间主题和跟随系统还没做。

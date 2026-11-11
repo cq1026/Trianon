@@ -11,6 +11,16 @@ const turn = (() => {
   const isLast = m => S.chat.messages[S.chat.messages.length - 1] === m;
 
   /* 显示用的文字：替换 {{char}} {{user}}，名字按消息发出时的快照 */
+  const auto = () => Object.assign({ think: false, thinkPre: '<think>', thinkSuf: '</think>', rsnPrompt: false }, S.settings.auto || {});
+  /* 解析推理标签：正文以 <think> 开头时，把标签里的内容拆进推理块 */
+  function splitThink(m) {
+    const A = auto(); if (!A.think || !A.thinkPre) return;
+    const raw = m._raw, t = raw.replace(/^\s+/, '');
+    if (!t.startsWith(A.thinkPre)) { if (t.length >= A.thinkPre.length || !A.thinkPre.startsWith(t)) { m.text = (m._base || '') + raw; } else m.text = m._base || ''; return; }
+    const body = t.slice(A.thinkPre.length), j = A.thinkSuf ? body.indexOf(A.thinkSuf) : -1;
+    if (j < 0) { m.reasoning = body.trim(); m.text = m._base || ''; m._thinking = true; }
+    else { m.reasoning = body.slice(0, j).trim(); m.text = (m._base || '') + body.slice(j + A.thinkSuf.length).replace(/^\s+/, ''); m._thinking = false; }
+  }
   const disp = (m, t) => macros(t == null ? m.text : t, Object.assign(ctx(), { char: m.charName || S.char.name || '', user: m.userName || persona().name || '' }));
 
   /* 发给后端的历史：截止到某条消息（不含），隐藏的不发 */
@@ -18,7 +28,7 @@ const turn = (() => {
     const out = [];
     for (const m of S.chat.messages) {
       if (m.id === uptoId && !include) break;
-      if (!m.hidden && m.state !== 'error' && (m.text || '').trim()) out.push({ id: m.id, role: m.role, name: m.role === 'user' ? (m.userName || m.name) : (m.charName || m.name), text: m.text });
+      if (!m.hidden && m.state !== 'error' && (m.text || '').trim()) { const it = { id: m.id, role: m.role, name: m.role === 'user' ? (m.userName || m.name) : (m.charName || m.name), text: m.text }; if (auto().rsnPrompt && m.reasoning) it.reasoning = m.reasoning; out.push(it); }
       if (m.id === uptoId) break;
     }
     return out;
@@ -64,6 +74,7 @@ const turn = (() => {
     if (m) {
       if (kind === 'continue') Object.assign(m, { state: 'pending', error: '', tStart: S.turn.t0, contBase: (m.text || '').length });
       else Object.assign(m, { state: 'pending', text: '', reasoning: '', error: '', tStart: S.turn.t0, dur: 0, reasonDur: 0, contBase: 0, time: Date.now() });
+      m._raw = ''; m._base = kind === 'continue' ? (m.text || '') : ''; m._thinking = false;
       touch(m);
     }
     bus.emit('ui:turn');
@@ -179,17 +190,23 @@ const turn = (() => {
     const t = cur(p.turnId); if (!t || !busy()) return;
     if (!t.msgId) { t.state = 'streaming'; bus.emit('ui:impersonate', { delta: p.delta || '' }); return; }
     const m = msg(t.msgId); if (!m) return;
+    if (auto().think) {
+      m._raw = (m._raw || '') + (p.delta || ''); splitThink(m);
+      if (m._thinking) { if (t.state === 'pending') { t.state = 'reasoning'; m.state = 'reasoning'; m.tReason = now(); } touch(m); return; }
+      if (!m.text && t.state !== 'streaming') { touch(m); return; }
+    }
     if (t.state !== 'streaming') {
       if (t.state === 'reasoning') m.reasonDur = now() - (m.tReason || now());
       t.state = 'streaming'; m.state = 'streaming'; t.tFirst = now();
     }
-    m.text = (m.text || '') + (p.delta || ''); touch(m);
+    if (!auto().think) m.text = (m.text || '') + (p.delta || '');
+    touch(m);
   });
   bus.on('be:turn.done', p => {
     const t = cur(p.turnId); if (!t || !busy()) return;
     if (!t.msgId) { if (typeof p.text === 'string') bus.emit('ui:impersonate', { text: p.text }); t.state = 'done'; bus.emit('ui:turn'); return; }
     const m = msg(t.msgId); if (!m) return;
-    if (typeof p.text === 'string') m.text = t.kind === 'continue' && !t.tFirst ? (m.text || '') + p.text : p.text;
+    if (typeof p.text === 'string') { if (auto().think) { m._raw = p.text; splitThink(m); } else m.text = t.kind === 'continue' && !t.tFirst ? (m.text || '') + p.text : p.text; }
     if (typeof p.reasoning === 'string' && p.reasoning) m.reasoning = p.reasoning;
     if (t.state === 'reasoning') m.reasonDur = now() - (m.tReason || now());
     if (p.usage) m.usage = p.usage;

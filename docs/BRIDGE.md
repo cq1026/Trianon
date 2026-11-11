@@ -99,6 +99,7 @@ async function handle(type, p) {
 | `turn.continue` | `{ turnId, chatId, msgId, history, stream, persona, characterId }` | 同上。接着 `msgId` 这条消息往下写：`turn.delta` 的内容会**追加**到它后面；`history` 的最后一条就是这条消息本身。 |
 | `turn.impersonate` | `{ turnId, chatId, history, stream, persona, characterId }` | 同上。以用户人设代写一段：`turn.delta` / `turn.done` 的文字写进输入框，不生成消息。事件里 `msgId` 为空。 |
 | `turn.stop` | `{ turnId }` | 任意；可以再发 `turn.stopped` 确认。 |
+| `turn.summarize` | `{ chatId, characterId, history, prompt, previous, persona, params }` | `{ ok: true, text }`。让模型总结这段对话：`prompt` 是总结要求（已替换宏），`previous` 是上一次的总结。返回的 `text` 存进对话的 `meta.summary`，之后每次生成都放在 `summary` 字段里。 |
 | `turn.prompt` | `{ chatId, msgId, history, persona, characterId }` | `{ ok: true, prompt, tokens? }`。「查看提示词」用。`prompt` 可以是字符串，或 `[{ role, name?, content }]` 数组。 |
 | `chat.new` | `{ characterId }` | `{ ok: true, chatId }`。不返回 `chatId` 时前端自己生成。 |
 | `chat.save` | `{ chatId, characterId, title, meta, messages: Message[] }` | 任意。对话有改动（新消息、编辑、删除、隐藏、切换候选）后 0.6 秒合并发一次，后端负责存。只有开场白、还没写过一句的对话不会存。`meta` 里可能有 `branchOf` / `checkpointOf: { chatId, msgId }`。 |
@@ -143,6 +144,9 @@ Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: st
 - `params`：生成参数 `{ temperature, top_p, top_k, min_p, repetition_penalty, frequency_penalty, presence_penalty, max_tokens, context_size, seed, stop: string[] }`；`preset` 是预设名。后端按模型支持的部分使用，不支持的忽略。
 - `authorsNote`：作者注释 `{ text, position: 'before' | 'after' | 'chat', depth, freq, role: 'system' | 'user' | 'assistant' }`，没写时为 `null`。`position` 为 `chat` 时插在倒数第 `depth` 条消息前；`freq` 是每隔几条插入一次（0 = 不插入）。
 - `prompts`：Prompt Manager 的提示词块，按发给模型的顺序排列：`[{ id, name, role, content?, marker, enabled }]`。`id` 沿用 SillyTavern 的 identifier（`main`、`worldInfoBefore`、`personaDescription`、`charDescription`、`charPersonality`、`scenario`、`enhanceDefinitions`、`nsfw`、`worldInfoAfter`、`dialogueExamples`、`chatHistory`、`jailbreak`，以及用户自建的 `c_…`）。`marker: true` 的是占位块，后端在那个位置填入对应内容（`chatHistory` 就是 `history`，作者注释也插在这里面）；其余块的 `content` 已由前端替换过宏。`enabled: false` 的跳过。角色卡的 `system_prompt` / `post_history_instructions` 不为空时，按 SillyTavern 的习惯覆盖 `main` / `jailbreak`。
+- `summary`：这段对话的总结 `{ text, content, position: 'before' | 'after' | 'chat', depth, role }`，没有时为 `null`。`content` 是套好模板、可以直接插进提示词的文字。
+- `history` 的每一项在用户打开「推理加入提示词」时会多一个 `reasoning` 字段。
+- 推理标签：有的模型把推理和正文混在一起发回来（开头是 `<think>…</think>`）。用户打开「解析标签」后，前端会把标签里的内容拆进推理块，后端照常用 `turn.delta` 推原文即可。
 - `lorebooks`：要启用的世界书 id 列表（全局启用的 + 本对话启用的）。关键词扫描、触发、按 `position` / `depth` / `order` 插入都由后端完成；角色卡自带的 `character_book` 也由后端处理。
 - `text`：用户刚输入的原文，没有经过宏替换。
 - `history`：截止到这次生成之前的对话，`[{ id, role, name, text }]`，**已去掉用户隐藏的消息**。当前对话以前端为准（用户可以编辑、删除、隐藏、切换候选），后端拼提示词时用它，不必自己维护对话状态。
@@ -177,7 +181,7 @@ Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: st
 
 ## 4. `/` 命令
 
-`/` 命令全部在前端执行，不需要后端支持：`/sys` 旁白、`/send` 只发不生成、`/trigger` 让角色接着说（发一个 `text` 为空的 `chat.send`）、`/continue`、`/regen`、`/impersonate`、`/stop`、`/del`、`/hide`、`/unhide`、`/persona`、`/char`、`/newchat`、`/echo`、`/help`。
+`/` 命令全部在前端执行，不需要后端支持：`/sys` 旁白、`/send` 只发不生成、`/trigger` 让角色接着说（发一个 `text` 为空的 `chat.send`）、`/continue`、`/regen`、`/impersonate`、`/stop`、`/del`、`/hide`、`/unhide`、`/persona`、`/char`、`/newchat`、`/summarize`（发 `turn.summarize`）、`/echo`、`/help`。
 
 ## 5. 调试
 
@@ -192,4 +196,4 @@ Lorebook = { id, name, entries: [{ uid, comment, key: string[], keysecondary: st
 
 ## 6. 之后会加的接口
 
-下面这些随后续功能加入，加入时更新本文档：Prompt Manager、总结。
+群聊不在这一版里。之后如有新增接口，会更新本文档。

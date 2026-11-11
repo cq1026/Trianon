@@ -34,7 +34,9 @@
 
   function run(turnId, payload) {
     if (opt.failNext) { opt.failNext = false; later(turnId, opt.delay + .6, () => emit('turn.error', { turnId, message: '连接中断（模拟）' })); return; }
-    const text = payload.textOverride || (payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length]);
+    let text = payload.textOverride || (payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length]);
+    if (opt.thinkTags) text = '<think>先回应对方，再带一点花园的意象。</think>\n' + text;
+    if (opt.short) text = '嗯。';
     const stream = payload.stream !== false;
     let t = opt.delay;
     if (opt.reasoning && stream) {
@@ -55,6 +57,7 @@
     later(turnId, t, step);
   }
 
+  const P0 = p => (p.persona && p.persona.name) || '用户';
   const mock = {
     opt,
     set(o) { Object.assign(opt, o || {}); return opt; },
@@ -104,6 +107,7 @@
           if (p.params) out.push({ role: 'system', name: '参数（演示）', content: JSON.stringify(p.params) });
           return { ok: true, prompt: out, tokens: Math.round(JSON.stringify(out).length / 1.6) };
         }
+        case 'turn.summarize': { const h = p.history || []; await new Promise(r => setTimeout(r, 900)); return { ok: true, text: `${P0(p)}与 ${CHAR.name} 聊了 ${h.length} 条：从玫瑰园说到清晨的雾，约好了一起去散步。（模拟后端的示例总结）` }; }
         case 'chat.save': {
           const ms = p.messages || [], last = ms.filter(m => (m.text || '').trim()).slice(-1)[0];
           const rec = { chatId: p.chatId, characterId: p.characterId, title: p.title || '', meta: p.meta || {}, messages: ms };

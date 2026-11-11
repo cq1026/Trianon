@@ -13,9 +13,15 @@
     if (e.isComposing || e.keyCode === 229) return;
     const empty = !ci.value, la = turn.lastAssistant();
     /* 快捷键（同 SillyTavern）：Ctrl+Enter 重新生成 · Alt+Enter 续写 · 输入框为空时 ←/→ 切换候选、↑ 编辑最后一条 */
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (la) turn.regenerate(la.id); return; }
+    const ctrlMode = (S.settings.auto || {}).enterSend === 'ctrl';
+    if (ctrlMode) {      /* 设置为 Ctrl+Enter 发送：Enter 换行，Ctrl+Shift+Enter 重新生成 */
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.shiftKey) { e.preventDefault(); if (la) turn.regenerate(la.id); return; }
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(); return; }
+    } else {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (la) turn.regenerate(la.id); return; }
+      if (e.key === 'Enter' && !e.shiftKey && !e.altKey) { e.preventDefault(); go(); return; }
+    }
     if (e.key === 'Enter' && e.altKey) { e.preventDefault(); turn.cont(); return; }
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); return; }
     if (empty && la && turn.isLast(la) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); turn.swipe(la.id, e.key === 'ArrowLeft' ? -1 : 1); return; }
     if (empty && e.key === 'ArrowUp') { const m = S.chat.messages[S.chat.messages.length - 1]; if (m) { e.preventDefault(); chatView.startEdit(m.id); } }
   });

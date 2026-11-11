@@ -39,6 +39,36 @@ const plume = (() => {
   const applyPreset = p => { S.gen.params = Object.assign({}, DEF, p); delete S.gen.params.prompts; S.gen.prompts = p.prompts ? JSON.parse(JSON.stringify(p.prompts)) : pmDef(); };
   const saveGen = () => store.set('gen', S.gen);
   const note = () => (S.chat.meta = S.chat.meta || {}, S.chat.meta.note = Object.assign({ text: '', depth: 4, position: 'chat', role: 'system', freq: 1 }, S.chat.meta.note || {}));
+  /* 总结：内容跟着对话（meta.summary）；怎么总结、多久总结一次存在本机 */
+  const SUMDEF = { every: 0, position: 'after', depth: 4, role: 'system', template: '[故事到目前为止的总结：{{summary}}]',
+    prompt: '暂停角色扮演。用不超过 200 字总结到目前为止的故事：重要的事件、人物关系的变化、还没解决的事。只输出总结本身。' };
+  const sumCfg = () => Object.assign({}, SUMDEF, store.get('summaryCfg', {}));
+  const summ = () => (S.chat.meta = S.chat.meta || {}, S.chat.meta.summary = Object.assign({ text: '', at: 0 }, S.chat.meta.summary || {}));
+  let sumBusy = false;
+  async function summarize(auto) {
+    if (sumBusy) return; sumBusy = true; if (open && tab === 'summary') render();
+    const C = sumCfg();
+    try {
+      const r = await bridge.request('turn.summarize', { chatId: S.chat.id, characterId: S.char.id, history: turn.history(null, true), prompt: macros(C.prompt, ctx()), previous: summ().text,
+        persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, params: Object.assign({}, S.gen.params) });
+      if (r && typeof r.text === 'string' && r.text.trim()) { const Sm = summ(); Sm.text = r.text.trim(); Sm.at = S.chat.messages.length; turn.save(); if (!auto) flash('总结好了'); }
+      else if (!auto) flash('后端没有返回总结' + (r && r.error ? '：' + r.error : ''));
+    } catch (e) { if (!auto) flash('总结失败：' + (e.message || e)); }
+    sumBusy = false; if (open && tab === 'summary') render();
+  }
+  function sumHTML() {
+    const Sm = summ(), C = sumCfg(), since = S.chat.messages.length - (Sm.at || 0);
+    return `<div class="pl-grid"><div class="pl-col"><div class="pl-cap"><em>Résumé</em><b>这段对话的总结</b><small>${Sm.text ? '上次总结后又有 ' + since + ' 条' : '还没有总结'}</small></div>
+      <label class="lb-f"><textarea rows="12" data-sum="text" placeholder="点「现在总结」让模型写，也可以自己写或修改" spellcheck="false">${esc(Sm.text)}</textarea></label>
+      <div class="pl-pa" style="margin-top:12px"><button type="button" class="lb-btn pri" data-a="sumNow"${sumBusy ? ' disabled' : ''}>${sumBusy ? '正在总结…' : '现在总结'}</button><button type="button" class="lb-btn" data-a="sumClear">清空</button><span class="lb-saved" id="plSaved"></span></div></div>
+      <div class="pl-col"><div class="pl-card"><div class="pl-cap"><em>Automate</em><b>自动总结</b></div>
+        <div class="pl-nr"><span>每隔</span><input class="pl-n" type="number" min="0" max="500" step="1" value="${C.every}" data-cfg="every"><span>条消息自动总结一次（0 = 不自动）</span></div></div>
+        <div class="pl-card"><div class="pl-cap"><em>Insertion</em><b>插进提示词</b></div>
+          <label class="lb-f"><span>模板 <small>{{summary}} 会换成总结</small></span><input data-cfg="template" value="${esc(C.template)}"></label>
+          <div class="pl-nr"><span>位置</span><span class="st-segx" data-cfg-seg="position">${[['before', '主提示词前'], ['after', '主提示词后'], ['chat', '聊天中按深度']].map(([v, t]) => `<button type="button" data-v="${v}" class="${C.position === v ? 'on' : ''}">${t}</button>`).join('')}</span>
+            <span>深度</span><input class="pl-n" type="number" min="0" max="100" value="${C.depth}" data-cfg="depth"></div></div>
+        <div class="pl-card"><div class="pl-cap"><em>Consigne</em><b>让模型怎么总结</b></div><label class="lb-f"><textarea rows="4" data-cfg="prompt" spellcheck="false">${esc(C.prompt)}</textarea></label></div></div></div>`;
+  }
 
   const box = document.createElement('div');
   box.className = 'lib pl'; box.id = 'plume'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '生成参数'); box.setAttribute('aria-hidden', 'true');
@@ -52,8 +82,9 @@ const plume = (() => {
   function render() {
     const g = S.gen.params, N = note(), ps = presets();
     $('plCrumb').textContent = '· ' + S.gen.preset + (dirty() ? ' （已改动）' : '');
-    const tabs = `<div class="pl-tabs">${[['params', '采样 · 预设 · 作者注释'], ['prompts', '提示词编排']].map(([k, t]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>`;
+    const tabs = `<div class="pl-tabs">${[['params', '采样 · 预设 · 作者注释'], ['prompts', '提示词编排'], ['summary', '总结']].map(([k, t]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>`;
     if (tab === 'prompts') { body.innerHTML = tabs + pmHTML(); return; }
+    if (tab === 'summary') { body.innerHTML = tabs + sumHTML(); return; }
     body.innerHTML = tabs + `<div class="pl-grid">
       <div class="pl-col"><div class="pl-cap"><em>Échantillonnage</em><b>采样</b><button type="button" class="lnk" data-a="reset">恢复这个预设</button></div>
         ${P.map(([k, t, mn, mx, st, , tip]) => `<label class="pl-row"><span class="pl-l"><b>${t}</b><small>${tip}</small></span>
@@ -99,12 +130,15 @@ const plume = (() => {
     else if (t.dataset.n) { const v = +t.value; if (!isNaN(v)) { g[t.dataset.n] = v; const r = body.querySelector(`[data-k="${t.dataset.n}"]`); if (r) r.value = v; } }
     else if (t.hasAttribute('data-stop')) g.stop = t.value.split('\n').map(x => x).filter(x => x.length);
     else if (t.dataset.note) { const N = note(); N[t.dataset.note] = t.dataset.note === 'text' ? t.value : +t.value; turn.save(); return; }
+    else if (t.dataset.sum) { summ().text = t.value; turn.save(); return; }
+    else if (t.dataset.cfg) { const c = store.get('summaryCfg', {}); c[t.dataset.cfg] = t.type === 'number' ? +t.value : t.value; store.set('summaryCfg', c); return; }
     else if (t.dataset.pm) { const it = t.closest('.pm-it'), x = S.gen.prompts[+it.dataset.i]; if (!x) return; x[t.dataset.pm] = t.type === 'checkbox' ? t.checked : t.value; if (t.type === 'checkbox') it.classList.toggle('off', !t.checked); if (t.dataset.pm === 'name') it.querySelector('.pm-n b').textContent = t.value || x.id; }
     saveGen(); crumb();
   });
   box.addEventListener('click', e => {
     if (e.target.closest('.lb-x') || e.target.classList.contains('lb-scrim')) { show(false); return; }
     const tb = e.target.closest('[data-tab]'); if (tb) { tab = tb.dataset.tab; render(); return; }
+    const cb = e.target.closest('[data-cfg-seg] button'); if (cb) { const c = store.get('summaryCfg', {}); c[cb.parentElement.dataset.cfgSeg] = cb.dataset.v; store.set('summaryCfg', c); cb.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === cb)); return; }
     const sb = e.target.closest('[data-note-seg] button');
     if (sb) { const k = sb.parentElement.dataset.noteSeg; note()[k] = sb.dataset.v; sb.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === sb)); turn.save(); return; }
     const a = e.target.closest('[data-a]'); if (!a) return;
@@ -112,6 +146,8 @@ const plume = (() => {
     if (k === 'pick') { S.gen.preset = a.dataset.n; applyPreset(presets()[a.dataset.n]); saveGen(); render(); }
     else if (k === 'reset') { applyPreset(presets()[S.gen.preset]); saveGen(); render(); }
     else if (k === 'save') { if (S.gen.preset === '默认') return; all[S.gen.preset] = snapshot(); store.set('presets', all); render(); flash('已保存'); }
+    else if (k === 'sumNow') summarize(false);
+    else if (k === 'sumClear') { const Sm = summ(); Sm.text = ''; Sm.at = 0; turn.save(); render(); }
     else if (k === 'pmToggle') { const x = S.gen.prompts[+a.closest('.pm-it').dataset.i]; pmOpen = pmOpen === x.id ? null : x.id; render(); }
     else if (k === 'pmUp' || k === 'pmDown') { const i = +a.closest('.pm-it').dataset.i; pmMove(i, i + (k === 'pmUp' ? -1 : 1)); }
     else if (k === 'pmDel') { const i = +a.closest('.pm-it').dataset.i; S.gen.prompts.splice(i, 1); saveGen(); render(); }
@@ -165,8 +201,13 @@ const plume = (() => {
   /* 请求里带的内容 */
   const payload = () => {
     const N = (S.chat.meta || {}).note;
-    return { params: Object.assign({}, S.gen.params), preset: S.gen.preset, prompts: S.gen.prompts.map(x => ({ id: x.id, name: x.name, role: x.role, content: x.marker ? undefined : macros(x.content || '', ctx()), marker: !!x.marker, enabled: !!x.enabled })), authorsNote: N && N.text && N.text.trim() ? Object.assign({}, N) : null };
+    const Sm = (S.chat.meta || {}).summary, C = sumCfg();
+    return { summary: Sm && Sm.text && Sm.text.trim() ? { text: Sm.text, content: macros(C.template.replace(/\{\{summary\}\}/g, Sm.text), ctx()), position: C.position, depth: C.depth, role: C.role } : null,
+      params: Object.assign({}, S.gen.params), preset: S.gen.preset, prompts: S.gen.prompts.map(x => ({ id: x.id, name: x.name, role: x.role, content: x.marker ? undefined : macros(x.content || '', ctx()), marker: !!x.marker, enabled: !!x.enabled })), authorsNote: N && N.text && N.text.trim() ? Object.assign({}, N) : null };
   };
-  return { show, payload, get open() { return open; } };
+  /* 自动总结：每生成完一条检查一次 */
+  bus.on('ui:turn', () => { const t = S.turn; if (!t || t.state !== 'done' || t._sumChecked) return; t._sumChecked = true;
+    const C = sumCfg(); if (!C.every) return; const Sm = summ(); if (S.chat.messages.length - (Sm.at || 0) >= C.every) setTimeout(() => summarize(true), 400); });
+  return { show, payload, summarize, get open() { return open; } };
 })();
 T.plume = plume;

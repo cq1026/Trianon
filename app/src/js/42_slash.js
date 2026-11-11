@@ -21,6 +21,7 @@ const slash = (() => {
       try { const r = await bridge.request('char.list', {}); const L = (r && r.chars) || []; const c = L.find(x => x.name === a.trim()) || L.find(x => (x.name || '').includes(a.trim()));
         if (!c) { toast('没有找到角色：' + a); return; } const g = await bridge.request('char.get', { id: c.id }); T.chars.select((g && g.char) || c, true); } catch (e) { toast('切换失败'); } }],
     ['newchat', '', '开始一段新对话', () => bus.emit('nav', 'new')],
+    ['summarize', '', '让模型总结这段对话（写进作者注释旁的「总结」）', () => T.plume.summarize(false)],
     ['echo', '<文字>', '弹一张小纸条（测试用）', a => toast(macros(a, ctx()))],
     ['help', '', '列出全部命令', () => toast(CMDS.map(c => '/' + c[0]).join('  '))]
   ];
