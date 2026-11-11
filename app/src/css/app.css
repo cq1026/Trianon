@@ -1,0 +1,112 @@
+/* ===== Trianon · SillyTavern 前端：布局与新增部件（组件原样式在 kit_*.css）===== */
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { font-family: var(--serif); color: var(--inktext); overflow: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+.app { position: relative; z-index: 2; display: flex; height: 100vh; height: 100dvh; }
+.stage { flex: 1 1 0%; display: flex; flex-direction: column; min-width: 0; position: relative; justify-content: flex-end; }
+
+/* 顶栏 */
+.topbar { position: absolute; top: 14px; left: 0; right: 0; z-index: 6; display: flex; justify-content: center; align-items: center; gap: 14px; pointer-events: none; }
+.tb-char { font-size: 10px; letter-spacing: .5em; text-transform: uppercase; color: rgba(46, 58, 99, .5); padding-left: .5em; }
+.tb-conn { pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px 4px 10px; border-radius: 999px; font: italic 500 12.5px/1 CormI, Georgia, serif; color: #5B6C93; background: rgba(251, 249, 244, .82); border: 1px solid var(--champ); box-shadow: 0 6px 16px -10px rgba(40, 50, 90, .4); }
+.tb-conn i { width: 6px; height: 6px; border-radius: 50%; background: #C8B27C; animation: tbPulse 1.4s ease-in-out infinite; }
+.tb-conn[data-state="failed"] i { background: #B07A86; animation: none; }
+@keyframes tbPulse { 50% { opacity: .3; } }
+
+/* 视图 */
+.vw { top: 0; bottom: var(--cH, 132px); }
+.scroll.chat { display: block; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; padding-top: 52px; }
+.scroll.chat::-webkit-scrollbar { display: none; }
+.thread { width: min(720px, calc(100% - 120px)); margin: 0 auto; padding: 0 0 34px; }
+.wrap { width: min(720px, calc(100% - 120px)); }
+
+/* 消息 */
+.row .col { display: flex; flex-direction: column; min-width: 0; }
+.row.out .col { align-items: flex-end; max-width: 78%; }
+.row.in .col { max-width: min(640px, 92%); }
+.b .tx p + p { margin-top: .7em; }
+.b .tx .act { font-style: italic; color: rgba(70, 82, 120, .82); }
+.row.out .b .tx .act { color: rgba(88, 76, 104, .8); }
+.b .tx .say { quotes: none; color: inherit; }
+.b .tx b { font-weight: 700; }
+.in .b.empty { min-height: 58px; min-width: 220px; }
+.in .b.empty::after { content: ""; }
+.row[data-state="error"] .b.empty, .row[data-state="stopped"] .b.empty { display: none; }
+.who { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+.who .st { letter-spacing: .12em; color: rgba(46, 58, 99, .55); font-size: 11px; }
+.who .st em { font-style: normal; margin-right: 6px; color: rgba(180, 150, 90, .8); }
+.dots b { display: inline-block; margin-left: 2px; animation: dot 1.2s ease-in-out infinite; }
+.dots b:nth-child(2) { animation-delay: .2s; } .dots b:nth-child(3) { animation-delay: .4s; }
+@keyframes dot { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+.meta { display: flex; gap: 12px; align-items: baseline; margin: 7px 18px 0; min-height: 16px; font: italic 400 12.5px/1.2 CormI, Georgia, serif; color: rgba(70, 82, 120, .55); opacity: 0; transition: opacity .25s; }
+.row:hover .meta, .row:focus-within .meta, .row[data-state="error"] .meta, .row[data-state="stopped"] .meta, .row:last-child .meta { opacity: 1; }
+.meta .err { color: #9A6474; }
+.meta .lnk { border: 0; background: none; padding: 0; font: inherit; color: #4E5E8E; text-decoration: underline; text-decoration-color: var(--champ); text-underline-offset: 3px; }
+.meta .lnk:hover { color: #26305A; }
+
+/* 推理块：默认折叠 */
+.rsn { margin: 0 0 10px 6px; }
+.rsn-h { display: inline-flex; align-items: center; gap: 7px; padding: 4px 13px 4px 11px; border-radius: 999px; border: 1px dashed rgba(91, 108, 147, .5); background: rgba(236, 240, 247, .7); color: #5B6C93; font: italic 400 13px/1.2 CormI, Georgia, serif; }
+.rsn-h em { font-style: italic; }
+.rsn-h .rsn-t { font: 400 11px/1 var(--serif); letter-spacing: .06em; color: rgba(91, 108, 147, .75); }
+.rsn-h b { font-weight: 400; transition: transform .25s; }
+.rsn.open .rsn-h b { transform: rotate(90deg); }
+.rsn-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(91, 108, 147, .45); }
+.rsn.live .rsn-dot { background: #C8B27C; animation: tbPulse 1.2s ease-in-out infinite; }
+.rsn-b { display: none; margin: 8px 0 0 10px; padding-left: 12px; border-left: 1px solid rgba(91, 108, 147, .3); font: italic 400 14px/1.7 CormI, var(--serif); color: rgba(46, 58, 99, .66); white-space: pre-wrap; max-height: 40vh; overflow: auto; }
+.rsn.open .rsn-b { display: block; }
+
+/* 输入栏：多行 textarea 叠在占位文字上 */
+.field { position: relative; }
+.field .ph { position: absolute; left: 22px; top: 14px; right: 60px; pointer-events: none; }
+.ph.off em, .ph.off .pht { opacity: 0; }
+.field .ci { display: block; width: 100%; min-height: 30px; max-height: 32vh; border: 0; outline: 0; resize: none; background: none; padding: 4px 70px 0 6px; font: 500 14.5px/1.75 var(--serif); letter-spacing: .03em; color: var(--inktext); overflow-y: auto; scrollbar-width: thin; position: relative; z-index: 1; }
+.field .bar { margin-top: 2px; position: relative; z-index: 1; }
+.field .pill { cursor: default; }
+.send { position: relative; }
+.send .stopg { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; opacity: 0; transform: scale(.86); transition: opacity .25s, transform .35s var(--e-out); pointer-events: none; }
+.send.busy .stopg { opacity: 1; transform: none; }
+.send .sl { transition: opacity .25s !important; }
+.send.busy .sl.s0 { opacity: 0 !important; }
+.send.busy .sl.s1 { opacity: 1 !important; }
+
+.field .fbow.quill { height: auto !important; width: 150px !important; right: -18px !important; top: -46px !important; transform: rotate(-24deg) !important; transform-origin: 0 50%; }
+/* 空白页问候 */
+.scroll.empty { display: flex; align-items: center; justify-content: center; padding: 0 24px; }
+.greet { text-align: center; transform: translateY(-4vh); }
+.g-hi { font: 400 clamp(34px, 5vw, 58px)/1.2 Pinyon, serif; color: #33406B; }
+.g-hi b { font-weight: 400; color: #26305A; }
+.g-sub { margin-top: 14px; font-size: 12px; letter-spacing: .32em; color: rgba(46, 58, 99, .5); }
+
+/* 即将推出 */
+.soon { position: fixed; left: 118px; top: 50%; z-index: 60; transform: translate(-12px, -50%) rotate(-2deg); opacity: 0; pointer-events: none; padding: 10px 18px 11px; background: #FBF8F1; border: 1px solid var(--champ); border-radius: 4px; box-shadow: 0 10px 24px -14px rgba(40, 50, 90, .5); font-size: 13px; letter-spacing: .14em; color: #2E3A63; transition: opacity .25s, transform .4s var(--e-out); }
+.soon em { font: 400 18px/1 Pinyon, serif; margin-right: 10px; color: #8C9DC0; letter-spacing: 0; }
+.soon.on { opacity: 1; transform: translate(0, -50%) rotate(-2deg); }
+
+/* 手机按钮：桌面不显示 */
+.rail-btn { display: none; }
+
+@media (max-width: 760px) {
+  .thread, .wrap { width: calc(100% - 24px); }
+  .scroll.chat { padding-top: 46px; }
+  .row.out .col { max-width: 88%; }
+  .row.in .col { max-width: 96%; }
+  .b { padding: 11px 16px 12px !important; border-radius: 22px !important; }
+  .in .b { padding-bottom: 18px !important; }
+  .rnd { display: none; }
+  .send img { width: 58px !important; height: 58px !important; }
+  .composer { padding: 10px 0 calc(22px + env(safe-area-inset-bottom)) !important; }
+  .rail-btn { display: grid; place-items: center; position: fixed; left: 8px; top: 6px; z-index: 44; width: 44px; height: 44px; border: 0; background: none; padding: 0; }
+  .rail-btn img { width: 34px; filter: drop-shadow(0 3px 5px rgba(50, 60, 95, .25)); }
+  body::before { content: ""; position: fixed; inset: 0; z-index: 40; background: rgba(236, 240, 247, .55); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .3s; }
+  body.rail-open::before { opacity: 1; pointer-events: auto; }
+  .rail { left: 4px !important; }
+  body.rail-open .rail .it:not(.ttip) > span { display: flex !important; opacity: 1 !important; transform: translate(0, -50%) scale(.86) !important; transform-origin: 0 50%; left: 70px !important; }
+  .rail .ttip { display: none !important; }
+  body.rail-open .rail-btn { opacity: 0; pointer-events: none; }
+  .field .fbow.quill { width: 96px !important; top: -30px !important; right: -6px !important; }
+  .soon { left: 50%; top: auto; bottom: calc(var(--cH, 120px) + 12px); transform: translate(-50%, 8px) rotate(-1deg); }
+  .soon.on { transform: translate(-50%, 0) rotate(-1deg); }
+}
+
+.rm *, .rm *::before, .rm *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

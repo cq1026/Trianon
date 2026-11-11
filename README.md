@@ -3,6 +3,8 @@
 > 一套洛可可风格的 AI 编程助手桌面端**前端概念稿**：雾蓝、银蓝、奶白，信笺、吊牌、火漆和票根。
 > 名字来自凡尔赛的小特里亚农宫（Petit Trianon）。
 
+> **🌿 `st-frontend` 分支：** 正在把这套界面改造成 SillyTavern 风格的角色扮演前端，见 [`app/README.md`](app/README.md)（成品 `dist/trianon-st.html`，接口文档 [`docs/BRIDGE.md`](docs/BRIDGE.md)）。下面是原版说明。
+
 **⚠️ 非官方项目。** Trianon 是社区做的界面概念作品，和 Moonshot AI（月之暗面）没有任何关联，也没有得到它的认可或赞助。「Kimi」「Kimi Code」是 Moonshot AI 的名称；这里提到它们，只是为了说明这套界面是照着 Kimi Code 的使用场景设计的。仓库里没有官方 logo，也没有官方代码。
 
 **▶ 在线试玩：<https://qimingjiu.github.io/Trianon/>**（地址末尾也可以加 `#empty`、`#play` 等场景名）

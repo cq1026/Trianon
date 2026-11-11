@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trianon</title>
+<style>
+{{CSS}}
+</style>
+</head>
+<body class="v-empty">
+<canvas id="fog"></canvas>
+<div class="grain" id="grain"></div>
+<div class="edge" id="edge"></div>
+<nav class="rail" id="rail" aria-label="导航">
+  <i class="cord"></i><i class="knot"></i><i class="tassel"></i>
+  <div class="grp">
+  </div>
+  <div class="grp"><b class="orn2">✦</b>
+  </div>
+</nav>
+<button class="rail-btn" id="railBtn" type="button" aria-label="打开导航"><img src="asset:img/tag_bow.png" alt=""></button>
+
+<div class="app">
+  <section class="stage" id="stage">
+    <header class="topbar" id="topbar">
+      <span class="tb-char" id="tbChar"></span>
+      <span class="tb-conn" id="tbConn" hidden><i></i><em id="tbConnTx"></em></span>
+    </header>
+
+    <div class="scroll empty vw on" id="vEmpty">
+      <div class="greet" id="greet">
+        <p class="g-hi" id="gHi"></p>
+        <p class="g-sub" id="gSub"></p>
+      </div>
+    </div>
+
+    <div class="scroll chat vw" id="vChat">
+      <div class="thread" id="thread"></div>
+    </div>
+
+    <div class="composer" id="composer">
+      <div class="wrap">
+        <div class="field" id="field"><img class="fbow quill" src="asset:img/quill.webp" alt=""><i class="lb2"></i>
+          <div class="ph" id="ph"><em>Écrivez-moi</em><span class="pht">说一句话⋯</span></div>
+          <textarea class="ci" id="ci" rows="1" autocomplete="off" spellcheck="false" aria-label="说一句话"></textarea>
+          <div class="bar">
+            <span class="pill p" id="pPersona" title="当前人设"></span>
+            <span class="pill rb blue" id="pModel" title="模型" hidden></span>
+          </div>
+        </div>
+        <div class="send" id="send" role="button" tabindex="0" aria-label="发送">
+          <img src="asset:img/watch.webp" alt="">
+          <span class="sl s0">Envoyer</span><span class="sl s1">Stopper</span>
+          <i class="stopg" aria-hidden="true"><svg width="40" height="40" viewBox="-20 -20 40 40">
+            <circle r="14.6" fill="none" stroke="rgba(143,161,196,.28)" stroke-width=".9"/>
+            <circle class="arc" r="14.6" fill="none" stroke="#7F93BC" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="20 72"/>
+            <circle r="10.2" fill="rgba(249,250,253,.94)" stroke="rgba(91,108,147,.42)" stroke-width=".6"/>
+            <rect x="-3.3" y="-3.3" width="6.6" height="6.6" rx="1.5" fill="#5B6C93"/></svg></i>
+        </div>
+      </div>
+      <div class="hint"><em>Entrée</em> 发送 <b>✦</b> <em>Maj + Entrée</em> 换行</div>
+    </div>
+  </section>
+</div>
+
+<div class="soon" id="soon" role="status" aria-live="polite"><em id="soonFr"></em><span id="soonTx"></span></div>
+
+<script>
+{{JS}}
+</script>
+</body>
+</html>
