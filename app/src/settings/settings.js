@@ -548,6 +548,8 @@ const tabs=[...root.querySelectorAll('.st-tab')],secs=[...root.querySelectorAll(
 const saved=$('stSaved');
 let ANS=[];
 const refs=()=>{
+  /* 手机竖排时卡片会变宽变窄：纸张底图跟着拉伸 */
+  root.querySelectorAll('svg.pp').forEach(v=>v.setAttribute('preserveAspectRatio','none'));
   /* every animated piece, with its own seeded flight */
   ANS=[...root.querySelectorAll('.an')].map((el,i)=>{const r=RNG(i*977+13);return {el,g:el.dataset.g,d:+el.dataset.d,k:el.dataset.k,r:+el.dataset.r,
     ox:(r()-.5)*90,oy:-70-r()*80,or:(r()-.5)*14,ex:(r()-.35)*130,es:r()<.5?-1:1,last:''}})};
@@ -571,7 +573,7 @@ const save=(key,val)=>{const [grp,k]=key.split('.');
   APP.saveSettings();APP.bus.emit('ui:settings',key);showSaved()};
 
 /* ---------------------------------------------------------------- open / close / switch */
-const fitSheet=()=>{const z=Math.min(1,(innerWidth-6)/1000,(innerHeight-6)/890),W=innerWidth/z,H=innerHeight/z;
+const fitSheet=()=>{const mob=innerWidth<=760;const z=mob?1:Math.min(1,(innerWidth-6)/1000,(innerHeight-6)/890),W=innerWidth/z,H=innerHeight/z;
   root.style.setProperty('--stz',z.toFixed(3));root.style.setProperty('--stl',(W>=1124?124:Math.max(0,(W-980)/2)).toFixed(1)+'px');root.style.setProperty('--stt',Math.max(0,Math.min(18,(H-864)/2)).toFixed(1)+'px')};
 addEventListener('resize',fitSheet);
 const open=(sec)=>{const t=sT();fitSheet();if(!S.open){clearTimeout(S.lyT);b.classList.add('ly-st');S.open=true;S.oT=t;root.classList.add('on');root.setAttribute('aria-hidden','false');b.classList.add('st-open');
