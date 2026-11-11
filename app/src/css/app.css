@@ -71,12 +71,8 @@ body { font-family: var(--serif); color: var(--inktext); overflow: hidden; -webk
 .send.busy .sl.s1 { opacity: 1 !important; }
 
 .field .fbow.quill { height: auto !important; width: 150px !important; right: -18px !important; top: -46px !important; transform: rotate(-24deg) !important; transform-origin: 0 50%; }
-/* 空白页问候 */
-.scroll.empty { display: flex; align-items: center; justify-content: center; padding: 0 24px; }
-.greet { text-align: center; transform: translateY(-4vh); }
-.g-hi { font: 400 clamp(34px, 5vw, 58px)/1.2 Pinyon, serif; color: #33406B; }
-.g-hi b { font-weight: 400; color: #26305A; }
-.g-sub { margin-top: 14px; font-size: 12px; letter-spacing: .32em; color: rgba(46, 58, 99, .5); }
+/* 空白页拼贴：窄屏时整体缩放（JS 设 zoom） */
+#vEmpty .hall { width: min(720px, 100%); }
 
 /* 即将推出 */
 .soon { position: fixed; left: 118px; top: 50%; z-index: 60; transform: translate(-12px, -50%) rotate(-2deg); opacity: 0; pointer-events: none; padding: 10px 18px 11px; background: #FBF8F1; border: 1px solid var(--champ); border-radius: 4px; box-shadow: 0 10px 24px -14px rgba(40, 50, 90, .5); font-size: 13px; letter-spacing: .14em; color: #2E3A63; transition: opacity .25s, transform .4s var(--e-out); }

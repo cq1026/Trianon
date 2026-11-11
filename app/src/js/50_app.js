@@ -2,21 +2,41 @@
 (() => {
   const b = document.body;
   const views = { empty: $('vEmpty'), chat: $('vChat') };
+  let cur = 'empty', tOut = 0;
   function show(v) {
+    if (v === cur) return;
+    const from = cur; cur = v;
+    if (from === 'empty' && v === 'chat') {
+      /* 原版的离场：盖「Envoyé」章，拼贴向两边散开 */
+      window.__emptyExit && window.__emptyExit();
+      views.empty.classList.add('out'); clearTimeout(tOut);
+      tOut = setTimeout(() => views.empty.classList.remove('out'), RMQ.matches ? 0 : 720);
+    }
+    if (v === 'empty') { views.empty.classList.remove('out'); window.__v11restart && window.__v11restart(); }
     for (const k in views) views[k].classList.toggle('on', k === v);
     b.classList.toggle('v-empty', v === 'empty'); b.classList.toggle('v-chat', v === 'chat');
   }
   bus.on('ui:chat', () => show(S.chat.messages.length ? 'chat' : 'empty'));
 
-  /* 空白页问候：按当地时间问好，名字用当前人设 */
+  /* 空白页：问候里的名字用当前人设；三张快捷标签 */
   function greet() {
-    const H = new Date().getHours();
-    const hi = H < 5 ? 'Bonne nuit,' : H < 12 ? 'Bonjour,' : H < 18 ? 'Bon après-midi,' : 'Bonsoir,';
-    $('gHi').innerHTML = `${hi} <b>${esc(persona().name || '')}</b>`;
-    $('gSub').textContent = S.char.name ? `${S.char.name} 在等你的信` : '';
+    window.__emptyNameNow = persona().name || '';
+    window.__emptyName && window.__emptyName(window.__emptyNameNow);
   }
-  bus.on('ui:char', () => { greet(); topbar(); bus.emit('ui:chat'); });
   bus.on('ui:persona', greet);
+  const inv = $('invite');
+  const zoomEmpty = () => {
+    const w = views.empty.clientWidth, h = views.empty.clientHeight;
+    const z = Math.min(1, (w - 12) / 700, (h - 40) / 600);
+    inv.style.zoom = z < .995 ? z.toFixed(3) : '';
+  };
+  new ResizeObserver(zoomEmpty).observe(views.empty);
+  views.empty.addEventListener('click', e => {
+    const t = e.target.closest('.tag'); if (!t) return;
+    if (t.classList.contains('t1')) $('ci').focus();
+    else if (t.classList.contains('t2')) bus.emit('nav', 'chars');
+    else if (t.classList.contains('t3')) turn.send('随便聊聊吧。');
+  });
 
   /* 顶栏：角色名 + 连接状态（只在未连上时出现） */
   const CONN = { connecting: '正在连接…', reconnecting: '连接断开，正在重连', failed: '连接失败', ready: '' };
@@ -47,7 +67,7 @@
   bus.on('nav', k => { if (k === 'new') newChat(); else toastSoon(k); });
 
   /* 启动：给真实后端一个注册的机会；500ms 内没人接手就用模拟后端 */
-  greet(); topbar(); show('empty');
+  greet(); topbar();
   b.classList.toggle('rm', RMQ.matches || S.settings.reducedMotion);
   let real = false;
   bus.on('bridge:handler', v => { real = v; if (v) bridge.request('frontend.hello', { version: bridge.api.version }).catch(() => {}); });

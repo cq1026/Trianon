@@ -4,7 +4,9 @@ import json,re,sys,base64,hashlib,os
 src,out=sys.argv[1],sys.argv[2]
 KIT=os.path.join(os.path.dirname(__file__),'..','assets','kit')
 r=json.load(open(src))
-DROP=re.compile(r'\.(eg-|tv-|sl-|q-|qc|so-|prf|ts-|tn|tg-|ap-|fl-|mc-|mchip|mpop|mdl|tool|rec\b|dl\b|dd\b|da\b|dh\b|dfold|th\b|tb\b|tsum|slip|qcard|seal|pen12|rk-|tgrp|inkrk|hg-sand|dw-|drw|c5|invite|tag\b|tagcap|sr-|br-|cl-|tm-|rd-|rp)|#(eg|tv|rk|sl|q[A-Z]|ap|mc|dw|fl|c5)|\bpre\b|\.k\b|\.f\b|\.c\b|\.v-(empty|live)|body\.ly-(fl|st)|\.cmt')
+DROP_ALL=r'\.(eg-|tv-|sl-|q-|qc|so-|prf|ts-|tn|tg-|ap-|fl-|mc-|mchip|mpop|mdl|tool|rec\b|dl\b|dd\b|da\b|dh\b|dfold|th\b|tb\b|tsum|slip|qcard|seal|pen12|rk-|tgrp|inkrk|hg-sand|dw-|drw|c5|invite|tag\b|tagcap|sr-|br-|cl-|tm-|rd-|rp)|#(eg|tv|rk|sl|q[A-Z]|ap|mc|dw|fl|c5)|\bpre\b|\.k\b|\.f\b|\.c\b|\.v-(empty|live)|body\.ly-(fl|st)|\.cmt'
+if os.environ.get('KEEP_EMPTY'):DROP_ALL=DROP_ALL.replace('|c5|invite|tag\\b|tagcap','').replace('|c5)',')')
+DROP=re.compile(DROP_ALL)
 def keep(rule):
     sel=rule.split('{',1)[0]
     if sel.startswith('@media'):return True
