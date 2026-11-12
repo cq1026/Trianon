@@ -43,7 +43,7 @@
     if (!v.trim()) { ci.focus(); return; }
     ci.value = ''; fit();
     if (v.trim().startsWith('/') && await slash.run(v)) return;   /* / 命令 */
-    await turn.send(v);
+    if (!(await turn.send(v)) && !ci.value) { ci.value = v; fit(); }   /* 没发出去（比如外部来源还锁着）：把字还回去 */
   }
   const click = () => busy() ? turn.stop() : quill.writing() ? quill.skip() : go();
   addEventListener('keydown', e => { if (e.key === 'Escape' && !busy() && quill.writing()) { e.preventDefault(); quill.skip(); } });
@@ -59,9 +59,9 @@
   setInterval(sync, 250);   /* 写完积压的字时也要把停止环换回发送 */
 
   /* 人设与模型标签 */
-  const pP = $('pPersona'), pM = $('pModel');
-  const tags = () => { pP.textContent = '✦ ' + (persona().name || ''); pM.textContent = S.model; pM.hidden = !S.model; };
-  bus.on('ui:model', tags); bus.on('ui:persona', tags); tags();
+  const pP = $('pPersona');
+  const tags = () => { pP.textContent = '✦ ' + (persona().name || ''); };
+  bus.on('ui:persona', tags); tags();
 
   /* 点人设标签：快速切换人设，并锁定到这段对话 / 这位角色，或设为默认 */
   const pop = document.createElement('div'); pop.className = 'ppop'; pop.hidden = true; document.body.appendChild(pop);

@@ -701,6 +701,158 @@ body:not(.rail-open) .rail .it, body:not(.rail-open) .edge:hover + .rail .it, bo
   100% { transform: rotate(360deg); }
 }
 
+/* ---- kit_model.css ---- */
+/* 模型标签、选择弹窗、模型目录：原版 v2 的样式，原样搬来（tools/harvest_model.py 生成，不要手改） */
+.drw-ribbon{position:absolute;right:30px;top:-7px;width:13px;height:92px;z-index:3;
+ background:linear-gradient(90deg,#9AA3B6 0,#E9ECF2 30%,#C2C8D5 52%,#F4F6F9 70%,#A7AFC0 100%);
+ clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 8px),0 100%);
+ filter:drop-shadow(0 2px 2px rgba(40,52,95,.25))}
+.drw-ribbon::before{content:"";position:absolute;left:0;right:0;top:0;height:9px;background:linear-gradient(180deg,rgba(70,80,110,.35),rgba(70,80,110,0))}
+.dw-q{position:relative;display:flex;align-items:baseline;gap:8px;margin:34px 0 0;padding:0 2px 9px;cursor:var(--cu-text)}
+.dw-q svg:first-child{align-self:center;flex:none}
+.dw-q em{font-family:"Pinyon",serif;font-style:normal;font-size:17px;color:#8C9DC0;line-height:1}
+.dw-q kbd{margin-left:auto;font-family:"CormI",serif;font-style:italic;font-size:12px;color:rgba(70,85,120,.45);white-space:nowrap}
+.dw-ink{position:absolute;left:-2px;right:-4px;bottom:0;width:calc(100% + 6px);height:6px}
+/* shared paper index tabs */
+.ptabs{position:relative;display:flex;align-items:flex-end;gap:5px;height:33px;padding:0 3px}
+.ptabs::after{content:"";position:absolute;left:-8px;right:-8px;bottom:0;height:1px;z-index:1;
+ background:linear-gradient(90deg,rgba(124,143,184,0),rgba(124,143,184,.42) 7%,rgba(124,143,184,.42) 93%,rgba(124,143,184,0))}
+.ptab{position:relative;flex:1;height:28px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:var(--cu-pointer);white-space:nowrap;
+ font-size:12px;letter-spacing:.2em;color:rgba(46,58,99,.5);border-radius:7px 7px 0 0;transform:translateY(3px);
+ background:linear-gradient(180deg,#E8EDF5,#DFE5EF);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 0 0 .6px rgba(124,143,184,.34);
+ transition:transform .42s cubic-bezier(.3,1.35,.45,1),background-color .3s,color .3s}
+.ptab:hover{transform:translateY(1px);color:rgba(46,58,99,.72)}
+.ptab.on{z-index:2;transform:none;color:#2E3A63;font-weight:600;background:linear-gradient(180deg,#FFFEFA,#FAF8F2);
+ box-shadow:inset 0 1px 0 #fff,0 0 0 .6px rgba(124,143,184,.38),0 -5px 9px -7px rgba(40,52,95,.35)}
+.ptab.on::after{content:"";position:absolute;left:.6px;right:.6px;bottom:-1px;height:2px;background:#FAF8F2;z-index:3}
+.ptab.on::before{content:"";position:absolute;left:30%;right:30%;top:4px;height:1.5px;border-radius:2px;background:linear-gradient(90deg,#C9CFDA,#8E9BB8,#C9CFDA)}
+
+/* ---------- composer model chip: paper luggage tag ---------- */
+.field .bar{position:relative}
+.mchip{position:relative;margin-left:auto;margin-right:2px;display:flex;align-items:center;gap:6px;height:25px;padding:0 11px 0 19px;cursor:var(--cu-pointer);user-select:none;
+ color:#3E4C76;background:linear-gradient(180deg,#FDFCF8,#EFF2F7);
+ clip-path:polygon(9px 0,100% 0,100% 100%,9px 100%,0 50%);
+ filter:drop-shadow(0 1px 1px rgba(40,52,95,.18));transition:transform .4s cubic-bezier(.3,1.35,.45,1)}
+.mchip::before{content:"";position:absolute;inset:0;clip-path:inherit;pointer-events:none;
+ background:linear-gradient(180deg,rgba(124,143,184,.0),rgba(124,143,184,.0));box-shadow:inset 0 0 0 1px rgba(124,143,184,.45)}
+.mchip::after{content:"";position:absolute;left:1px;top:1px;bottom:1px;width:9px;background:linear-gradient(90deg,rgba(124,143,184,.18),rgba(124,143,184,0))}
+.mc-eye{position:absolute;left:9px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;
+ background:radial-gradient(circle at 50% 50%,#EEF1F6 0 1.2px,#9AA3B6 1.6px,#E9ECF2 2.2px,#A7AFC0 3px)}
+.mc-m{font-family:"CormI",serif;font-style:italic;font-weight:600;font-size:14px;letter-spacing:.01em;line-height:1;white-space:nowrap}
+.mc-d{font-style:normal;color:rgba(91,108,147,.55);font-size:12px;line-height:1}
+.mc-t{display:inline-block;font-style:normal;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#9A7584;line-height:1;min-width:26px}
+.mc-car{transition:transform .4s cubic-bezier(.3,1.35,.45,1);margin-left:1px}
+.mchip:hover{transform:translateY(-1.5px) rotate(-.6deg)}
+.mchip.on{transform:translateY(-2px) rotate(-1deg)}.mchip.on .mc-car{transform:rotate(180deg)}
+
+/* ---------- popover: menu card rising from the chip ---------- */
+.mpop{position:fixed;left:0;top:0;width:312px;z-index:60;pointer-events:none;visibility:hidden}
+body.pop-open .mpop{pointer-events:auto;visibility:visible}.mpop.anim{visibility:visible}
+.mp-mv{position:relative;transform-origin:88% 100%;will-change:transform;
+ filter:drop-shadow(0 20px 22px rgba(40,52,95,.24)) drop-shadow(0 2px 3px rgba(40,52,95,.16))}
+.mp-paper{position:absolute;inset:0;
+ -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20312%20470%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0.0%2C0.6%20L6.7%2C1.2%20L16.8%2C1.2%20L23.5%2C1.5%20L34.0%2C1.6%20L44.4%2C2.2%20L51.3%2C2.1%20L59.9%2C1.8%20L71.9%2C1.2%20L78.0%2C2.0%20L86.5%2C0.9%20L94.4%2C0.9%20L106.2%2C0.5%20L113.5%2C0.9%20L122.8%2C1.3%20L133.8%2C0.8%20L141.0%2C1.4%20L153.0%2C0.8%20L163.4%2C2.1%20L173.3%2C1.6%20L184.0%2C2.3%20L191.2%2C2.2%20L198.5%2C1.5%20L206.5%2C1.7%20L214.9%2C1.9%20L225.9%2C1.9%20L237.8%2C1.7%20L248.5%2C0.7%20L255.6%2C0.9%20L264.9%2C1.0%20L271.4%2C0.5%20L283.0%2C1.1%20L293.1%2C0.8%20L301.5%2C1.9%20L311.4%2C2.3%20L310.9%2C0.0%20L310.6%2C10.8%20L310.2%2C21.5%20L310.6%2C28.2%20L310.4%2C40.1%20L310.2%2C47.3%20L309.7%2C57.6%20L310.2%2C66.4%20L310.7%2C77.2%20L310.6%2C85.4%20L311.5%2C95.2%20L311.5%2C101.9%20L311.0%2C112.2%20L310.9%2C124.1%20L310.8%2C131.6%20L311.0%2C143.5%20L310.9%2C149.6%20L310.9%2C157.3%20L310.8%2C163.6%20L310.6%2C174.7%20L310.3%2C184.4%20L309.6%2C191.6%20L310.4%2C199.4%20L309.9%2C208.1%20L310.0%2C217.3%20L310.6%2C225.7%20L310.9%2C236.0%20L311.1%2C246.3%20L311.6%2C253.1%20L311.0%2C263.8%20L310.9%2C275.4%20L311.3%2C284.9%20L311.1%2C296.0%20L310.8%2C304.6%20L310.4%2C312.9%20L309.8%2C321.4%20L310.3%2C330.7%20L309.7%2C341.3%20L310.7%2C352.3%20L309.9%2C362.0%20L310.9%2C369.5%20L311.0%2C380.4%20L310.7%2C388.8%20L311.5%2C397.1%20L311.4%2C404.4%20L311.3%2C414.6%20L311.5%2C425.2%20L310.7%2C432.7%20L310.6%2C441.6%20L310.6%2C453.2%20L310.7%2C460.3%20L310.3%2C469.2%20L312.0%2C468.8%20L306.0%2C468.5%20L295.5%2C468.9%20L284.0%2C468.9%20L275.6%2C468.8%20L268.2%2C469.1%20L257.1%2C469.2%20L249.2%2C469.6%20L239.7%2C469.3%20L231.5%2C468.7%20L219.8%2C468.2%20L210.7%2C467.8%20L202.9%2C468.2%20L192.8%2C467.9%20L185.5%2C468.1%20L174.5%2C468.4%20L164.3%2C468.8%20L152.6%2C468.4%20L144.6%2C468.3%20L133.8%2C469.6%20L126.4%2C469.2%20L114.4%2C469.6%20L108.1%2C469.4%20L101.8%2C469.2%20L92.6%2C469.0%20L85.7%2C469.2%20L74.9%2C468.5%20L66.0%2C468.2%20L55.9%2C467.6%20L45.0%2C467.7%20L36.9%2C468.4%20L30.4%2C467.7%20L24.0%2C468.2%20L12.6%2C468.7%20L4.3%2C468.8%20L2.2%2C470.0%20L1.3%2C459.0%20L1.5%2C448.6%20L1.7%2C440.2%20L1.5%2C429.8%20L1.3%2C419.3%20L0.8%2C410.8%20L0.7%2C400.1%20L1.0%2C393.2%20L1.5%2C382.0%20L1.1%2C375.3%20L1.3%2C367.9%20L1.7%2C356.1%20L1.7%2C348.2%20L2.2%2C339.6%20L1.7%2C331.5%20L1.7%2C324.2%20L1.4%2C312.8%20L1.1%2C302.2%20L0.9%2C291.5%20L0.9%2C280.8%20L0.4%2C274.4%20L0.8%2C263.6%20L0.6%2C254.7%20L0.9%2C244.5%20L1.2%2C238.1%20L1.7%2C230.3%20L1.9%2C221.0%20L1.9%2C214.2%20L2.3%2C204.6%20L2.1%2C193.3%20L2.3%2C183.7%20L2.0%2C176.1%20L1.8%2C165.4%20L1.9%2C156.2%20L0.9%2C144.3%20L1.1%2C137.9%20L1.4%2C131.0%20L0.8%2C122.1%20L1.2%2C111.2%20L0.8%2C104.4%20L1.0%2C97.3%20L1.6%2C90.5%20L1.3%2C82.3%20L2.0%2C71.0%20L1.9%2C62.9%20L1.6%2C53.0%20L2.4%2C46.1%20L2.2%2C39.2%20L2.0%2C28.7%20L2.1%2C20.7%20L0.9%2C10.0%20Z%22%20fill%3D%22%23000%22/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20312%20470%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0.0%2C0.6%20L6.7%2C1.2%20L16.8%2C1.2%20L23.5%2C1.5%20L34.0%2C1.6%20L44.4%2C2.2%20L51.3%2C2.1%20L59.9%2C1.8%20L71.9%2C1.2%20L78.0%2C2.0%20L86.5%2C0.9%20L94.4%2C0.9%20L106.2%2C0.5%20L113.5%2C0.9%20L122.8%2C1.3%20L133.8%2C0.8%20L141.0%2C1.4%20L153.0%2C0.8%20L163.4%2C2.1%20L173.3%2C1.6%20L184.0%2C2.3%20L191.2%2C2.2%20L198.5%2C1.5%20L206.5%2C1.7%20L214.9%2C1.9%20L225.9%2C1.9%20L237.8%2C1.7%20L248.5%2C0.7%20L255.6%2C0.9%20L264.9%2C1.0%20L271.4%2C0.5%20L283.0%2C1.1%20L293.1%2C0.8%20L301.5%2C1.9%20L311.4%2C2.3%20L310.9%2C0.0%20L310.6%2C10.8%20L310.2%2C21.5%20L310.6%2C28.2%20L310.4%2C40.1%20L310.2%2C47.3%20L309.7%2C57.6%20L310.2%2C66.4%20L310.7%2C77.2%20L310.6%2C85.4%20L311.5%2C95.2%20L311.5%2C101.9%20L311.0%2C112.2%20L310.9%2C124.1%20L310.8%2C131.6%20L311.0%2C143.5%20L310.9%2C149.6%20L310.9%2C157.3%20L310.8%2C163.6%20L310.6%2C174.7%20L310.3%2C184.4%20L309.6%2C191.6%20L310.4%2C199.4%20L309.9%2C208.1%20L310.0%2C217.3%20L310.6%2C225.7%20L310.9%2C236.0%20L311.1%2C246.3%20L311.6%2C253.1%20L311.0%2C263.8%20L310.9%2C275.4%20L311.3%2C284.9%20L311.1%2C296.0%20L310.8%2C304.6%20L310.4%2C312.9%20L309.8%2C321.4%20L310.3%2C330.7%20L309.7%2C341.3%20L310.7%2C352.3%20L309.9%2C362.0%20L310.9%2C369.5%20L311.0%2C380.4%20L310.7%2C388.8%20L311.5%2C397.1%20L311.4%2C404.4%20L311.3%2C414.6%20L311.5%2C425.2%20L310.7%2C432.7%20L310.6%2C441.6%20L310.6%2C453.2%20L310.7%2C460.3%20L310.3%2C469.2%20L312.0%2C468.8%20L306.0%2C468.5%20L295.5%2C468.9%20L284.0%2C468.9%20L275.6%2C468.8%20L268.2%2C469.1%20L257.1%2C469.2%20L249.2%2C469.6%20L239.7%2C469.3%20L231.5%2C468.7%20L219.8%2C468.2%20L210.7%2C467.8%20L202.9%2C468.2%20L192.8%2C467.9%20L185.5%2C468.1%20L174.5%2C468.4%20L164.3%2C468.8%20L152.6%2C468.4%20L144.6%2C468.3%20L133.8%2C469.6%20L126.4%2C469.2%20L114.4%2C469.6%20L108.1%2C469.4%20L101.8%2C469.2%20L92.6%2C469.0%20L85.7%2C469.2%20L74.9%2C468.5%20L66.0%2C468.2%20L55.9%2C467.6%20L45.0%2C467.7%20L36.9%2C468.4%20L30.4%2C467.7%20L24.0%2C468.2%20L12.6%2C468.7%20L4.3%2C468.8%20L2.2%2C470.0%20L1.3%2C459.0%20L1.5%2C448.6%20L1.7%2C440.2%20L1.5%2C429.8%20L1.3%2C419.3%20L0.8%2C410.8%20L0.7%2C400.1%20L1.0%2C393.2%20L1.5%2C382.0%20L1.1%2C375.3%20L1.3%2C367.9%20L1.7%2C356.1%20L1.7%2C348.2%20L2.2%2C339.6%20L1.7%2C331.5%20L1.7%2C324.2%20L1.4%2C312.8%20L1.1%2C302.2%20L0.9%2C291.5%20L0.9%2C280.8%20L0.4%2C274.4%20L0.8%2C263.6%20L0.6%2C254.7%20L0.9%2C244.5%20L1.2%2C238.1%20L1.7%2C230.3%20L1.9%2C221.0%20L1.9%2C214.2%20L2.3%2C204.6%20L2.1%2C193.3%20L2.3%2C183.7%20L2.0%2C176.1%20L1.8%2C165.4%20L1.9%2C156.2%20L0.9%2C144.3%20L1.1%2C137.9%20L1.4%2C131.0%20L0.8%2C122.1%20L1.2%2C111.2%20L0.8%2C104.4%20L1.0%2C97.3%20L1.6%2C90.5%20L1.3%2C82.3%20L2.0%2C71.0%20L1.9%2C62.9%20L1.6%2C53.0%20L2.4%2C46.1%20L2.2%2C39.2%20L2.0%2C28.7%20L2.1%2C20.7%20L0.9%2C10.0%20Z%22%20fill%3D%22%23000%22/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;
+ background:radial-gradient(110% 50% at 85% 0,rgba(255,255,255,.75),rgba(255,255,255,0) 60%),
+  radial-gradient(90% 40% at 10% 100%,rgba(214,222,238,.6),rgba(214,222,238,0) 70%),linear-gradient(180deg,#FDFBF6,#F6F5F0)}
+.mp-paper::after{content:"";position:absolute;inset:0;opacity:.45;mix-blend-mode:multiply;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.014 .028' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .6 0 0 0 0 .72 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E")}
+.mp-stk{position:absolute;right:-7px;top:-10px;z-index:3;transform:rotate(14deg);filter:drop-shadow(0 1.5px 1.5px rgba(56,68,108,.25))}
+.mp-in{position:relative;padding:18px 18px 12px 20px}
+.mp-hd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px 2px}
+.mp-hd em{font-family:"Pinyon",serif;font-style:normal;font-size:23px;color:#5B6C93;line-height:1}
+.mp-hd span{font-family:"CormI",serif;font-style:italic;font-size:12.5px;letter-spacing:.06em;color:rgba(46,58,99,.5)}
+.mp-row{position:relative;display:flex;align-items:center;gap:8px;height:33px;margin:0 -8px;padding:0 12px 0 12px;border-radius:2px;cursor:var(--cu-pointer);
+ transition:background-color .24s,box-shadow .28s,transform .32s cubic-bezier(.22,1,.36,1)}
+.mp-row b{font-weight:500;font-size:13.2px;color:#2E3A63;letter-spacing:.02em;white-space:nowrap}
+.mp-x{font-weight:400;font-size:8.6px;letter-spacing:.16em;text-transform:uppercase;color:#9A7584;white-space:nowrap;padding:2px 6px 2px 7px;margin-left:2px;
+ background:linear-gradient(180deg,#F5E9EC,#EDDDE2);clip-path:polygon(4px 0,100% 0,100% 100%,4px 100%,0 50%)}
+.mp-row .ck{margin-left:auto;opacity:0;transform:scale(.6) rotate(-12deg);transition:opacity .2s,transform .4s cubic-bezier(.3,1.5,.45,1)}
+.mp-row:hover{background-color:#FFFEFB;transform:translate(-1px,-1px) rotate(-.35deg);box-shadow:0 8px 12px -9px rgba(40,52,95,.42),0 1px 2px rgba(40,52,95,.1)}
+.mp-row.on{background:#E7EDF5;box-shadow:inset 0 1px 2px rgba(40,52,95,.14),inset 0 0 0 1px rgba(124,143,184,.28);transform:none}
+.mp-row.on b{font-weight:600;color:#25305A}.mp-row.on .ck{opacity:1;transform:none}
+.mp-rule{position:relative;height:6px;margin:8px -4px}.mp-rule .dw-ink{left:0;right:0;width:100%}
+.mp-think{display:flex;align-items:center;justify-content:space-between;margin:2px 0 2px 2px}
+.mp-tl{display:flex;align-items:baseline;gap:8px;font-size:11.5px;letter-spacing:.3em;color:rgba(46,58,99,.62)}
+.mp-tl em{font-family:"Pinyon",serif;font-style:normal;font-size:19px;letter-spacing:0;color:#6F82AC;line-height:1}
+.sld{position:relative;display:flex;width:156px;height:28px;padding:2px;border-radius:3px;
+ background:linear-gradient(180deg,#E3E8F0,#ECEFF4);box-shadow:inset 0 1px 2px rgba(40,52,95,.18),inset 0 0 0 1px rgba(124,143,184,.22)}
+.sld button{position:relative;z-index:1;flex:1;border:0;background:none;cursor:var(--cu-pointer);font-family:"CormI",serif;font-style:italic;font-size:13.5px;color:rgba(46,58,99,.5);transition:color .3s}
+.sld button.on{color:#25305A;font-weight:600}
+.sld button:hover{color:rgba(46,58,99,.8)}
+.sld-th{position:absolute;left:2px;top:2px;bottom:2px;width:calc((100% - 4px)/3);border-radius:2px;
+ transform:translateX(calc(var(--v,2) * 100%));transition:transform .5s cubic-bezier(.3,1.32,.45,1);
+ background:linear-gradient(180deg,#FFFEFA,#F6F4EE);box-shadow:0 2px 3px -1px rgba(40,52,95,.3),0 0 0 .6px rgba(124,143,184,.45),inset 0 1px 0 #fff}
+.sld-th::after{content:"";position:absolute;left:50%;bottom:3px;width:12px;height:1.5px;margin-left:-6px;border-radius:2px;background:linear-gradient(90deg,#C9CFDA,#8E9BB8,#C9CFDA)}
+.mp-hint{margin:10px 2px 0;font-size:11px;line-height:1.75;font-style:italic;letter-spacing:.03em;color:rgba(62,76,116,.74)}
+.mp-more{display:flex;align-items:center;gap:9px;height:32px;margin:0 -8px;padding:0 12px;border-radius:2px;cursor:var(--cu-pointer);transition:background-color .24s,transform .32s cubic-bezier(.22,1,.36,1)}
+.mp-more b{font-weight:600;font-size:12.6px;letter-spacing:.14em;color:#3E4C76}
+.mp-more em{margin-left:auto;font-family:"Pinyon",serif;font-style:normal;font-size:16px;color:#9AA8C6;transition:transform .32s cubic-bezier(.22,1,.36,1)}
+.mp-more:hover{background:#FFFEFB;box-shadow:0 8px 12px -9px rgba(40,52,95,.4)}.mp-more:hover em{transform:translateX(3px)}
+
+/* ---------- catalogue modal ---------- */
+.mscrim{position:fixed;inset:0;z-index:70;pointer-events:none;opacity:0;background:rgba(48,58,92,.17)}
+body.mdl-open .mscrim{pointer-events:auto;opacity:1}
+.mdl{position:fixed;left:50%;top:50%;width:780px;height:660px;margin:-338px 0 0 -390px;z-index:71;pointer-events:none;visibility:hidden}
+body.mdl-open .mdl{pointer-events:auto;visibility:visible}.mdl.anim{visibility:visible}
+.mdl-mv{position:absolute;inset:0;will-change:transform;filter:drop-shadow(0 26px 30px rgba(40,52,95,.26)) drop-shadow(0 2px 4px rgba(40,52,95,.16))}
+.mdl-paper{position:absolute;inset:0;
+ -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20780%20660%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0.0%2C1.1%20L9.5%2C1.3%20L18.6%2C2.9%20L26.4%2C2.9%20L36.2%2C2.7%20L42.3%2C2.3%20L51.4%2C1.9%20L59.7%2C2.2%20L69.6%2C1.5%20L79.7%2C0.9%20L90.6%2C0.8%20L100.0%2C0.1%20L109.3%2C0.2%20L118.8%2C0.8%20L129.4%2C1.4%20L137.6%2C1.5%20L144.9%2C2.5%20L156.0%2C1.9%20L163.3%2C2.1%20L173.2%2C2.1%20L184.8%2C1.4%20L192.9%2C1.9%20L199.1%2C1.6%20L208.6%2C1.0%20L220.5%2C0.7%20L228.8%2C0.9%20L236.3%2C0.6%20L243.3%2C-0.0%20L253.4%2C0.4%20L260.4%2C0.5%20L268.8%2C0.6%20L279.0%2C1.7%20L290.8%2C1.2%20L298.7%2C2.3%20L309.8%2C1.8%20L321.0%2C1.5%20L330.3%2C1.3%20L337.2%2C2.2%20L345.9%2C2.2%20L357.6%2C1.1%20L366.8%2C0.7%20L373.8%2C0.6%20L384.5%2C0.5%20L395.4%2C0.1%20L402.0%2C1.4%20L409.4%2C0.4%20L420.7%2C1.7%20L432.0%2C2.2%20L438.7%2C2.0%20L448.6%2C1.8%20L458.2%2C2.0%20L466.1%2C2.0%20L475.5%2C1.6%20L485.9%2C1.5%20L494.3%2C1.3%20L503.7%2C1.8%20L515.0%2C0.8%20L521.7%2C0.1%20L532.8%2C-0.1%20L540.4%2C0.7%20L546.5%2C1.0%20L557.8%2C1.3%20L568.0%2C1.7%20L577.8%2C1.0%20L584.0%2C2.3%20L594.6%2C2.6%20L605.0%2C1.8%20L611.1%2C2.2%20L617.4%2C2.3%20L625.2%2C2.2%20L635.7%2C2.2%20L644.8%2C1.2%20L651.9%2C0.6%20L658.2%2C1.5%20L665.1%2C1.0%20L671.2%2C0.6%20L678.3%2C1.0%20L685.0%2C1.0%20L695.8%2C0.9%20L705.1%2C1.1%20L715.2%2C1.4%20L726.5%2C1.4%20L733.2%2C2.2%20L740.3%2C1.7%20L750.1%2C2.9%20L756.9%2C1.8%20L764.4%2C1.8%20L774.3%2C1.8%20L777.7%2C0.0%20L778.3%2C7.1%20L777.5%2C18.3%20L778.2%2C28.5%20L777.6%2C35.8%20L778.4%2C43.5%20L778.3%2C52.7%20L778.0%2C61.0%20L778.2%2C68.7%20L779.8%2C76.9%20L779.6%2C85.1%20L779.6%2C91.8%20L779.8%2C100.2%20L778.6%2C110.5%20L779.7%2C117.1%20L778.4%2C125.1%20L778.3%2C133.1%20L778.8%2C140.9%20L778.7%2C147.3%20L777.7%2C156.2%20L778.3%2C166.4%20L777.5%2C173.8%20L777.8%2C184.9%20L777.8%2C192.2%20L779.2%2C203.9%20L779.3%2C213.4%20L778.8%2C224.2%20L778.9%2C233.8%20L778.7%2C243.3%20L779.9%2C252.5%20L779.6%2C260.6%20L779.4%2C270.8%20L779.3%2C279.1%20L778.0%2C290.9%20L777.6%2C301.2%20L778.5%2C311.3%20L778.1%2C318.6%20L778.4%2C329.0%20L778.5%2C336.4%20L778.9%2C345.1%20L778.1%2C353.3%20L779.6%2C363.8%20L779.0%2C374.6%20L779.7%2C385.3%20L778.7%2C396.4%20L779.3%2C404.6%20L778.4%2C413.0%20L779.4%2C420.5%20L779.0%2C427.0%20L778.8%2C433.1%20L778.5%2C442.3%20L777.7%2C453.7%20L777.8%2C461.6%20L777.6%2C469.4%20L778.2%2C480.5%20L778.0%2C491.8%20L778.3%2C502.2%20L779.7%2C512.1%20L778.9%2C523.3%20L779.5%2C530.4%20L778.8%2C539.4%20L779.0%2C546.5%20L778.4%2C554.6%20L779.1%2C561.6%20L779.0%2C572.6%20L777.6%2C580.7%20L777.3%2C587.6%20L777.8%2C594.0%20L777.1%2C603.1%20L777.9%2C611.5%20L778.1%2C621.3%20L777.9%2C629.4%20L778.6%2C636.4%20L779.2%2C645.4%20L779.3%2C653.6%20L780.0%2C659.2%20L773.2%2C658.5%20L766.5%2C657.4%20L754.5%2C657.2%20L748.1%2C657.2%20L736.4%2C657.5%20L724.9%2C658.3%20L714.7%2C658.0%20L705.2%2C659.5%20L697.7%2C659.6%20L688.1%2C659.6%20L677.9%2C659.0%20L669.1%2C660.1%20L659.0%2C658.5%20L649.9%2C658.5%20L639.7%2C658.2%20L631.9%2C657.8%20L623.2%2C658.1%20L616.2%2C657.4%20L607.2%2C657.6%20L597.1%2C658.5%20L588.2%2C658.6%20L579.5%2C658.2%20L570.0%2C658.9%20L561.5%2C658.2%20L550.7%2C658.8%20L541.1%2C659.5%20L533.7%2C660.1%20L524.7%2C658.9%20L514.0%2C659.7%20L506.8%2C659.4%20L497.0%2C658.1%20L489.6%2C658.7%20L481.2%2C657.6%20L470.4%2C658.3%20L460.1%2C658.1%20L448.6%2C657.4%20L436.6%2C658.8%20L430.6%2C658.1%20L422.9%2C659.2%20L415.1%2C658.5%20L405.1%2C659.0%20L396.3%2C658.9%20L386.8%2C658.7%20L378.1%2C659.9%20L369.3%2C658.5%20L357.8%2C658.3%20L350.8%2C659.2%20L342.4%2C658.2%20L334.5%2C658.0%20L326.6%2C658.5%20L319.1%2C658.2%20L307.8%2C657.8%20L296.9%2C657.9%20L288.9%2C658.8%20L277.6%2C658.7%20L267.7%2C659.4%20L257.7%2C659.7%20L251.2%2C658.7%20L240.5%2C659.9%20L231.9%2C658.8%20L221.4%2C659.8%20L213.5%2C658.5%20L206.8%2C658.0%20L195.7%2C658.1%20L186.5%2C658.4%20L178.4%2C657.6%20L170.9%2C657.7%20L163.7%2C658.4%20L156.6%2C658.0%20L147.9%2C657.7%20L140.3%2C658.2%20L128.9%2C658.7%20L122.4%2C658.4%20L114.5%2C659.5%20L103.7%2C659.1%20L95.8%2C659.7%20L88.0%2C658.7%20L80.9%2C658.8%20L69.5%2C658.4%20L63.3%2C658.0%20L55.3%2C658.1%20L44.9%2C657.4%20L36.4%2C658.2%20L26.8%2C658.3%20L17.7%2C657.9%20L9.1%2C657.5%20L2.6%2C657.5%20L0.9%2C660.0%20L1.0%2C653.1%20L1.9%2C642.8%20L2.0%2C635.4%20L1.8%2C627.0%20L2.5%2C616.2%20L2.6%2C606.0%20L1.7%2C595.1%20L2.0%2C583.4%20L2.0%2C575.6%20L1.7%2C565.4%20L0.3%2C556.6%20L0.4%2C549.0%20L0.2%2C540.6%20L0.4%2C533.0%20L0.7%2C524.5%20L0.3%2C518.0%20L1.1%2C508.0%20L0.7%2C501.9%20L1.0%2C495.5%20L1.2%2C484.4%20L1.8%2C474.6%20L2.1%2C465.4%20L2.4%2C457.1%20L1.7%2C445.3%20L1.6%2C438.6%20L1.3%2C429.6%20L0.6%2C419.0%20L1.0%2C409.5%20L0.8%2C398.1%20L0.6%2C391.7%20L-0.0%2C380.0%20L0.2%2C373.9%20L0.4%2C364.2%20L0.9%2C353.1%20L1.3%2C347.0%20L1.9%2C339.2%20L1.8%2C329.2%20L1.9%2C320.9%20L1.7%2C312.1%20L2.0%2C300.5%20L2.3%2C291.7%20L1.9%2C282.6%20L0.7%2C276.0%20L0.6%2C265.6%20L0.5%2C255.7%20L0.3%2C247.3%20L0.6%2C235.9%20L0.3%2C224.7%20L0.5%2C214.1%20L1.7%2C203.4%20L2.2%2C195.2%20L2.6%2C184.4%20L1.9%2C176.3%20L2.8%2C165.5%20L1.7%2C158.8%20L2.0%2C151.2%20L1.1%2C142.1%20L1.2%2C130.6%20L0.3%2C121.0%20L0.1%2C112.4%20L0.5%2C101.6%20L0.6%2C91.5%20L0.3%2C80.7%20L1.4%2C69.9%20L1.0%2C58.1%20L2.2%2C49.5%20L1.9%2C38.6%20L2.5%2C32.2%20L2.5%2C21.6%20L2.1%2C15.2%20L1.4%2C4.3%20Z%22%20fill%3D%22%23000%22/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20780%20660%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0.0%2C1.1%20L9.5%2C1.3%20L18.6%2C2.9%20L26.4%2C2.9%20L36.2%2C2.7%20L42.3%2C2.3%20L51.4%2C1.9%20L59.7%2C2.2%20L69.6%2C1.5%20L79.7%2C0.9%20L90.6%2C0.8%20L100.0%2C0.1%20L109.3%2C0.2%20L118.8%2C0.8%20L129.4%2C1.4%20L137.6%2C1.5%20L144.9%2C2.5%20L156.0%2C1.9%20L163.3%2C2.1%20L173.2%2C2.1%20L184.8%2C1.4%20L192.9%2C1.9%20L199.1%2C1.6%20L208.6%2C1.0%20L220.5%2C0.7%20L228.8%2C0.9%20L236.3%2C0.6%20L243.3%2C-0.0%20L253.4%2C0.4%20L260.4%2C0.5%20L268.8%2C0.6%20L279.0%2C1.7%20L290.8%2C1.2%20L298.7%2C2.3%20L309.8%2C1.8%20L321.0%2C1.5%20L330.3%2C1.3%20L337.2%2C2.2%20L345.9%2C2.2%20L357.6%2C1.1%20L366.8%2C0.7%20L373.8%2C0.6%20L384.5%2C0.5%20L395.4%2C0.1%20L402.0%2C1.4%20L409.4%2C0.4%20L420.7%2C1.7%20L432.0%2C2.2%20L438.7%2C2.0%20L448.6%2C1.8%20L458.2%2C2.0%20L466.1%2C2.0%20L475.5%2C1.6%20L485.9%2C1.5%20L494.3%2C1.3%20L503.7%2C1.8%20L515.0%2C0.8%20L521.7%2C0.1%20L532.8%2C-0.1%20L540.4%2C0.7%20L546.5%2C1.0%20L557.8%2C1.3%20L568.0%2C1.7%20L577.8%2C1.0%20L584.0%2C2.3%20L594.6%2C2.6%20L605.0%2C1.8%20L611.1%2C2.2%20L617.4%2C2.3%20L625.2%2C2.2%20L635.7%2C2.2%20L644.8%2C1.2%20L651.9%2C0.6%20L658.2%2C1.5%20L665.1%2C1.0%20L671.2%2C0.6%20L678.3%2C1.0%20L685.0%2C1.0%20L695.8%2C0.9%20L705.1%2C1.1%20L715.2%2C1.4%20L726.5%2C1.4%20L733.2%2C2.2%20L740.3%2C1.7%20L750.1%2C2.9%20L756.9%2C1.8%20L764.4%2C1.8%20L774.3%2C1.8%20L777.7%2C0.0%20L778.3%2C7.1%20L777.5%2C18.3%20L778.2%2C28.5%20L777.6%2C35.8%20L778.4%2C43.5%20L778.3%2C52.7%20L778.0%2C61.0%20L778.2%2C68.7%20L779.8%2C76.9%20L779.6%2C85.1%20L779.6%2C91.8%20L779.8%2C100.2%20L778.6%2C110.5%20L779.7%2C117.1%20L778.4%2C125.1%20L778.3%2C133.1%20L778.8%2C140.9%20L778.7%2C147.3%20L777.7%2C156.2%20L778.3%2C166.4%20L777.5%2C173.8%20L777.8%2C184.9%20L777.8%2C192.2%20L779.2%2C203.9%20L779.3%2C213.4%20L778.8%2C224.2%20L778.9%2C233.8%20L778.7%2C243.3%20L779.9%2C252.5%20L779.6%2C260.6%20L779.4%2C270.8%20L779.3%2C279.1%20L778.0%2C290.9%20L777.6%2C301.2%20L778.5%2C311.3%20L778.1%2C318.6%20L778.4%2C329.0%20L778.5%2C336.4%20L778.9%2C345.1%20L778.1%2C353.3%20L779.6%2C363.8%20L779.0%2C374.6%20L779.7%2C385.3%20L778.7%2C396.4%20L779.3%2C404.6%20L778.4%2C413.0%20L779.4%2C420.5%20L779.0%2C427.0%20L778.8%2C433.1%20L778.5%2C442.3%20L777.7%2C453.7%20L777.8%2C461.6%20L777.6%2C469.4%20L778.2%2C480.5%20L778.0%2C491.8%20L778.3%2C502.2%20L779.7%2C512.1%20L778.9%2C523.3%20L779.5%2C530.4%20L778.8%2C539.4%20L779.0%2C546.5%20L778.4%2C554.6%20L779.1%2C561.6%20L779.0%2C572.6%20L777.6%2C580.7%20L777.3%2C587.6%20L777.8%2C594.0%20L777.1%2C603.1%20L777.9%2C611.5%20L778.1%2C621.3%20L777.9%2C629.4%20L778.6%2C636.4%20L779.2%2C645.4%20L779.3%2C653.6%20L780.0%2C659.2%20L773.2%2C658.5%20L766.5%2C657.4%20L754.5%2C657.2%20L748.1%2C657.2%20L736.4%2C657.5%20L724.9%2C658.3%20L714.7%2C658.0%20L705.2%2C659.5%20L697.7%2C659.6%20L688.1%2C659.6%20L677.9%2C659.0%20L669.1%2C660.1%20L659.0%2C658.5%20L649.9%2C658.5%20L639.7%2C658.2%20L631.9%2C657.8%20L623.2%2C658.1%20L616.2%2C657.4%20L607.2%2C657.6%20L597.1%2C658.5%20L588.2%2C658.6%20L579.5%2C658.2%20L570.0%2C658.9%20L561.5%2C658.2%20L550.7%2C658.8%20L541.1%2C659.5%20L533.7%2C660.1%20L524.7%2C658.9%20L514.0%2C659.7%20L506.8%2C659.4%20L497.0%2C658.1%20L489.6%2C658.7%20L481.2%2C657.6%20L470.4%2C658.3%20L460.1%2C658.1%20L448.6%2C657.4%20L436.6%2C658.8%20L430.6%2C658.1%20L422.9%2C659.2%20L415.1%2C658.5%20L405.1%2C659.0%20L396.3%2C658.9%20L386.8%2C658.7%20L378.1%2C659.9%20L369.3%2C658.5%20L357.8%2C658.3%20L350.8%2C659.2%20L342.4%2C658.2%20L334.5%2C658.0%20L326.6%2C658.5%20L319.1%2C658.2%20L307.8%2C657.8%20L296.9%2C657.9%20L288.9%2C658.8%20L277.6%2C658.7%20L267.7%2C659.4%20L257.7%2C659.7%20L251.2%2C658.7%20L240.5%2C659.9%20L231.9%2C658.8%20L221.4%2C659.8%20L213.5%2C658.5%20L206.8%2C658.0%20L195.7%2C658.1%20L186.5%2C658.4%20L178.4%2C657.6%20L170.9%2C657.7%20L163.7%2C658.4%20L156.6%2C658.0%20L147.9%2C657.7%20L140.3%2C658.2%20L128.9%2C658.7%20L122.4%2C658.4%20L114.5%2C659.5%20L103.7%2C659.1%20L95.8%2C659.7%20L88.0%2C658.7%20L80.9%2C658.8%20L69.5%2C658.4%20L63.3%2C658.0%20L55.3%2C658.1%20L44.9%2C657.4%20L36.4%2C658.2%20L26.8%2C658.3%20L17.7%2C657.9%20L9.1%2C657.5%20L2.6%2C657.5%20L0.9%2C660.0%20L1.0%2C653.1%20L1.9%2C642.8%20L2.0%2C635.4%20L1.8%2C627.0%20L2.5%2C616.2%20L2.6%2C606.0%20L1.7%2C595.1%20L2.0%2C583.4%20L2.0%2C575.6%20L1.7%2C565.4%20L0.3%2C556.6%20L0.4%2C549.0%20L0.2%2C540.6%20L0.4%2C533.0%20L0.7%2C524.5%20L0.3%2C518.0%20L1.1%2C508.0%20L0.7%2C501.9%20L1.0%2C495.5%20L1.2%2C484.4%20L1.8%2C474.6%20L2.1%2C465.4%20L2.4%2C457.1%20L1.7%2C445.3%20L1.6%2C438.6%20L1.3%2C429.6%20L0.6%2C419.0%20L1.0%2C409.5%20L0.8%2C398.1%20L0.6%2C391.7%20L-0.0%2C380.0%20L0.2%2C373.9%20L0.4%2C364.2%20L0.9%2C353.1%20L1.3%2C347.0%20L1.9%2C339.2%20L1.8%2C329.2%20L1.9%2C320.9%20L1.7%2C312.1%20L2.0%2C300.5%20L2.3%2C291.7%20L1.9%2C282.6%20L0.7%2C276.0%20L0.6%2C265.6%20L0.5%2C255.7%20L0.3%2C247.3%20L0.6%2C235.9%20L0.3%2C224.7%20L0.5%2C214.1%20L1.7%2C203.4%20L2.2%2C195.2%20L2.6%2C184.4%20L1.9%2C176.3%20L2.8%2C165.5%20L1.7%2C158.8%20L2.0%2C151.2%20L1.1%2C142.1%20L1.2%2C130.6%20L0.3%2C121.0%20L0.1%2C112.4%20L0.5%2C101.6%20L0.6%2C91.5%20L0.3%2C80.7%20L1.4%2C69.9%20L1.0%2C58.1%20L2.2%2C49.5%20L1.9%2C38.6%20L2.5%2C32.2%20L2.5%2C21.6%20L2.1%2C15.2%20L1.4%2C4.3%20Z%22%20fill%3D%22%23000%22/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;
+ background:linear-gradient(180deg,transparent 0,transparent 86px,rgba(214,166,178,.34) 86px,rgba(214,166,178,.34) 87px,transparent 87px),
+  radial-gradient(90% 45% at 85% 4%,rgba(255,255,255,.75),rgba(255,255,255,0) 60%),
+  radial-gradient(70% 40% at 10% 100%,rgba(212,220,236,.5),rgba(212,220,236,0) 70%),linear-gradient(180deg,#FDFBF5,#F8F6F0 55%,#F3F3F1)}
+.mdl-paper::after{content:"";position:absolute;inset:0;opacity:.5;mix-blend-mode:multiply;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.011 .026' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .6 0 0 0 0 .72 0 0 0 .085 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E")}
+.mdl-rib{right:128px;height:84px}
+.mdl-in{position:absolute;inset:0;display:flex;flex-direction:column;padding:28px 46px 0 48px}
+.md-hd{display:flex;align-items:baseline;gap:14px;height:40px;padding-right:70px}
+.md-hd em{font-family:"Pinyon",serif;font-style:normal;font-size:34px;color:#5B6C93;line-height:1}
+.md-hd span{font-size:12px;letter-spacing:.44em;color:rgba(46,58,99,.6)}
+.md-x{position:absolute;right:20px;top:20px;width:30px;height:30px;border:0;border-radius:50%;display:grid;place-items:center;cursor:var(--cu-pointer);
+ background:radial-gradient(circle at 35% 30%,#FFFFFF,#E3E7EE 70%,#C9CFDA);box-shadow:0 1px 2px rgba(60,70,100,.25);transition:transform .4s cubic-bezier(.3,1.35,.45,1)}
+.md-x:hover{transform:rotate(90deg)}
+.md-q{margin:30px 0 0!important}
+.md-q input{flex:1;min-width:0;border:0;outline:0;background:none;padding:0;font:inherit;font-size:13px;letter-spacing:.06em;color:#2E3A63}
+.md-q input::placeholder{color:rgba(70,85,120,.42)}
+.md-tabs{margin:20px -2px 0;justify-content:flex-start}
+.md-tabs .ptab{flex:none;padding:0 17px;letter-spacing:.12em}
+.md-list{position:relative;flex:1;min-height:0;overflow-y:auto;margin:0 -14px;padding:10px 14px 18px}
+.md-list::-webkit-scrollbar{width:6px;background:transparent}.md-list::-webkit-scrollbar-track{background:transparent}.md-list::-webkit-scrollbar-button{display:none;height:0}.md-list::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#9AA3B6,#F2F4F8 45%,#A9B1C2);border-radius:3px}
+.md-pv{display:none;align-items:baseline;gap:10px;margin:14px 0 4px;white-space:nowrap}
+.md-list.all .md-pv{display:flex}.md-list.all .md-pv:first-child{margin-top:4px}
+.md-pv em{font-family:"Pinyon",serif;font-style:normal;font-size:19px;color:#6F82AC;line-height:1}
+.md-pv span{font-family:"CormI",serif;font-style:italic;font-size:12px;color:rgba(46,58,99,.45)}
+.md-pv::after{content:"";flex:1;align-self:center;height:1px;background:linear-gradient(90deg,rgba(124,143,184,.38),rgba(124,143,184,0))}
+.md-row{position:relative;display:flex;align-items:center;gap:14px;margin:0 -12px;padding:9px 14px 10px 16px;border-radius:2px;cursor:var(--cu-pointer);outline:none;
+ transition:background-color .24s,box-shadow .3s,transform .34s cubic-bezier(.22,1,.36,1)}
+.md-row+.md-row{margin-top:2px}
+.md-tx{flex:1;min-width:0}
+.md-tx b{display:flex;align-items:center;gap:8px;font-weight:500;font-size:14.6px;color:#2E3A63;letter-spacing:.02em;line-height:1.45}
+.md-meta{display:flex;align-items:baseline;margin-top:3px;font-size:10.6px;letter-spacing:.06em;color:rgba(70,85,125,.62);white-space:nowrap;overflow:hidden}
+.md-meta .sc{font-size:9.2px;letter-spacing:.15em;text-transform:uppercase}
+.md-meta .sep{flex:none;width:1px;height:8px;margin:0 8px;align-self:center;background:rgba(124,143,184,.45)}
+.md-row .ck{flex:none;opacity:0;transform:scale(.6) rotate(-12deg);transition:opacity .2s,transform .42s cubic-bezier(.3,1.5,.45,1)}
+.md-star{flex:none;width:30px;height:30px;border:0;padding:0;background:none;cursor:var(--cu-pointer);display:grid;place-items:center;border-radius:50%;opacity:0;transition:opacity .2s,background-color .2s}
+.md-star .st{overflow:visible}.md-star .onn{opacity:0;transform:scale(.4);transform-origin:0 0}
+.md-star[aria-pressed="true"]{opacity:1}
+.md-star[aria-pressed="true"] .off{opacity:0}.md-star[aria-pressed="true"] .onn{opacity:1;transform:rotate(-12deg) scale(1.18);filter:drop-shadow(0 1.6px 1.4px rgba(56,68,108,.38))}
+.md-star:hover{background:rgba(124,143,184,.12)}
+.md-row:hover,.md-row.kb{background-color:#FFFEFB;transform:translate(-1px,-2px) rotate(-.3deg);box-shadow:0 10px 15px -10px rgba(40,52,95,.42),0 1px 2px rgba(40,52,95,.1),inset 0 0 0 1px rgba(255,255,255,.9)}
+.md-row:hover .md-star,.md-row.kb .md-star,.md-row.on .md-star{opacity:1}
+.md-row.on{background:#E7EDF5;box-shadow:inset 0 1px 2px rgba(40,52,95,.14),inset 0 0 0 1px rgba(124,143,184,.28);transform:none}
+.md-row.on.kb,.md-row.on:hover{background:#E9EFF7}
+.md-row.on b{font-weight:600;color:#25305A}.md-row.on .ck{opacity:1;transform:none}
+.md-row.hide,.md-pv.hide{display:none!important}
+.md-empty{display:none;text-align:center;margin-top:60px;font-family:"CormI",serif;font-style:italic;font-size:13px;letter-spacing:.16em;color:rgba(46,58,99,.4)}
+.md-list.none .md-empty{display:block}
+.md-ft{display:flex;align-items:center;gap:6px;height:52px;margin:0 -10px;padding:0 10px;border-top:1px solid rgba(124,143,184,.24);font-size:11px;letter-spacing:.14em;color:rgba(70,85,120,.55)}
+.md-ft b{font-weight:400;color:#B9A27A;margin:0 8px;font-size:10px}
+.kc{display:inline-grid;place-items:center;min-width:22px;height:21px;padding:0 6px;border-radius:3px;font-family:"CormI",serif;font-style:italic;font-size:12.5px;letter-spacing:.02em;color:#3E4C76;
+ background:linear-gradient(180deg,#FFFEFA,#F2F1EC);box-shadow:0 1.5px 0 rgba(124,143,184,.45),0 2px 3px -1px rgba(40,52,95,.25),inset 0 0 0 .6px rgba(124,143,184,.4)}
+.kl{margin-left:3px}
+.md-cnt{margin-left:auto;font-family:"CormI",serif;font-style:italic;font-size:12.5px;letter-spacing:.06em;color:rgba(46,58,99,.45)}
+
+@media (prefers-reduced-motion:reduce){.ptab,.sld-th,.mchip,.mp-row,.md-row{transition:none!important;transform:none}}
+
 /* ---- kit_empty.css ---- */
 .scroll { flex: 1 1 0%; display: flex; justify-content: center; overflow: hidden; padding-top: 4px; }
 .dsep { display: flex; align-items: center; gap: 12px; margin: 8px 0px 18px; color: rgba(22, 26, 36, 0.45); }
@@ -1223,6 +1375,59 @@ body.rail-open .rail .it { pointer-events: auto; }
   .meta .more.open .mm { position: fixed; left: 12px !important; right: 12px !important; top: auto; bottom: calc(var(--cH, 120px) + 10px); flex-direction: row; flex-wrap: wrap; justify-content: space-around; min-width: 0; padding: 8px; z-index: 47; }
   .meta .mm .lnk { padding: 8px 10px; }
 }
+
+/* ===== 生成来源：模型标签、弹窗里新加的几样（原版 v2 的样式在 kit_model.css） ===== */
+.field .bar .mchip { flex: none; margin-left: auto; margin-right: 2px; }
+.mchip.bi .mc-t { color: #8C9AB9; letter-spacing: .12em; text-transform: none; font-family: "CormI", serif; font-style: italic; font-size: 12px; }
+.mchip.lk .mc-t { color: #A0647A; }
+.mchip.lk .mc-eye { background: radial-gradient(circle at 50% 50%, #F6ECEF 0 1.2px, #B48C9C 1.6px, #F2E6EA 2.2px, #C4A2AF 3px); }
+.mc-m { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+.mpop { width: 330px; }
+.sld.n2 { width: 168px; } .sld.n2 .sld-th { width: calc((100% - 4px) / 2); }
+.mp-tl { white-space: nowrap; }
+.sld.n4 { width: 184px; } .sld.n4 .sld-th { width: calc((100% - 4px) / 4); }
+.sld.n2 button { font-family: inherit; font-style: normal; font-size: 12.5px; letter-spacing: .06em; }
+.mp-src { margin-top: 2px; }
+.mp-think.dis .sld { opacity: .45; filter: grayscale(.6); }
+.mp-think.dis .sld button { cursor: not-allowed; }
+.mp-think.dis .mp-tl { opacity: .55; }
+.mp-list { min-height: 33px; }
+.mp-row.on .mp-x, .mp-row .mp-x { margin-left: 4px; }
+.mp-note { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 33px; padding: 4px 4px; font-size: 12.5px; letter-spacing: .04em; color: #3E4C76; }
+.mp-a { border: 0; border-radius: 2px; padding: 5px 11px; cursor: var(--cu-pointer); font: 600 12px/1 var(--serif); letter-spacing: .12em; color: #2E3A63;
+  background: linear-gradient(180deg, #FFFEFA, #F2F1EC); box-shadow: 0 1.5px 0 rgba(124, 143, 184, .45), 0 2px 3px -1px rgba(40, 52, 95, .25), inset 0 0 0 .6px rgba(124, 143, 184, .4); }
+.mp-a:hover { background: #fff; }
+.mp-lock { display: flex; gap: 8px; align-items: center; flex: 1 1 100%; }
+.mp-lock input { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid rgba(76, 93, 136, .45); background: rgba(255, 255, 255, .7); padding: 6px 8px; font: 13px/1.3 var(--serif); color: #232A44; outline: 0; border-radius: 2px; }
+.mp-lock input:focus { background: #fff; border-bottom-color: #4C5D88; }
+.md-msg { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 6px 4px 4px; padding: 12px 14px; border-radius: 2px; font-size: 13px; color: #3E4C76; background: rgba(231, 237, 245, .55); box-shadow: inset 0 0 0 1px rgba(124, 143, 184, .22); }
+.md-msg.md-man { background: none; box-shadow: none; padding: 8px 2px; font-size: 12px; color: rgba(62, 76, 116, .7); }
+.md-msg.md-man .mp-lock { flex: 1 1 260px; }
+.md-msg.hide { display: none !important; }
+.pl-fs { border: 0; margin: 0; padding: 0; min-width: 0; }
+.pl-fs.off .pl-row, .pl-fs.off .pl-stop { opacity: .42; filter: grayscale(.7); }
+.pl-fs.off input, .pl-fs.off textarea, .pl-fs.off .lnk { cursor: not-allowed; }
+.pl-off { margin-left: 10px; font: italic 13px/1 CormI, Georgia, serif; color: #A0647A; }
+@media (max-width: 760px) {
+  .mpop { width: calc(100vw - 16px); max-width: 340px; }
+  .mc-m { max-width: 120px; }
+  .mdl { left: 8px; top: 8px; width: calc(100vw - 16px); height: calc(100dvh - 16px); margin: 0; }
+  .mdl-in { padding: 22px 18px 0; }
+  .md-hd { padding-right: 44px; } .md-hd em { font-size: 28px; } .md-hd span { letter-spacing: .3em; }
+  .md-x { right: 12px; top: 14px; }
+  .md-q { margin-top: 18px !important; } .md-q kbd { display: none; }
+  .md-tabs { margin-top: 14px; } .md-tabs .ptab { padding: 0 12px; }
+  .md-list { margin: 0 -6px; padding: 10px 6px 18px; }
+  .md-row { margin: 0 -4px; padding: 9px 8px 10px 10px; gap: 8px; }
+  .md-star { opacity: 1; }
+  .md-ft .kc, .md-ft .kl, .md-ft b { display: none; }
+  .mdl-rib { right: 70px; }
+}
+/* 弹窗和目录关着时用 display:none（只切 visibility 时，Chrome 偶尔会让正在做入场动画的子元素停在 hidden） */
+.mpop, .mdl { display: none; visibility: visible; }
+body.pop-open .mpop, .mpop.anim { display: block; }
+body.mdl-open .mdl, .mdl.anim { display: block; }
+@media (max-width: 760px) { .mp-lock input, #mdIn { font-size: 16px; } }
 
 /* ---- settings（原版设置页，已加作用域）---- */
 @font-face{font-family:"PinyonX";src:url(data:font/woff;base64,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) format("woff")}
@@ -1890,7 +2095,7 @@ body.rail-open .rail .it { pointer-events: auto; }
 #stSet .cv .sf-r { min-height: 38px; }
 #stSet .cv .sf-r + .sf-r { margin-top: 4px; }
 #stSet .cv-hd { display: flex; align-items: baseline; gap: 8px; height: 26px; }
-#stSet .cn { padding: 22px 26px 10px; }
+#stSet .cn { padding: 18px 26px 8px; }
 #stSet .cn-st { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding-bottom: 12px; border-bottom: 1px dashed rgba(76, 93, 136, .35); }
 #stSet .cn-st em { font-size: 26px; }
 #stSet .cn-st b { font-size: 15px; letter-spacing: .3em; color: #1E2750; }
@@ -1901,7 +2106,7 @@ body.rail-open .rail .it { pointer-events: auto; }
 #stSet .cn-caps { display: flex; flex-wrap: wrap; gap: 8px; }
 #stSet .cn-cap { font: italic 500 12.5px/1 CormI, Georgia, serif; padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(76, 93, 136, .35); color: #3C4A75; background: rgba(236, 240, 247, .7); }
 #stSet .cn-cap.no { color: #9A6378; border-color: rgba(154, 99, 120, .35); background: rgba(250, 240, 243, .7); }
-#stSet .cn-acts { position: absolute; left: 26px; bottom: 22px; display: flex; gap: 12px; }
+#stSet .cn-acts { display: flex; gap: 12px; padding: 0 26px; }
 #stSet .cn-lg { padding: 26px 22px; font-family: "Tw", "Courier New", monospace; font-size: 11px; line-height: 1.75; color: #2E3A63; }
 #stSet .cn-lh { font-weight: 700; letter-spacing: .12em; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed rgba(46, 58, 99, .4); }
 #stSet .cn-l { display: flex; gap: 8px; white-space: nowrap; overflow: hidden; }
@@ -1963,6 +2168,36 @@ body.rail-open .rail .it { pointer-events: auto; }
   #stSet.on .pn-ed.css textarea { min-height: 180px; }
   #stSet.on .c2nt { position: relative; }
 }
+/* ---- 连接：生成来源 + DeepSeek 钥匙 ---- */
+#stSet .cn-src { min-height: 40px; margin: 10px 0 0; padding-bottom: 10px; border-bottom: 1px dashed rgba(76, 93, 136, .35); }
+#stSet .cn-src .st-seg button { white-space: nowrap; }
+#stSet .cn-dl { margin: 12px 0; }
+#stSet .cn-dl i { font-style: italic; color: #9A6378; }
+#stSet .kk { display: flex; flex-direction: column; gap: 9px; padding: 20px 26px 16px; }
+#stSet .kk .cv-hd { display: flex; align-items: baseline; gap: 10px; margin: 0; }
+#stSet .kk .cv-hd small { margin-left: auto; font: italic 500 13px/1 CormI, Georgia, serif; color: #3C4A75; white-space: nowrap; }
+#stSet .kk-g { display: grid; grid-template-columns: 40px 1fr; gap: 8px 10px; align-items: center; }
+#stSet .kk-g label { font-size: 12px; font-weight: 700; letter-spacing: .14em; color: #1E2750; }
+#stSet .kk-g input { width: 100%; min-width: 0; border: 0; border-bottom: 1px solid rgba(76, 93, 136, .45); background: rgba(255, 255, 255, .6); padding: 6px 8px; font: 500 13.5px/1.5 var(--serif); color: #232A44; outline: 0; border-radius: 2px; }
+#stSet .kk-g input:focus { background: rgba(255, 255, 255, .95); border-bottom-color: #4C5D88; box-shadow: 0 1px 0 #4C5D88; }
+#stSet .kk-g input:disabled { opacity: .45; cursor: not-allowed; }
+#stSet .kk-n { margin: -3px 0 0 50px; font: italic 12.5px/1.4 CormI, Georgia, serif; color: #9A6378; }
+#stSet .kk-mn { color: #5B6C93; }
+#stSet .kk.bi .kk-mn { color: #9A6378; }
+#stSet .kk-a { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-left: 46px; }
+#stSet .kk-gap { flex: 1; }
+#stSet .kk-st { display: flex; flex-direction: column; gap: 2px; min-height: 40px; justify-content: center; padding: 5px 10px; border-radius: 2px; background: rgba(236, 240, 247, .6); box-shadow: inset 0 0 0 1px rgba(76, 93, 136, .2); }
+#stSet .kk-st b { font-size: 12.5px; font-weight: 600; letter-spacing: .04em; color: #1E2750; }
+#stSet .kk-st small { font-size: 11.5px; color: #5B6C93; }
+#stSet .kk-mr { display: flex; align-items: center; gap: 8px; }
+#stSet .kk-mr input { flex: 1; }
+@media (max-width: 760px) {
+  #stSet.on .kk-c { height: auto !important; }
+  #stSet.on .kk-a { gap: 6px; padding-left: 0; }
+  #stSet.on .kk-n { margin-left: 0; }
+  #stSet.on .kk-gap { flex-basis: 100%; height: 0; }
+}
+@media (max-width: 760px) { #stSet.on .kk-g input { font-size: 16px; } }
 
 </style>
 </head>
@@ -2002,8 +2237,8 @@ body.rail-open .rail .it { pointer-events: auto; }
           <textarea class="ci" id="ci" rows="1" autocomplete="off" spellcheck="false" aria-label="说一句话"></textarea>
           <div class="bar">
             <span class="pill p" id="pPersona" title="当前人设"></span>
-            <span class="pill rb blue" id="pModel" title="模型" hidden></span>
             <button class="pill imp" id="pImp" type="button" title="让模型以你的人设代写一段（写进输入框）">✒ 代写</button>
+            <div class="mchip" id="mchip" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" title="生成来源与模型"><i class="mc-eye"></i><b class="mc-m" id="mcM"></b><i class="mc-d">·</i><em class="mc-t" id="mcT"></em><svg class="mc-car" width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2.4,6.4 L5,3.7 L7.6,6.4" fill="none" stroke="#5B6C93" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
           </div>
         </div>
         <div class="send" id="send" role="button" tabindex="0" aria-label="发送">
@@ -2019,6 +2254,49 @@ body.rail-open .rail .it { pointer-events: auto; }
       <div class="hint"><em>Entrée</em> 发送 <b>✦</b> <em>Maj + Entrée</em> 换行</div>
     </div>
   </section>
+</div>
+
+<!-- 模型标签的弹窗和模型目录：原版 v2 的结构，内容由 js/43_source.js 填 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+ <radialGradient id="cg13" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#F4F7FB"/><stop offset=".55" stop-color="#A9B8D3"/><stop offset="1" stop-color="#7386AD"/></radialGradient>
+ <linearGradient id="ink13" x1="0" x2="1"><stop offset="0" stop-color="#5B6C93" stop-opacity="0"/><stop offset=".08" stop-color="#5B6C93" stop-opacity=".55"/><stop offset=".85" stop-color="#5B6C93" stop-opacity=".45"/><stop offset="1" stop-color="#5B6C93" stop-opacity="0"/></linearGradient>
+ <linearGradient id="pg13" x1="0" y1="-1" x2="0" y2="-11" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#E6C9CF"/><stop offset=".45" stop-color="#F2E1E1"/><stop offset="1" stop-color="#FCF8F2"/></linearGradient>
+ <linearGradient id="sv2s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3F5F9"/><stop offset=".38" stop-color="#A3AEC4"/><stop offset=".55" stop-color="#E4E8F0"/><stop offset=".82" stop-color="#76829C"/><stop offset="1" stop-color="#C3CAD8"/></linearGradient>
+</defs></svg>
+<div class="mpop" id="mpop" role="menu" aria-label="选择模型" aria-hidden="true">
+ <div class="mp-mv" id="mpMv">
+  <div class="mp-paper"></div>
+  <svg class="mp-stk" width="24" height="24" viewBox="-12.5 -12.5 25 25" aria-hidden="true"><g><g transform="rotate(0)"><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="#FFFDF8" stroke="#FFFDF8" stroke-width="2.6" stroke-linejoin="round"></path><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="url(#pg13)" stroke="rgba(166,122,138,.5)" stroke-width=".42"></path><path d="M0,-2.6 L0,-6.6" stroke="rgba(186,146,158,.32)" stroke-width=".38" stroke-linecap="round"></path></g><g transform="rotate(72)"><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="#FFFDF8" stroke="#FFFDF8" stroke-width="2.6" stroke-linejoin="round"></path><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="url(#pg13)" stroke="rgba(166,122,138,.5)" stroke-width=".42"></path><path d="M0,-2.6 L0,-6.6" stroke="rgba(186,146,158,.32)" stroke-width=".38" stroke-linecap="round"></path></g><g transform="rotate(144)"><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="#FFFDF8" stroke="#FFFDF8" stroke-width="2.6" stroke-linejoin="round"></path><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="url(#pg13)" stroke="rgba(166,122,138,.5)" stroke-width=".42"></path><path d="M0,-2.6 L0,-6.6" stroke="rgba(186,146,158,.32)" stroke-width=".38" stroke-linecap="round"></path></g><g transform="rotate(216)"><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="#FFFDF8" stroke="#FFFDF8" stroke-width="2.6" stroke-linejoin="round"></path><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="url(#pg13)" stroke="rgba(166,122,138,.5)" stroke-width=".42"></path><path d="M0,-2.6 L0,-6.6" stroke="rgba(186,146,158,.32)" stroke-width=".38" stroke-linecap="round"></path></g><g transform="rotate(288)"><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="#FFFDF8" stroke="#FFFDF8" stroke-width="2.6" stroke-linejoin="round"></path><path d="M0,-1.4 C-3.7,-3.1 -5.5,-7.3 -3.3,-10.1 C-2.1,-11.5 -0.8,-11.1 0,-9.9 C0.8,-11.1 2.1,-11.5 3.3,-10.1 C5.5,-7.3 3.7,-3.1 0,-1.4Z" fill="url(#pg13)" stroke="rgba(166,122,138,.5)" stroke-width=".42"></path><path d="M0,-2.6 L0,-6.6" stroke="rgba(186,146,158,.32)" stroke-width=".38" stroke-linecap="round"></path></g><circle r="2.35" fill="url(#cg13)" stroke="rgba(92,108,148,.35)" stroke-width=".35"></circle><circle cx="-.7" cy="-.8" r=".65" fill="#fff" opacity=".75"></circle></g></svg>
+  <div class="mp-in">
+   <div class="mp-hd mp-c"><em>Modèles</em><span id="mpSub"></span></div>
+   <div class="mp-think mp-src mp-c"><span class="mp-tl"><em>Source</em>来 源</span>
+     <div class="sld n2" id="mpSrc" role="radiogroup" aria-label="生成来源"><i class="sld-th"></i><button data-v="builtin" role="radio">内置</button><button data-v="external" role="radio">DeepSeek</button></div></div>
+   <div class="mp-rule mp-c"><svg class="dw-ink" viewBox="0 0 260 6" preserveAspectRatio="none" aria-hidden="true"><path d="M1,3.6 C40,2.2 70,4.4 112,3.1 C150,2 190,4.2 259,2.8" fill="none" stroke="url(#ink13)" stroke-width="1.1" stroke-linecap="round"></path></svg></div>
+   <div class="mp-list" id="mpList"></div>
+   <div class="mp-rule mp-c"><svg class="dw-ink" viewBox="0 0 260 6" preserveAspectRatio="none" aria-hidden="true"><path d="M1,3.6 C40,2.2 70,4.4 112,3.1 C150,2 190,4.2 259,2.8" fill="none" stroke="url(#ink13)" stroke-width="1.1" stroke-linecap="round"></path></svg></div>
+   <div class="mp-think mp-c" id="mpThink"><span class="mp-tl"><em>Pensée</em>思 考</span>
+     <div class="sld n4" id="mpSld" role="radiogroup" aria-label="思考程度"><i class="sld-th"></i><button data-v="0" role="radio">Off</button><button data-v="1" role="radio">Low</button><button data-v="2" role="radio">High</button><button data-v="3" role="radio">Max</button></div></div>
+   <p class="mp-hint mp-c" id="mpHint"></p>
+   <div class="mp-rule mp-c"><svg class="dw-ink" viewBox="0 0 260 6" preserveAspectRatio="none" aria-hidden="true"><path d="M1,3.6 C40,2.2 70,4.4 112,3.1 C150,2 190,4.2 259,2.8" fill="none" stroke="url(#ink13)" stroke-width="1.1" stroke-linecap="round"></path></svg></div>
+   <div class="mp-more mp-c" id="mpMore" role="button" tabindex="0"><svg width="16" height="15" viewBox="0 0 16 15" aria-hidden="true"><path d="M8,3.2 C6,2 3.6,1.8 1.6,2.4 V12.6 C3.6,12 6,12.2 8,13.4 C10,12.2 12.4,12 14.4,12.6 V2.4 C12.4,1.8 10,2 8,3.2 Z" fill="#FBF9F3" stroke="#5B6C93" stroke-width="1.05" stroke-linejoin="round"></path><path d="M8,3.2 V13.3" stroke="#5B6C93" stroke-width=".9"></path><path d="M11.6,1.9 V6.2 L12.5,5.4 L13.4,6.2 V2.2" fill="#D9B8C1" stroke="none"></path></svg><b>更多模型…</b><em>Catalogue</em></div>
+   <div class="mp-more mp-c" id="mpKey" role="button" tabindex="0"><svg width="16" height="15" viewBox="0 0 16 15" aria-hidden="true"><circle cx="4.6" cy="7.5" r="3.1" fill="#FBF9F3" stroke="#5B6C93" stroke-width="1.05"/><circle cx="4.6" cy="7.5" r="1" fill="#D9B8C1"/><path d="M7.7,7.5 H14.6 M12.2,7.5 V10.2 M14,7.5 V9.6" fill="none" stroke="#5B6C93" stroke-width="1.05" stroke-linecap="round"/></svg><b>钥匙与口令…</b><em>Connexion</em></div>
+  </div>
+ </div>
+</div>
+<div class="mscrim" id="mscrim" aria-hidden="true"></div>
+<div class="mdl" id="mdl" role="dialog" aria-modal="true" aria-label="切换模型" aria-hidden="true">
+ <div class="mdl-mv" id="mdlMv">
+  <div class="mdl-paper"></div>
+  <i class="drw-ribbon mdl-rib" aria-hidden="true"></i>
+  <div class="mdl-in">
+   <header class="md-hd md-c"><em>Catalogue</em><span>切 换 模 型</span><button class="md-x" id="mdX" aria-label="关闭"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.4,2.6 C5,5.1 7.2,7.3 9.6,9.5 M9.5,2.4 C7,5 5,7 2.5,9.6" fill="none" stroke="#4A5A86" stroke-width="1.35" stroke-linecap="round"></path></svg></button></header>
+   <label class="md-q dw-q md-c"><svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.4" cy="8.4" r="5.6" fill="none" stroke="#7183A9" stroke-width="1.3"></circle><path d="M12.6 12.6l4.6 4.8" stroke="#7183A9" stroke-width="1.5" stroke-linecap="round"></path></svg><em>Chercher</em><input id="mdIn" type="text" placeholder="搜索模型或来源…" autocomplete="off" spellcheck="false"><kbd>/</kbd><svg class="dw-ink" viewBox="0 0 260 6" preserveAspectRatio="none" aria-hidden="true"><path d="M1,3.6 C40,2.2 70,4.4 112,3.1 C150,2 190,4.2 259,2.8" fill="none" stroke="url(#ink13)" stroke-width="1.1" stroke-linecap="round"></path></svg></label>
+   <div class="ptabs md-tabs md-c" id="mdTabs" role="tablist"><div class="ptab" data-t="all" role="tab">全部</div><div class="ptab" data-t="builtin" role="tab">内置</div><div class="ptab" data-t="external" role="tab">DeepSeek</div></div>
+   <div class="md-list" id="mdList" role="listbox"></div>
+   <footer class="md-ft md-c"><span class="kc">↑</span><span class="kc">↓</span><span class="kl">导航</span><b>✦</b><span class="kc">Enter</span><span class="kl">选择</span><b>✦</b><span class="kc">Esc</span><span class="kl">关闭</span>
+     <em class="md-cnt" id="mdCnt"></em></footer>
+  </div>
+ </div>
 </div>
 
 <div class="soon" id="soon" role="status" aria-live="polite"><em id="soonFr"></em><span id="soonTx"></span></div>
@@ -2170,7 +2448,9 @@ T.bridge = bridge;
 /* ---- 11_mock.js ---- */
 /* ===== 模拟后端：没接真实后端时演示用 =====
    行为与 docs/BRIDGE.md 一致：收到 chat.send 后按 turnId 依次发 turn.start → (turn.reasoning…) → turn.delta… → turn.done。
-   调试：__trianon.mock.set({ delay: 9, failNext: true, reasoning: false, cps: 30 }) */
+   调试：__trianon.mock.set({ delay: 9, failNext: true, reasoning: false, cps: 30 })
+   生成来源：回复第一行标出这次用的来源（内置 / 外部 DeepSeek · 模型 · 思考程度）。
+   钥匙：只记「存过没有」，不记钥匙本身；尾号固定用假数据 MOCK_LAST4。口令写 wrong 时按「口令不对」处理。 */
 (() => {
   const emit = (ev, p) => bridge.api.emit(ev, p);
   const opt = { delay: 1.6, cps: 16, reasoning: true, failNext: false };
@@ -2202,11 +2482,28 @@ T.bridge = bridge;
   const THINK = ['先接住对方的话。', '语气放软一点，', '带一点花园和雾的意象，', '最后留个邀请。'];
   let k = 0;
 
+  /* 生成来源：外部来源先检查钥匙和口令，再在回复开头标明来源 */
+  const MOCK_LAST4 = '7c1e', MODELS = [{ id: 'deepseek-chat', owned_by: 'deepseek' }, { id: 'deepseek-reasoner', owned_by: 'deepseek' }];
+  const EFF = { low: 'Low', high: 'High', max: 'Max' };
+  const srcTag = p => {
+    if (p.source !== 'external') return '〔来源：内置〕';
+    const r = (p.params || {}).reasoning || {};
+    return `〔来源：外部 DeepSeek · ${p.model || '未指定模型'} · 思考 ${r.enabled ? EFF[r.effort] || r.effort : 'Off'}〕`;
+  };
+  const srcErr = p => {
+    if (p.source !== 'external') return null;
+    if (!db.get('keySaved', false)) return { code: 'no_key', message: '没有存好的钥匙（模拟）' };
+    if (!p.passphrase || p.passphrase === 'wrong') return { code: 'bad_passphrase', message: '口令不对（模拟）' };
+    return null;
+  };
   function run(turnId, payload) {
+    const se = srcErr(payload);
+    if (se) { later(turnId, .5, () => emit('turn.error', Object.assign({ turnId }, se))); return; }
     if (opt.failNext) { opt.failNext = false; later(turnId, opt.delay + .6, () => emit('turn.error', { turnId, message: '连接中断（模拟）' })); return; }
     let text = payload.textOverride || (payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length]);
-    if (opt.thinkTags) text = '<think>先回应对方，再带一点花园的意象。</think>\n' + text;
     if (opt.short) text = '嗯。';
+    text = /^\n/.test(text) ? '\n\n' + srcTag(payload) + '\n' + text.replace(/^\n+/, '') : srcTag(payload) + '\n' + text;
+    if (opt.thinkTags) text = '<think>先回应对方，再带一点花园的意象。</think>\n' + text;
     const stream = payload.stream !== false;
     let t = opt.delay;
     if (opt.reasoning && stream) {
@@ -2277,7 +2574,16 @@ T.bridge = bridge;
           if (p.params) out.push({ role: 'system', name: '参数（演示）', content: JSON.stringify(p.params) });
           return { ok: true, prompt: out, tokens: Math.round(JSON.stringify(out).length / 1.6) };
         }
-        case 'turn.summarize': { const h = p.history || []; await new Promise(r => setTimeout(r, 900)); return { ok: true, text: `${P0(p)}与 ${CHAR.name} 聊了 ${h.length} 条：从玫瑰园说到清晨的雾，约好了一起去散步。（模拟后端的示例总结）` }; }
+        case 'key.status': return db.get('keySaved', false) ? { ok: true, saved: true, last4: MOCK_LAST4 } : { ok: true, saved: false };
+        case 'key.save': await new Promise(r => setTimeout(r, 400));
+          if (!p.key || !p.passphrase) return { ok: false, code: 'invalid', message: '钥匙和口令都要填' };
+          db.set('keySaved', true); return { ok: true, last4: MOCK_LAST4 };   /* 假装存好：钥匙和口令都不留 */
+        case 'key.delete': db.del('keySaved'); return { ok: true };
+        case 'model.list': await new Promise(r => setTimeout(r, 500));
+          if (!db.get('keySaved', false)) return { ok: false, code: 'no_key', message: '没有存好的钥匙（模拟）' };
+          if (!p.passphrase || p.passphrase === 'wrong') return { ok: false, code: 'bad_passphrase', message: '口令不对（模拟）' };
+          return { ok: true, models: MODELS };
+        case 'turn.summarize': { const h = p.history || []; await new Promise(r => setTimeout(r, 900)); const se = srcErr(p); if (se) return Object.assign({ ok: false }, se); return { ok: true, text: `${srcTag(p)} ${P0(p)}与 ${CHAR.name} 聊了 ${h.length} 条：从玫瑰园说到清晨的雾，约好了一起去散步。（模拟后端的示例总结）` }; }
         case 'chat.save': {
           const ms = p.messages || [], last = ms.filter(m => (m.text || '').trim()).slice(-1)[0];
           const rec = { chatId: p.chatId, characterId: p.characterId, title: p.title || '', meta: p.meta || {}, messages: ms };
@@ -2449,18 +2755,23 @@ const turn = (() => {
       touch(m);
     }
     bus.emit('ui:turn');
-    return Object.assign({ turnId: id, chatId: S.chat.id, msgId: m ? m.id : null, stream: S.settings.stream,
-      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, characterId: S.char.id }, T.plume ? T.plume.payload() : {}, T.lore ? T.lore.payload() : {}, extra || {});
+    const req = Object.assign({ turnId: id, chatId: S.chat.id, msgId: m ? m.id : null, stream: S.settings.stream,
+      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, characterId: S.char.id }, T.plume ? T.plume.payload() : {}, T.lore ? T.lore.payload() : {}, T.source ? T.source.payload() : {}, extra || {});
+    if (req.params && T.source) req.params = Object.assign({}, req.params, { reasoning: T.source.reasoning() });
+    return req;
   }
+  /* 外部来源锁着、没钥匙或没选模型时不发请求（会提示用户） */
+  const can = () => !T.source || T.source.ready();
   async function go(type, req) {
-    try { await bridge.request(type, req); }
-    catch (e) { fail(req.turnId, e.message || String(e)); }
+    try { const r = await bridge.request(type, req); if (r && r.ok === false) fail(req.turnId, r.message || r.error, r.code); }
+    catch (e) { fail(req.turnId, e.message || String(e), e.code); }
   }
 
   async function send(text, opt) {
     opt = opt || {};
     text = (text || '').trim();
     if (!text || busy()) return false;
+    if (!opt.noGen && !can()) return false;
     ensureStarted();
     text = macros(text, ctx());          /* 同 SillyTavern：发送时就把宏换掉再存 */
     const u = { id: uid('m'), role: 'user', name: persona().name, userName: persona().name, personaId: persona().id, text, time: Date.now(), state: 'done' };
@@ -2476,7 +2787,7 @@ const turn = (() => {
   /* 重新生成 = 给这条消息加一个新候选 */
   function regenerate(msgId) {
     const m = msg(msgId);
-    if (!m || m.role !== 'assistant' || busy()) return;
+    if (!m || m.role !== 'assistant' || busy() || !can()) return;
     if (m.text || m.state === 'done') { store1(m); m.swipes.push(snap(m)); m.sid = m.swipes.length - 1; }
     const req = begin(m, 'regen', { history: history(m.id) });
     go('turn.regenerate', req);
@@ -2492,7 +2803,7 @@ const turn = (() => {
   }
   function cont(msgId) {
     const m = msgId ? msg(msgId) : lastAssistant();
-    if (!m || m.role !== 'assistant' || busy() || !isLast(m) || !(m.text || '').trim()) return;
+    if (!m || m.role !== 'assistant' || busy() || !isLast(m) || !(m.text || '').trim() || !can()) return;
     const req = begin(m, 'continue', { history: history(m.id, true) });
     go('turn.continue', req);
   }
@@ -2500,13 +2811,13 @@ const turn = (() => {
   function narrate(text) { text = macros((text || '').trim(), ctx()); if (!text) return; ensureStarted(); S.chat.messages.push({ id: uid('m'), role: 'system', name: '', text, time: Date.now(), state: 'done' }); bus.emit('ui:chat'); save(); }
   /* /trigger：不发新消息，直接让角色接着说 */
   function trigger() {
-    if (busy()) return; ensureStarted();
+    if (busy() || !can()) return; ensureStarted();
     const a = { id: uid('m'), role: 'assistant', name: S.char.name, charName: S.char.name, userName: persona().name, text: '', time: Date.now(), state: 'pending' };
     S.chat.messages.push(a); bus.emit('ui:chat');
     go('chat.send', begin(a, 'new', { text: '', history: history(a.id) }));
   }
   function impersonate() {
-    if (busy()) return;
+    if (busy() || !can()) return;
     ensureStarted();
     const req = begin(null, 'impersonate', { history: history(null, true) });
     bus.emit('ui:impersonate', { reset: true });
@@ -2527,8 +2838,9 @@ const turn = (() => {
     touch(m); bus.emit('ui:turn');
     if (state !== 'error') save();
   }
-  function fail(turnId, message) {
+  function fail(turnId, message, code) {
     const t = cur(turnId); if (!t) return;
+    if (code && T.source) message = T.source.fail(code, message);
     t.state = 'error';
     if (!t.msgId) { bus.emit('ui:impersonate', { error: message }); bus.emit('ui:turn'); return; }
     const m = msg(t.msgId); if (m) m.error = message || '出错了'; finish(m, 'error');
@@ -2583,12 +2895,12 @@ const turn = (() => {
     if (p.usage) m.usage = p.usage;
     t.state = 'done'; finish(m, 'done');
   });
-  bus.on('be:turn.error', p => fail(p.turnId, p.message));
+  bus.on('be:turn.error', p => fail(p.turnId, p.message, p.code));
   bus.on('be:turn.stopped', p => { const t = cur(p.turnId); if (t && busy()) { t.state = 'stopped'; if (t.msgId) finish(msg(t.msgId), 'stopped'); else bus.emit('ui:turn'); } });
 
   addEventListener('keydown', e => { if (e.key === 'Escape' && busy()) { e.preventDefault(); stop(); } });
 
-  return { send, narrate, trigger, regenerate, swipe, cont, impersonate, stop, edit, remove, hide, prompt, save, history, disp, ensureStarted, lastAssistant, isLast };
+  return { send, can, narrate, trigger, regenerate, swipe, cont, impersonate, stop, edit, remove, hide, prompt, save, history, disp, ensureStarted, lastAssistant, isLast };
 })();
 T.turn = turn;
 
@@ -3254,7 +3566,7 @@ const run=()=>{tod='';t0=performance.now()-(window.__emptyAtRest?5700:0);
     if (!v.trim()) { ci.focus(); return; }
     ci.value = ''; fit();
     if (v.trim().startsWith('/') && await slash.run(v)) return;   /* / 命令 */
-    await turn.send(v);
+    if (!(await turn.send(v)) && !ci.value) { ci.value = v; fit(); }   /* 没发出去（比如外部来源还锁着）：把字还回去 */
   }
   const click = () => busy() ? turn.stop() : quill.writing() ? quill.skip() : go();
   addEventListener('keydown', e => { if (e.key === 'Escape' && !busy() && quill.writing()) { e.preventDefault(); quill.skip(); } });
@@ -3270,9 +3582,9 @@ const run=()=>{tod='';t0=performance.now()-(window.__emptyAtRest?5700:0);
   setInterval(sync, 250);   /* 写完积压的字时也要把停止环换回发送 */
 
   /* 人设与模型标签 */
-  const pP = $('pPersona'), pM = $('pModel');
-  const tags = () => { pP.textContent = '✦ ' + (persona().name || ''); pM.textContent = S.model; pM.hidden = !S.model; };
-  bus.on('ui:model', tags); bus.on('ui:persona', tags); tags();
+  const pP = $('pPersona');
+  const tags = () => { pP.textContent = '✦ ' + (persona().name || ''); };
+  bus.on('ui:persona', tags); tags();
 
   /* 点人设标签：快速切换人设，并锁定到这段对话 / 这位角色，或设为默认 */
   const pop = document.createElement('div'); pop.className = 'ppop'; pop.hidden = true; document.body.appendChild(pop);
@@ -3460,6 +3772,273 @@ const slash = (() => {
   return { run };
 })();
 T.slash = slash;
+
+/* ---- 43_source.js ---- */
+/* ===== 生成来源：内置 / 外部（DeepSeek）=====
+   来源、模型、思考程度是前端设置（存在本机）；钥匙交给宿主保存，前端从不存、也不显示原文。
+   口令只留在这个页面的内存里（变量 pass），刷新页面或点「锁定」就没了。
+   每次生成请求都带上 source；外部来源再带上 passphrase 和 model。见 docs/BRIDGE.md「生成来源」。 */
+const source = (() => {
+  const LV = ['Off', 'Low', 'High', 'Max'], EFF = [null, 'low', 'high', 'max'];
+  let pass = '';                                   /* 口令：只在内存里 */
+  const key = { checked: false, saved: false, last4: '' };
+  let models = [], mState = 'idle', mErr = '';     /* 模型列表：idle · loading · ok · error */
+  let busyKey = false;
+  const G = () => Object.assign({ source: 'builtin', model: '', think: 0 }, S.settings.gen || {});
+  const set = patch => { S.settings.gen = Object.assign(G(), patch); saveSettings(); changed(); };
+  const changed = () => bus.emit('ui:source');
+  const external = () => G().source === 'external';
+  const unlocked = () => !!pass;
+  const flash = t => { const s = $('soon'); $('soonFr').textContent = 'Connexion'; $('soonTx').textContent = t; s.classList.add('on'); clearTimeout(flash.t); flash.t = setTimeout(() => s.classList.remove('on'), 2600); };
+
+  /* ---- 和宿主的往来 ---- */
+  const MSG = { bad_passphrase: '口令不对：已清掉内存里的口令，请重新输入', no_key: '宿主那边没有存好的钥匙，请先保存钥匙' };
+  /* 宿主报错时的统一处理；返回给人看的文字 */
+  function onCode(code, message) {
+    if (code === 'bad_passphrase') { pass = ''; models = []; mState = 'idle'; changed(); }
+    if (code === 'no_key') { key.saved = false; key.last4 = ''; pass = ''; models = []; mState = 'idle'; changed(); }
+    return MSG[code] || message || code || '出错了';
+  }
+  async function status() {
+    try { const r = await bridge.request('key.status', {}); if (r && r.ok !== false) { key.saved = !!r.saved; key.last4 = r.saved ? String(r.last4 || '') : ''; } }
+    catch (e) { }
+    key.checked = true; changed();
+  }
+  /* 保存钥匙：调用方已经清空了输入框；只发一次请求 */
+  async function saveKey(k, p) {
+    k = (k || '').trim(); p = p || '';
+    if (busyKey) return { ok: false, message: '正在保存' };
+    if (!k) return { ok: false, message: '先填钥匙' };
+    if (!p) return { ok: false, message: '先填加密口令' };
+    busyKey = true; changed();
+    let r;
+    try { r = await bridge.request('key.save', { key: k, passphrase: p }); } catch (e) { r = { ok: false, message: e.message || String(e) }; }
+    k = '';
+    busyKey = false;
+    if (r && r.ok !== false) { key.saved = true; key.last4 = String(r.last4 || ''); key.checked = true; pass = p; changed(); fetchModels(); return { ok: true }; }
+    changed(); return { ok: false, message: onCode(r && r.code, r && (r.message || r.error)) };
+  }
+  async function delKey() {
+    if (busyKey) return { ok: false };
+    busyKey = true; changed();
+    let r; try { r = await bridge.request('key.delete', {}); } catch (e) { r = { ok: false, message: e.message || String(e) }; }
+    busyKey = false;
+    if (r && r.ok !== false) { key.saved = false; key.last4 = ''; pass = ''; models = []; mState = 'idle'; changed(); return { ok: true }; }
+    changed(); return { ok: false, message: (r && (r.message || r.error)) || '删除失败' };
+  }
+  function unlock(p) { if (!p) return false; pass = p; changed(); fetchModels(); return true; }
+  function lock() { pass = ''; changed(); }
+  async function fetchModels() {
+    if (!key.saved || !pass) return;
+    mState = 'loading'; mErr = ''; changed();
+    let r; try { r = await bridge.request('model.list', { passphrase: pass }); } catch (e) { r = { ok: false, message: e.message || String(e) }; }
+    if (r && r.ok !== false && Array.isArray(r.models)) {
+      models = r.models.map(m => typeof m === 'string' ? { id: m } : m).filter(m => m && m.id);
+      mState = 'ok';
+      if (!G().model && models.length) set({ model: models[0].id }); else changed();
+    } else { mState = 'error'; mErr = onCode(r && r.code, r && (r.message || r.error)); changed(); }
+  }
+
+  /* ---- 给生成请求用 ---- */
+  /* 能不能生成：外部来源要有钥匙、口令和模型；不行就提示并返回 false */
+  function ready(quiet) {
+    if (!external()) return true;
+    const no = (t, pop) => { if (!quiet) { flash(t); if (pop) openPop(); } return false; };
+    if (key.checked && !key.saved) return no('外部来源还没存钥匙：到「钥匙与口令」里保存');
+    if (!pass) return no('外部来源已锁定：先输入口令解锁', true);
+    if (!G().model) return no('先选一个 DeepSeek 模型', true);
+    return true;
+  }
+  const reasoning = () => { const t = G().think; return t ? { enabled: true, effort: EFF[t] } : { enabled: false }; };
+  function payload() {
+    const g = G();
+    return g.source === 'external' ? { source: 'external', passphrase: pass, model: g.model } : { source: 'builtin' };
+  }
+  /* 生成请求被宿主拒绝（turn.error 或请求返回 ok:false）时调用 */
+  const fail = (code, message) => onCode(code, message);
+
+  /* ================= 界面：输入栏的模型标签 + 弹窗 + 模型目录（原版 v2） ================= */
+  const b = document.body, RM = () => b.classList.contains('rm');
+  const $$ = (q, r) => [...(r || document).querySelectorAll(q)];
+  const EO = 'cubic-bezier(.22,1,.36,1)';
+  const spring = (z, w, t) => { if (z >= 1) return (1 + w * t) * Math.exp(-w * t); const wd = w * Math.sqrt(1 - z * z); return Math.exp(-z * w * t) * (Math.cos(wd * t) + (z * w / wd) * Math.sin(wd * t)); };
+  const CHECK = '<svg class="ck" width="15" height="13" viewBox="0 0 15 13" aria-hidden="true"><path d="M1.8,7.2 C3.3,8.4 4.6,9.8 5.7,11.3 C7.9,7.2 10.6,3.9 13.4,1.6" fill="none" stroke="#4A5A86" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const SP = 'M0,-7.2 L2.05,-2.55 L7,-2.2 L3.2,1.05 L4.4,6 L0,3.35 L-4.4,6 L-3.2,1.05 L-7,-2.2 L-2.05,-2.55 Z';
+  const STAR = `<svg class="st" width="22" height="22" viewBox="-11 -11 22 22" aria-hidden="true"><g class="off"><path d="${SP}" fill="none" stroke="rgba(79,97,136,.62)" stroke-width="1.05" stroke-linejoin="round"/></g><g class="onn"><path d="${SP}" fill="#FFFDF8" stroke="#FFFDF8" stroke-width="3.8" stroke-linejoin="round"/><path d="${SP}" fill="url(#sv2s)" stroke="rgba(58,70,106,.62)" stroke-width=".65" stroke-linejoin="round"/><path d="M-1.2,-4.4 L-.3,-2.2" stroke="#fff" stroke-width=".9" stroke-linecap="round" opacity=".9"/></g></svg>`;
+  const chip = $('mchip'), mcM = $('mcM'), mcT = $('mcT'), pop = $('mpop'), pmv = $('mpMv'), pList = $('mpList'), sld = $('mpSld'), src = $('mpSrc');
+  const builtinName = () => S.model || '空间内置模型';
+  const stars = () => store.get('modelStars', []);
+
+  const swapTxt = (el, txt) => { if (el.textContent === txt) return; el.textContent = txt; if (!RM()) el.animate([{ opacity: 0, transform: 'translateY(5px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: EO }); };
+  const setSld = (el, i) => { el.style.setProperty('--v', i); $$('button', el).forEach((x, k) => { x.classList.toggle('on', k === i); x.setAttribute('aria-checked', k === i); }); };
+  function drawChip() {
+    const g = G(), ext = g.source === 'external';
+    swapTxt(mcM, ext ? (g.model || '选择模型') : builtinName());
+    swapTxt(mcT, ext ? (pass ? LV[g.think] : '锁定') : 'intégré');
+    chip.classList.toggle('lk', ext && !pass);
+    chip.classList.toggle('bi', !ext);
+  }
+  /* 弹窗里的模型行 */
+  const row = (id, label, on, x) => `<div class="mp-c mp-row${on ? ' on' : ''}" data-m="${esc(id)}" role="menuitemradio" aria-checked="${on}"><b>${esc(label)}</b>${x ? `<span class="mp-x">${esc(x)}</span>` : ''}${CHECK}</div>`;
+  const note = (t, act) => `<div class="mp-c mp-note">${t}${act || ''}</div>`;
+  function drawPop() {
+    const g = G(), ext = g.source === 'external';
+    setSld(src, ext ? 1 : 0); setSld(sld, g.think);
+    $('mpSub').textContent = ext ? (key.saved ? 'DeepSeek · 尾号 ' + key.last4 : 'DeepSeek') : 'intégré';
+    let h = '';
+    if (!ext) h = row('', builtinName(), true, '无需钥匙');
+    else if (key.checked && !key.saved) h = note('还没存 DeepSeek 钥匙。', '<button type="button" class="mp-a" data-a="key">去保存</button>');
+    else if (!pass) h = note('已锁定 · 输入口令解锁', '<form class="mp-lock" data-a="unlock"><input type="password" id="mpPass" autocomplete="off" placeholder="加密口令" aria-label="加密口令"><button type="submit" class="mp-a">解锁</button></form>');
+    else if (mState === 'loading') h = note('正在向宿主要模型列表…');
+    else if (mState === 'error') h = note(esc(mErr), '<button type="button" class="mp-a" data-a="retry">重试</button>');
+    else {
+      const ids = models.map(m => m.id); if (g.model && !ids.includes(g.model)) ids.unshift(g.model);
+      const st = stars(); const sorted = ids.slice().sort((a, c) => (st.includes(c) - st.includes(a)));
+      h = sorted.slice(0, 6).map(id => row(id, id, id === g.model, st.includes(id) ? '★' : '')).join('') || note('宿主没有返回模型');
+    }
+    pList.innerHTML = h;
+    const off = !ext;
+    $('mpThink').classList.toggle('dis', off); $$('button', sld).forEach(x => x.disabled = off);
+    $('mpHint').textContent = off ? '内置来源不使用这些参数：模型、思考程度、温度等滑杆都不生效。' : '提示：切换模型或思考程度会使已有的提示词缓存失效。建议新建会话，避免额外的 token 消耗。';
+  }
+  let popOpen = false, pAn = [];
+  const place = () => {
+    const r = chip.getBoundingClientRect(), W = pop.offsetWidth, H = pmv.offsetHeight, f = chip.closest('.field').getBoundingClientRect();
+    pop.style.left = Math.round(Math.max(8, Math.min(innerWidth - W - 8, r.right - W + 20))) + 'px';
+    pop.style.top = Math.round(Math.max(8, Math.min(r.top, f.top) - H - 8)) + 'px';
+  };
+  const pstop = () => { pAn.forEach(a => a.cancel()); pAn = []; };
+  const popFrames = () => { const f = [], N = 24, D = .5; for (let i = 0; i <= N; i++) { const t = i / N * D, u = i / N; const y = spring(.62, 15, t), r = spring(.45, 16, t);
+    f.push({ offset: u, opacity: Math.min(1, u * 4), transform: `translateY(${(22 * y).toFixed(2)}px) rotate(${(2.2 * r).toFixed(3)}deg) scale(${(1 - .06 * y).toFixed(4)})` }); } f[N].transform = 'none'; return f; };
+  function setPop(v, fast) {
+    if (v === popOpen) return; popOpen = v; pstop(); chip.classList.toggle('on', v); chip.setAttribute('aria-expanded', v); pop.setAttribute('aria-hidden', !v);
+    if (v) {
+      drawPop(); b.classList.add('pop-open'); place();
+      if (external() && pass && mState === 'idle') fetchModels();
+      if (RM()) return; pop.classList.add('anim');
+      pAn.push(pmv.animate(popFrames(), { duration: 520, easing: 'linear' }));
+      $$('.mp-c', pop).forEach((e, k) => pAn.push(e.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: 90 + k * 24, easing: EO, fill: 'backwards' })));
+    } else {
+      b.classList.remove('pop-open'); if (RM()) return; pop.classList.add('anim');
+      const a = pmv.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateY(${fast ? -6 : 14}px) rotate(${fast ? 0 : 1.4}deg) scale(${fast ? 1.01 : .95})` }], { duration: fast ? 160 : 200, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' });
+      pAn.push(a); setTimeout(() => { if (!popOpen) { pop.classList.remove('anim'); a.cancel(); } }, (fast ? 160 : 200) + 20);
+    }
+  }
+  function openPop() { if (!popOpen) setTimeout(() => setPop(true), 0); }
+  chip.addEventListener('click', e => { e.stopPropagation(); setPop(!popOpen); });
+  chip.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPop(!popOpen); } });
+  chip.addEventListener('mousedown', e => e.stopPropagation());     /* 不要让输入框抢走焦点 */
+  pop.addEventListener('pointerdown', e => e.stopPropagation());
+  document.addEventListener('pointerdown', () => { if (popOpen) setPop(false); });
+  addEventListener('resize', () => { if (popOpen) place(); });
+  const openKeys = () => { setPop(false, true); if (T.settings) T.settings.open('connection'); };
+  pop.addEventListener('click', e => {
+    const sb = e.target.closest('#mpSrc button'); if (sb) { set({ source: sb.dataset.v }); drawPop(); place(); if (external() && pass && mState === 'idle') fetchModels(); return; }
+    const tb = e.target.closest('#mpSld button'); if (tb && !tb.disabled) { set({ think: +tb.dataset.v }); return; }
+    const r = e.target.closest('.mp-row'); if (r) { if (external()) set({ model: r.dataset.m }); return; }
+    const a = e.target.closest('button[data-a]'); if (a) { if (a.dataset.a === 'key') openKeys(); else if (a.dataset.a === 'retry') fetchModels(); return; }
+    if (e.target.closest('#mpMore')) { setPop(false, true); setMdl(true); return; }
+    if (e.target.closest('#mpKey')) openKeys();
+  });
+  pop.addEventListener('submit', e => { e.preventDefault(); const i = $('mpPass'); const v = i ? i.value : ''; if (i) i.value = ''; if (unlock(v)) flash('已解锁：口令只留在这个页面的内存里'); });
+  pop.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.mp-more')) { e.preventDefault(); e.target.click(); } });
+
+  /* ---- 模型目录 ---- */
+  const mdl = $('mdl'), mmv = $('mdlMv'), msc = $('mscrim'), list = $('mdList'), inp = $('mdIn'), mcnt = $('mdCnt');
+  const RN = ['', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii'];
+  let mdlOpen = false, mAn = [], prov = 'all', kb = -1;
+  const meta = parts => parts.filter(Boolean).map(t => `<span class="${/^[\x00-\x7f×]+$/.test(t) ? 'sc' : ''}">${esc(t)}</span>`).join('<i class="sep"></i>');
+  const mdRow = (p, id, label, on, m) => `<div class="md-row${on ? ' on' : ''}" data-p="${p}" data-m="${esc(id)}" role="option" aria-selected="${on}" tabindex="-1"><div class="md-tx"><b>${esc(label)}</b><div class="md-meta">${meta(m)}</div></div>${CHECK}<button class="md-star" type="button" aria-pressed="${stars().includes(p + ':' + id)}" aria-label="收藏">${STAR}</button></div>`;
+  function drawList() {
+    const g = G(), ext = g.source === 'external';
+    let h = `<div class="md-pv" data-p="builtin"><em>Intégré</em><span>空间自带 · 不用钥匙 · 不吃参数</span></div>` + mdRow('builtin', '', builtinName(), !ext, ['内置', '无需钥匙', '参数不生效']);
+    h += `<div class="md-pv" data-p="external"><em>DeepSeek</em><span>${key.saved ? 'api key · 尾号 ' + esc(key.last4) : '还没存钥匙'}</span></div>`;
+    if (key.checked && !key.saved) h += `<div class="md-msg" data-p="external">先在「钥匙与口令」里保存 DeepSeek 钥匙，再回来选模型。<button type="button" class="mp-a" data-a="key">去保存</button></div>`;
+    else if (!pass) h += `<div class="md-msg" data-p="external">外部来源已锁定。<form class="mp-lock" data-a="unlock"><input type="password" id="mdPass" autocomplete="off" placeholder="加密口令" aria-label="加密口令"><button type="submit" class="mp-a">解锁</button></form></div>`;
+    else if (mState === 'loading') h += `<div class="md-msg" data-p="external">正在向宿主要模型列表…</div>`;
+    else if (mState === 'error') h += `<div class="md-msg" data-p="external">${esc(mErr)}<button type="button" class="mp-a" data-a="retry">重试</button></div>`;
+    else {
+      const L = models.slice(); if (g.model && !L.some(m => m.id === g.model)) L.unshift({ id: g.model, manual: true });
+      h += L.map(m => mdRow('external', m.id, m.id, ext && m.id === g.model, ['DeepSeek', m.owned_by && !/^deepseek$/i.test(m.owned_by) ? m.owned_by : '', m.manual ? '手填' : '', LV[g.think] && ext && m.id === g.model ? '思考 ' + LV[g.think] : ''])).join('');
+      h += `<div class="md-msg md-man" data-p="external"><span>列表里没有？</span><form class="mp-lock" data-a="manual"><input id="mdMan" autocomplete="off" spellcheck="false" placeholder="手填模型名" aria-label="手填模型名"><button type="submit" class="mp-a">使用</button></form><button type="button" class="mp-a" data-a="retry">刷新列表</button></div>`;
+    }
+    h += '<div class="md-empty">— 没有匹配的模型 —</div>';
+    list.innerHTML = h; bindRows(); applyF(false);
+  }
+  const vis = () => $$('.md-row', list).filter(r => !r.classList.contains('hide'));
+  function applyF(anim) {
+    const q = inp.value.trim().toLowerCase(); list.classList.toggle('all', prov === 'all');
+    $$('.md-row,.md-msg', list).forEach(r => { const ok = (prov === 'all' || r.dataset.p === prov) && (!q || r.classList.contains('md-msg') || r.textContent.toLowerCase().includes(q)); r.classList.toggle('hide', !ok); });
+    $$('.md-pv', list).forEach(p => p.classList.toggle('hide', !$$(`[data-p="${p.dataset.p}"]:not(.md-pv)`, list).some(r => !r.classList.contains('hide'))));
+    const v = vis(); list.classList.toggle('none', !v.length && !$$('.md-msg:not(.hide)', list).length); mcnt.textContent = (RN[v.length] || v.length) + ' modèle' + (v.length > 1 ? 's' : ''); kbSet(-1);
+    if (anim && !RM()) { list.scrollTop = 0; [...list.children].filter(e => e.offsetParent !== null).slice(0, 9).forEach((e, k) => e.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 320, delay: k * 28, easing: EO, fill: 'backwards' })); }
+  }
+  const kbSet = i => { const v = vis(); $$('.md-row.kb', list).forEach(r => r.classList.remove('kb')); kb = i; if (i >= 0 && v[i]) { v[i].classList.add('kb'); v[i].scrollIntoView({ block: 'nearest' }); } };
+  const tabs = $$('#mdTabs .ptab');
+  const setTab = t => { prov = t; tabs.forEach(x => x.classList.toggle('on', x.dataset.t === t)); };
+  tabs.forEach(t => t.addEventListener('click', () => { if (prov === t.dataset.t) return; setTab(t.dataset.t); applyF(true); }));
+  inp.addEventListener('input', () => applyF(false));
+  function bindRows() {
+    $$('.md-row', list).forEach(r => r.addEventListener('click', e => {
+      if (e.target.closest('.md-star')) return;
+      if (r.dataset.p === 'builtin') set({ source: 'builtin' }); else set({ source: 'external', model: r.dataset.m });
+      setTimeout(() => setMdl(false), RM() ? 0 : 260);
+    }));
+    $$('.md-star', list).forEach(s => s.addEventListener('click', e => {
+      e.stopPropagation(); const r = s.closest('.md-row'), k = r.dataset.p + ':' + r.dataset.m, L = stars(), on = !L.includes(k);
+      store.set('modelStars', on ? L.concat(k) : L.filter(x => x !== k)); s.setAttribute('aria-pressed', on);
+      if (on && !RM()) s.querySelector('.onn').animate([{ transform: 'scale(.3) rotate(-40deg)', opacity: 0 }, { transform: 'scale(1.42) rotate(-6deg)', opacity: 1, offset: .55 }, { transform: 'scale(1.1) rotate(-14deg)', offset: .8 }, { transform: 'rotate(-12deg) scale(1.18)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.3,.8,.4,1)' });
+    }));
+  }
+  list.addEventListener('click', e => { const a = e.target.closest('button[data-a]'); if (!a) return; if (a.dataset.a === 'key') { setMdl(false); if (T.settings) T.settings.open('connection'); } else if (a.dataset.a === 'retry') fetchModels(); });
+  list.addEventListener('submit', e => {
+    e.preventDefault(); const f = e.target;
+    if (f.dataset.a === 'unlock') { const i = $('mdPass'); const v = i ? i.value : ''; if (i) i.value = ''; if (unlock(v)) flash('已解锁：口令只留在这个页面的内存里'); }
+    else if (f.dataset.a === 'manual') { const v = ($('mdMan').value || '').trim(); if (v) { set({ source: 'external', model: v }); setTimeout(() => setMdl(false), RM() ? 0 : 260); } }
+  });
+  function setMdl(v) {
+    if (v === mdlOpen) return; mdlOpen = v; mAn.forEach(a => a.cancel()); mAn = []; mdl.setAttribute('aria-hidden', !v);
+    if (v) {
+      setTab(external() ? 'external' : 'all'); inp.value = ''; drawList(); b.classList.add('mdl-open');
+      if (external() && pass && mState === 'idle') fetchModels();
+      if (RM()) { inp.focus({ preventScroll: true }); return; } mdl.classList.add('anim');
+      const f = [], N = 26, D = .55; for (let i = 0; i <= N; i++) { const t = i / N * D, u = i / N, y = spring(.7, 13, t), r = spring(.5, 14, t);
+        f.push({ offset: u, opacity: Math.min(1, u * 3.5), transform: `translateY(${(26 * y).toFixed(2)}px) rotate(${(-1.1 * r).toFixed(3)}deg) scale(${(1 - .035 * y).toFixed(4)})` }); } f[N].transform = 'none';
+      mAn.push(msc.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' }));
+      mAn.push(mmv.animate(f, { duration: 560, easing: 'linear' }));
+      $$('.md-c', mdl).concat(vis().slice(0, 7)).forEach((e, k) => mAn.push(e.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 340, delay: 110 + k * 30, easing: EO, fill: 'backwards' })));
+      if (matchMedia('(pointer:fine)').matches) inp.focus({ preventScroll: true });
+    } else {
+      b.classList.remove('mdl-open'); inp.blur(); if (RM()) return; mdl.classList.add('anim');
+      const a = mmv.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(16px) rotate(.6deg) scale(.975)' }], { duration: 230, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' });
+      mAn.push(a, msc.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: 'ease-in', fill: 'forwards' })); setTimeout(() => { if (!mdlOpen) { mdl.classList.remove('anim'); mAn.forEach(x => x.cancel()); mAn = []; } }, 280);
+    }
+  }
+  $('mdX').addEventListener('click', () => setMdl(false)); msc.addEventListener('click', () => setMdl(false));
+  /* 键盘：Esc 先关最上面一层；目录里 ↑↓ Enter；/ 聚焦搜索 */
+  addEventListener('keydown', e => {
+    if (mdlOpen) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); setMdl(false); return; }
+      if (e.target.closest && e.target.closest('.mp-lock')) { e.stopImmediatePropagation(); return; }
+      const v = vis(); if (e.key === 'ArrowDown') { e.preventDefault(); kbSet(Math.min(v.length - 1, kb + 1)); } else if (e.key === 'ArrowUp') { e.preventDefault(); kbSet(Math.max(0, kb - 1)); }
+      else if (e.key === 'Enter' && kb >= 0 && v[kb]) { e.preventDefault(); v[kb].click(); }
+      else if (e.key === '/' && document.activeElement !== inp) { e.preventDefault(); inp.focus(); }
+      e.stopImmediatePropagation(); return;
+    }
+    if (popOpen && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); setPop(false); chip.focus({ preventScroll: true }); }
+  }, true);
+
+  bus.on('ui:source', () => { drawChip(); if (popOpen) { const f = document.activeElement && document.activeElement.id === 'mpPass'; if (!f) { drawPop(); place(); } } if (mdlOpen && !(document.activeElement && /^(mdPass|mdMan)$/.test(document.activeElement.id))) drawList(); });
+  bus.on('ui:model', () => bus.emit('ui:source'));
+  bus.on('be:conn.state', p => { if (p && p.state === 'ready' && !key.checked) status(); });
+  bus.on('bridge:handler', () => { key.checked = false; status(); });
+  drawChip();
+
+  return { get: G, set, external, unlocked, ready, payload, reasoning, fail, status, saveKey, delKey, unlock, lock, fetchModels,
+    get key() { return { saved: key.saved, last4: key.last4, checked: key.checked }; }, get models() { return models.slice(); }, get mState() { return mState; }, get mErr() { return mErr; }, get busy() { return busyKey; },
+    openPop: () => setPop(true), closePop: () => setPop(false), openCatalogue: () => setMdl(true) };
+})();
+T.source = source;
 
 /* ---- 45_history.js ---- */
 /* ===== 聊天记录（吊牌 Mémoire）=====
@@ -3808,12 +4387,15 @@ const plume = (() => {
   const summ = () => (S.chat.meta = S.chat.meta || {}, S.chat.meta.summary = Object.assign({ text: '', at: 0 }, S.chat.meta.summary || {}));
   let sumBusy = false;
   async function summarize(auto) {
-    if (sumBusy) return; sumBusy = true; if (open && tab === 'summary') render();
+    if (sumBusy) return;
+    if (T.source && !T.source.ready(auto)) return;
+    sumBusy = true; if (open && tab === 'summary') render();
     const C = sumCfg();
     try {
       const r = await bridge.request('turn.summarize', { chatId: S.chat.id, characterId: S.char.id, history: turn.history(null, true), prompt: macros(C.prompt, ctx()), previous: summ().text,
-        persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, params: Object.assign({}, S.gen.params) });
-      if (r && typeof r.text === 'string' && r.text.trim()) { const Sm = summ(); Sm.text = r.text.trim(); Sm.at = S.chat.messages.length; turn.save(); if (!auto) flash('总结好了'); }
+        persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, params: Object.assign({}, S.gen.params, T.source ? { reasoning: T.source.reasoning() } : {}), ...(T.source ? T.source.payload() : {}) });
+      if (r && r.ok === false && r.code && T.source) { const t = T.source.fail(r.code, r.message); if (!auto) flash('总结失败：' + t); }
+      else if (r && typeof r.text === 'string' && r.text.trim()) { const Sm = summ(); Sm.text = r.text.trim(); Sm.at = S.chat.messages.length; turn.save(); if (!auto) flash('总结好了'); }
       else if (!auto) flash('后端没有返回总结' + (r && r.error ? '：' + r.error : ''));
     } catch (e) { if (!auto) flash('总结失败：' + (e.message || e)); }
     sumBusy = false; if (open && tab === 'summary') render();
@@ -3843,17 +4425,18 @@ const plume = (() => {
 
   function render() {
     const g = S.gen.params, N = note(), ps = presets();
+    const off = !!T.source && !T.source.external();
     $('plCrumb').textContent = '· ' + S.gen.preset + (dirty() ? ' （已改动）' : '');
     const tabs = `<div class="pl-tabs">${[['params', '采样 · 预设 · 作者注释'], ['prompts', '提示词编排'], ['summary', '总结']].map(([k, t]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>`;
     if (tab === 'prompts') { body.innerHTML = tabs + pmHTML(); return; }
     if (tab === 'summary') { body.innerHTML = tabs + sumHTML(); return; }
     body.innerHTML = tabs + `<div class="pl-grid">
-      <div class="pl-col"><div class="pl-cap"><em>Échantillonnage</em><b>采样</b><button type="button" class="lnk" data-a="reset">恢复这个预设</button></div>
+      <fieldset class="pl-col pl-fs${off ? ' off' : ''}"${off ? ' disabled' : ''}><div class="pl-cap"><em>Échantillonnage</em><b>采样</b>${off ? '<small class="pl-off">内置来源不使用这些参数</small>' : ''}<button type="button" class="lnk" data-a="reset">恢复这个预设</button></div>
         ${P.map(([k, t, mn, mx, st, , tip]) => `<label class="pl-row"><span class="pl-l"><b>${t}</b><small>${tip}</small></span>
           <input type="range" min="${mn}" max="${mx}" step="${st}" value="${g[k]}" data-k="${k}"><input class="pl-n" type="number" min="${mn}" max="${mx}" step="${st}" value="${fmtv(g[k], st)}" data-n="${k}"></label>`).join('')}
         <label class="pl-row"><span class="pl-l"><b>种子</b><small>-1 = 随机</small></span><span></span><input class="pl-n" type="number" step="1" value="${g.seed}" data-n="seed"></label>
         <label class="lb-f pl-stop"><span>停止序列 <small>一行一个</small></span><textarea rows="2" data-stop spellcheck="false">${esc((g.stop || []).join('\n'))}</textarea></label>
-      </div>
+      </fieldset>
       <div class="pl-col">
         <div class="pl-card"><div class="pl-cap"><em>Préréglages</em><b>预设</b></div>
           <div class="pl-ps">${Object.keys(ps).map(n => `<button type="button" class="pl-p${n === S.gen.preset ? ' on' : ''}" data-a="pick" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
@@ -3970,6 +4553,7 @@ const plume = (() => {
   /* 自动总结：每生成完一条检查一次 */
   bus.on('ui:turn', () => { const t = S.turn; if (!t || t.state !== 'done' || t._sumChecked) return; t._sumChecked = true;
     const C = sumCfg(); if (!C.every) return; const Sm = summ(); if (S.chat.messages.length - (Sm.at || 0) >= C.every) setTimeout(() => summarize(true), 400); });
+  bus.on('ui:source', () => { if (open && tab === 'params' && !body.contains(document.activeElement)) render(); });
   return { show, payload, summarize, get open() { return open; } };
 })();
 T.plume = plume;
@@ -4478,7 +5062,7 @@ const SECS=[
  {k:'appearance',n:'ii',em:'Parure',zh:'外观',sub:'字号 · 动效 · 输出方式'},
  {k:'salon',n:'iii',em:'Salon',zh:'对话样式',sub:'气泡 · 头像 · 宽度 · CSS'},
  {k:'auto',n:'iv',em:'Automates',zh:'推理与自动化',sub:'推理块 · 回车 · 自动续写'},
- {k:'connection',n:'v',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
+ {k:'connection',n:'v',em:'Connexion',zh:'连接',sub:'来源 · 钥匙 · 模型'}];
 const MODES=[
  {k:'manual',n:'i',zh:'始终询问',en:'Always Ask',was:'原 Manual · 默认',d:'只读操作自动放行；写文件、跑命令逐一向你确认。',risk:0},
  {k:'yolo',n:'ii',zh:'必要时询问',en:'Ask When Needed',was:'原 YOLO · /demo-ask',d:'普通调用自动批准；.env、私钥、rm -rf、退出 Plan 仍会问你。',risk:1},
@@ -4779,23 +5363,44 @@ const secAuto=()=>{const g='auto',A=Object.assign({},AUTODEF,APP.S.settings.auto
 
 /* V · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
 const CONN={ready:['En ligne','已连接','后端在线，可以写信了'],connecting:['Connexion…','正在连接','正在等后端回应'],reconnecting:['Reconnexion','连接断开','正在重连'],failed:['Hors ligne','连接失败','后端没有回应']};
-const connHTML=()=>{const A=APP.S,c=CONN[A.conn.state]||[A.conn.state,A.conn.state,''];const mock=window.__trianon.usingMock;
+const SRC=()=>window.Trianon.source;
+const connHTML=()=>{const A=APP.S,c=CONN[A.conn.state]||[A.conn.state,A.conn.state,''];const mock=window.__trianon.usingMock;const G=SRC().get(),ext=G.source==='external',K=SRC().key;
   const cap=(k,t)=>`<span class="cn-cap${A.caps[k]===false?' no':''}">${A.caps[k]===false?'✕':'✓'} ${t}</span>`;
   return `<div class="cn-st" data-s="${esc(A.conn.state)}"><em>${c[0]}</em><b>${c[1]}</b><small>${esc(c[2])}${A.conn.state==='reconnecting'&&A.conn.retryIn?`（${esc(A.conn.retryIn)} 秒后重试）`:''}</small></div>
-    <dl class="cn-dl"><dt>后端</dt><dd>${mock?'内置模拟后端 · 演示用':'宿主页面'}</dd><dt>模型</dt><dd>${esc(A.model||'—')}</dd><dt>角色</dt><dd>${esc(A.char.name||'—')}</dd></dl>
+    <div class="sf-r cn-src"><div class="sf-l"><b>生成来源</b><small>只影响之后生成的回复</small></div>${seg('gen.source',[['builtin','内置'],['external','外部 · DeepSeek']],G.source)}</div>
+    <dl class="cn-dl"><dt>后端</dt><dd>${mock?'内置模拟后端 · 演示用':'宿主页面'}</dd><dt>模型</dt><dd>${ext?(G.model?esc(G.model):'<i>还没选</i>')+(SRC().unlocked()?'':' · <i>已锁定</i>'):esc(A.model||'空间内置模型')}</dd><dt>角色</dt><dd>${esc(A.char.name||'—')}</dd></dl>
     <div class="cn-caps">${cap('streaming','流式')}${cap('reasoning','推理')}${cap('stop','停止')}${cap('regenerate','重新生成')}</div>`};
 const logHTML=()=>{const L=window.__trianon.log.slice(-15).reverse();const p=n=>String(n).padStart(2,'0');
   return `<div class="cn-lg"><div class="cn-lh">JOURNAL · 接口日志</div>${L.length?L.map(([t,d,e])=>{const x=new Date(t);return `<div class="cn-l"><i>${p(x.getHours())}:${p(x.getMinutes())}:${p(x.getSeconds())}</i><b>${d==='in'?'←':'→'}</b><span>${esc(e)}</span></div>`}).join(''):'<div class="cn-l"><span>还没有记录</span></div>'}<div class="cn-lf">— fin —</div></div>`};
+/* 钥匙卡：输入框只在这里建一次，之后的状态变化只改文字（drawKey），不重建输入框 */
+const keyHTML=()=>`<div class="kk" id="stKk"><div class="cv-hd"><em>Clef</em><b>DeepSeek 钥 匙</b><small id="stKs"></small></div>
+    <div class="kk-g"><label for="stKey">钥匙</label><input id="stKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="粘贴 DeepSeek 的 API Key">
+      <label for="stPass">口令</label><input id="stPass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="加密口令：只留在这个页面的内存里"></div>
+    <p class="kk-n">口令忘了，存的钥匙就作废，只能删除重存。</p>
+    <div class="kk-a">${tagBtn('保存','kSave','stKSave')}${tagBtn('删除','kDel','stKDel')}<i class="kk-gap"></i>${tagBtn('解锁','kUnlock')}${tagBtn('锁定','kLock')}</div>
+    <div class="kk-st" id="stKst" role="status" aria-live="polite"></div>
+    <div class="kk-g kk-m"><label for="stModel">模型</label><span class="kk-mr"><input id="stModel" list="stModelL" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="从列表选，或者手填"><datalist id="stModelL"></datalist>${tagBtn('刷新列表','kList')}</span></div>
+    <p class="kk-n kk-mn" id="stKm"></p></div>`;
+let kMsg='',kDelArm=0;
+const drawKey=()=>{const R=SRC();if(!R||!$('stKk'))return;const K=R.key,G=R.get(),ext=G.source==='external';
+  $('stKs').textContent=!K.checked?'正在查询…':K.saved?'已存 · 尾号 '+K.last4:'还没存';
+  const lock=K.saved?(R.unlocked()?'已解锁：外部来源可以生成':'已锁定：外部来源暂时不能生成，先输口令解锁'):'先保存钥匙';
+  const ms=R.mState==='loading'?'正在拉取模型列表…':R.mState==='error'?R.mErr:R.mState==='ok'?`模型列表 ${R.models.length} 个`:'';
+  $('stKst').innerHTML=`<b>${esc(kMsg||(R.busy?'正在交给宿主…':lock))}</b>${ms?`<small>${esc(ms)}</small>`:''}`;
+  const m=$('stModel');m.disabled=!ext;if(document.activeElement!==m)m.value=G.model||'';
+  $('stKm').textContent=ext?'也可以在输入栏的模型标签里切换。':'内置来源不使用这些参数。';$('stKk').classList.toggle('bi',!ext);
+  $('stModelL').innerHTML=R.models.map(x=>`<option value="${esc(x.id)}">`).join('');
+  const d=$('stKDel');if(d)d.querySelector('.tg-t').textContent=kDelArm>Date.now()?'确认删除':'删除'};
 const secConnection=()=>{const g='connection';let h='';
   h+=P(g,250,112,440,240,-1.2,'vellum','',{torn:'rb',cls:'deco'});
   h+=P(g,262,122,320,34,-2,null,dymo('连接 Connexion · 前端只认 window.__trianon','c2lt'),{cls:'c2-strip'});
-  h+=CD(g,262,168,380,300,-1,`<div class="cn" id="stCn">${connHTML()}</div><div class="cn-acts">${tagBtn('刷新','cnRefresh')}${window.__trianon.usingMock?tagBtn('模拟断线','cnDrop'):''}</div>`,{tone:'milk',band:0});
+  h+=CD(g,262,168,380,328,-1,`<div class="cn" id="stCn">${connHTML()}</div><div class="cn-acts">${tagBtn('刷新','cnRefresh')}${window.__trianon.usingMock?tagBtn('模拟断线','cnDrop'):''}</div>`,{tone:'milk',band:0});
+  h+=CD(g,262,512,404,356,.8,keyHTML(),{tone:'milk',band:0,cls:'kk-c'});
   h+=P(g,672,118,280,560,1.8,'receipt',`<div id="stLg">${logHTML()}</div>`,{torn:'tb',amp:2.4});
-  h+=OB(g,276,500,220,-2,O.gram,{sh:[12,70,4,16]});
-  h+=OB(g,548,560,86,6,O.hg,{sh:[14,72,2,10]});
-  h+=CD(g,486,764,330,84,-1.4,`<div class="c2nt s">接口文档在仓库的 <code>docs/BRIDGE.md</code>。没接后端时自动使用内置的模拟后端。</div>`,{tone:'silver',stitch:false});
+  h+=OB(g,700,668,150,-2,O.gram,{sh:[12,70,4,16]});
+  h+=OB(g,882,742,70,6,O.hg,{sh:[14,72,2,10]});
   return h};
-const drawConn=()=>{const a=$('stCn'),b=$('stLg');if(a)a.innerHTML=connHTML();if(b)b.innerHTML=logHTML()};
+const drawConn=()=>{const a=$('stCn'),b=$('stLg');if(a)a.innerHTML=connHTML();if(b)b.innerHTML=logHTML();drawKey()};
 
 /* ---------------------------------------------------------------- DOM */
 const defs=document.createElementNS('http://www.w3.org/2000/svg','svg');defs.setAttribute('width','0');defs.setAttribute('height','0');defs.style.position='absolute';
@@ -4839,6 +5444,7 @@ const save=(key,val)=>{const [grp,k]=key.split('.');
   else if(grp==='chat')APP.S.settings[k]=val;
   else if(grp==='ui'){APP.S.settings.ui=Object.assign({},APP.S.settings.ui||{},{[k]:val})}
   else if(grp==='auto'){APP.S.settings.auto=Object.assign({},APP.S.settings.auto||{},{[k]:val})}
+  else if(grp==='gen'){window.Trianon.source.set({[k]:val});showSaved();return}
   APP.saveSettings();APP.bus.emit('ui:settings',key);showSaved()};
 
 /* ---------------------------------------------------------------- open / close / switch */
@@ -4923,6 +5529,7 @@ const rebuild=sec=>{const keep=S.sec;const i=SECS.findIndex(x=>x.k===(sec||keep)
 APP.bus.on('ui:conn',()=>{if(S.open&&S.sec==='connection')drawConn()});
 APP.bus.on('ui:model',()=>{if(S.open&&S.sec==='connection')drawConn()});
 APP.bus.on('ui:caps',()=>{if(S.open&&S.sec==='connection')drawConn()});
+APP.bus.on('ui:source',()=>{if(S.open&&S.sec==='connection')drawConn()});
 
 /* ---------------------------------------------------------------- interaction */
 let drag=null;
@@ -4941,17 +5548,26 @@ root.addEventListener('click',e=>{const t=e.target;
   else if(act==='pnDef'){APP.setDefaultPersona(PE);rebuild('persona');showSaved()}
   else if(act==='pnNew'){const p={id:'p_'+Date.now().toString(36),name:'新的人设',desc:''};L.push(p);PE=p.id;APP.savePersonas();rebuild('persona');setTimeout(()=>{const i=$('stPnName');if(i){i.focus();i.select()}},60)}
   else if(act==='pnDel'){if(L.length<2)return;const i=L.findIndex(p=>p.id===PE);if(i<0)return;const was=L[i].id;L.splice(i,1);if(APP.S.personaId===was)APP.setPersona(L[0].id);PE=APP.S.personaId;APP.savePersonas();rebuild('persona');showSaved()}
-  else if(act==='cnRefresh')drawConn();
+  else if(act==='cnRefresh'){SRC().status();drawConn()}
+  else if(act==='kSave'){const k=$('stKey'),p=$('stPass');const kv=k.value,pv=p.value;k.value='';p.value='';kMsg='';   /* 先清空输入框，再交给宿主 */
+    if(!kv.trim()){kMsg='先填钥匙';drawKey();return}if(!pv){kMsg='先填加密口令';drawKey();return}
+    SRC().saveKey(kv,pv).then(r=>{kMsg=r.ok?'已保存：钥匙交给了宿主，这里不留原文':(r.message||'保存失败');drawKey();setTimeout(()=>{kMsg='';drawKey()},3200)});drawKey()}
+  else if(act==='kDel'){if(kDelArm<Date.now()){kDelArm=Date.now()+3000;drawKey();setTimeout(drawKey,3100);return}kDelArm=0;
+    SRC().delKey().then(r=>{kMsg=r.ok?'已删除':(r.message||'删除失败');drawKey();setTimeout(()=>{kMsg='';drawKey()},2400)})}
+  else if(act==='kUnlock'){const p=$('stPass');const v=p.value;p.value='';if(!v){kMsg='先在「加密口令」里输入口令';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400);return}kMsg='';SRC().unlock(v)}
+  else if(act==='kLock'){SRC().lock();kMsg='已锁定：内存里的口令清掉了';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400)}
+  else if(act==='kList'){if(!SRC().unlocked()){kMsg='先解锁才能拉模型列表';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400);return}SRC().fetchModels()}
   else if(act==='cnDrop'){window.__trianon.mock&&window.__trianon.mock.disconnect();later(.1,drawConn)}});
 const slVal=(el,x)=>{const r=el.getBoundingClientRect();const u=cl((x-r.left)/r.width);return 12+u*6};
 root.addEventListener('pointerdown',e=>{const sl=e.target.closest('.st-sl');if(!sl)return;drag=sl;sl.setPointerCapture&&sl.setPointerCapture(e.pointerId);setFont(slVal(sl,e.clientX))});
 root.addEventListener('pointermove',e=>{if(drag)setFont(slVal(drag,e.clientX))});
 root.addEventListener('pointerup',()=>{if(drag){drag=null;save('appearance.fontSize',V.appearance.fontSize)}});
-root.addEventListener('keydown',e=>{const sl=e.target.closest&&e.target.closest('.st-sl');if(sl&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();setFont(V.appearance.fontSize+(e.key==='ArrowRight'?.5:-.5),true)}});
+root.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='stKey'||e.target.id==='stPass')){e.preventDefault();const k=$('stKey');root.querySelector(k.value.trim()||!SRC().key.saved?'[data-a="kSave"]':'[data-a="kUnlock"]').click();return}
+  const sl=e.target.closest&&e.target.closest('.st-sl');if(sl&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();setFont(V.appearance.fontSize+(e.key==='ArrowRight'?.5:-.5),true)}});
 root.addEventListener('input',e=>{const id=e.target.id;const ak=e.target.dataset&&e.target.dataset.auto;if(ak){clearTimeout(S.auT);const v=e.target.type==='number'?(+e.target.value||0):e.target.value;S.auT=setTimeout(()=>save('auto.'+ak,v),300);return}if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
   if(id==='stPnName'){p.name=e.target.value;const av=root.querySelector('.c3av .av-ph');if(av){av.querySelector('b').textContent=[...(p.name||'?').trim()][0]||'?';av.querySelector('em').textContent=p.name}}else p.desc=e.target.value;
   clearTimeout(S.pnT);S.pnT=setTimeout(()=>{APP.savePersonas();if(p.id===APP.S.personaId)APP.bus.emit('ui:persona');showSaved()},500)});
-root.addEventListener('change',e=>{const id=e.target.id;const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});
+root.addEventListener('change',e=>{const id=e.target.id;if(id==='stModel'){const v=e.target.value.trim();SRC().set({model:v});return}const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});
 addEventListener('keydown',e=>{if(!S.open)return;
   if(e.key==='Tab'&&S.cf){const fs=[...cfL.querySelectorAll('button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length);
     if(fs.length){e.preventDefault();e.stopPropagation();const i=fs.indexOf(document.activeElement),n=e.shiftKey?(i<=0?fs.length-1:i-1):(i<0||i===fs.length-1?0:i+1);fs[n].focus({preventScroll:true})}return}

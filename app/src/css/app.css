@@ -410,3 +410,56 @@ body.rail-open .rail .it { pointer-events: auto; }
   .meta .more.open .mm { position: fixed; left: 12px !important; right: 12px !important; top: auto; bottom: calc(var(--cH, 120px) + 10px); flex-direction: row; flex-wrap: wrap; justify-content: space-around; min-width: 0; padding: 8px; z-index: 47; }
   .meta .mm .lnk { padding: 8px 10px; }
 }
+
+/* ===== 生成来源：模型标签、弹窗里新加的几样（原版 v2 的样式在 kit_model.css） ===== */
+.field .bar .mchip { flex: none; margin-left: auto; margin-right: 2px; }
+.mchip.bi .mc-t { color: #8C9AB9; letter-spacing: .12em; text-transform: none; font-family: "CormI", serif; font-style: italic; font-size: 12px; }
+.mchip.lk .mc-t { color: #A0647A; }
+.mchip.lk .mc-eye { background: radial-gradient(circle at 50% 50%, #F6ECEF 0 1.2px, #B48C9C 1.6px, #F2E6EA 2.2px, #C4A2AF 3px); }
+.mc-m { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+.mpop { width: 330px; }
+.sld.n2 { width: 168px; } .sld.n2 .sld-th { width: calc((100% - 4px) / 2); }
+.mp-tl { white-space: nowrap; }
+.sld.n4 { width: 184px; } .sld.n4 .sld-th { width: calc((100% - 4px) / 4); }
+.sld.n2 button { font-family: inherit; font-style: normal; font-size: 12.5px; letter-spacing: .06em; }
+.mp-src { margin-top: 2px; }
+.mp-think.dis .sld { opacity: .45; filter: grayscale(.6); }
+.mp-think.dis .sld button { cursor: not-allowed; }
+.mp-think.dis .mp-tl { opacity: .55; }
+.mp-list { min-height: 33px; }
+.mp-row.on .mp-x, .mp-row .mp-x { margin-left: 4px; }
+.mp-note { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 33px; padding: 4px 4px; font-size: 12.5px; letter-spacing: .04em; color: #3E4C76; }
+.mp-a { border: 0; border-radius: 2px; padding: 5px 11px; cursor: var(--cu-pointer); font: 600 12px/1 var(--serif); letter-spacing: .12em; color: #2E3A63;
+  background: linear-gradient(180deg, #FFFEFA, #F2F1EC); box-shadow: 0 1.5px 0 rgba(124, 143, 184, .45), 0 2px 3px -1px rgba(40, 52, 95, .25), inset 0 0 0 .6px rgba(124, 143, 184, .4); }
+.mp-a:hover { background: #fff; }
+.mp-lock { display: flex; gap: 8px; align-items: center; flex: 1 1 100%; }
+.mp-lock input { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid rgba(76, 93, 136, .45); background: rgba(255, 255, 255, .7); padding: 6px 8px; font: 13px/1.3 var(--serif); color: #232A44; outline: 0; border-radius: 2px; }
+.mp-lock input:focus { background: #fff; border-bottom-color: #4C5D88; }
+.md-msg { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 6px 4px 4px; padding: 12px 14px; border-radius: 2px; font-size: 13px; color: #3E4C76; background: rgba(231, 237, 245, .55); box-shadow: inset 0 0 0 1px rgba(124, 143, 184, .22); }
+.md-msg.md-man { background: none; box-shadow: none; padding: 8px 2px; font-size: 12px; color: rgba(62, 76, 116, .7); }
+.md-msg.md-man .mp-lock { flex: 1 1 260px; }
+.md-msg.hide { display: none !important; }
+.pl-fs { border: 0; margin: 0; padding: 0; min-width: 0; }
+.pl-fs.off .pl-row, .pl-fs.off .pl-stop { opacity: .42; filter: grayscale(.7); }
+.pl-fs.off input, .pl-fs.off textarea, .pl-fs.off .lnk { cursor: not-allowed; }
+.pl-off { margin-left: 10px; font: italic 13px/1 CormI, Georgia, serif; color: #A0647A; }
+@media (max-width: 760px) {
+  .mpop { width: calc(100vw - 16px); max-width: 340px; }
+  .mc-m { max-width: 120px; }
+  .mdl { left: 8px; top: 8px; width: calc(100vw - 16px); height: calc(100dvh - 16px); margin: 0; }
+  .mdl-in { padding: 22px 18px 0; }
+  .md-hd { padding-right: 44px; } .md-hd em { font-size: 28px; } .md-hd span { letter-spacing: .3em; }
+  .md-x { right: 12px; top: 14px; }
+  .md-q { margin-top: 18px !important; } .md-q kbd { display: none; }
+  .md-tabs { margin-top: 14px; } .md-tabs .ptab { padding: 0 12px; }
+  .md-list { margin: 0 -6px; padding: 10px 6px 18px; }
+  .md-row { margin: 0 -4px; padding: 9px 8px 10px 10px; gap: 8px; }
+  .md-star { opacity: 1; }
+  .md-ft .kc, .md-ft .kl, .md-ft b { display: none; }
+  .mdl-rib { right: 70px; }
+}
+/* 弹窗和目录关着时用 display:none（只切 visibility 时，Chrome 偶尔会让正在做入场动画的子元素停在 hidden） */
+.mpop, .mdl { display: none; visibility: visible; }
+body.pop-open .mpop, .mpop.anim { display: block; }
+body.mdl-open .mdl, .mdl.anim { display: block; }
+@media (max-width: 760px) { .mp-lock input, #mdIn { font-size: 16px; } }

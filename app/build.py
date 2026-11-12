@@ -6,7 +6,7 @@ import os, re, sys, base64, glob
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC, AS = os.path.join(HERE, 'src'), os.path.join(HERE, 'assets')
 OUT = os.environ.get('TRIANON_ST_OUT', os.path.join(HERE, '..', 'dist', 'trianon-st.html'))
-CSS = ['base.css', 'kit_rail.css', 'kit_thread.css', 'kit_composer.css', 'kit_empty.css', 'app.css']
+CSS = ['base.css', 'kit_rail.css', 'kit_thread.css', 'kit_composer.css', 'kit_model.css', 'kit_empty.css', 'app.css']
 MIME = {'png': 'image/png', 'webp': 'image/webp', 'jpg': 'image/jpeg', 'svg': 'image/svg+xml', 'woff2': 'font/woff2', 'woff': 'font/woff'}
 rd = lambda p: open(p, encoding='utf-8').read()
 used = set()
@@ -22,8 +22,8 @@ css = '\n'.join(f'/* ---- {f} ---- */\n' + rd(os.path.join(SRC, 'css', f)) for f
 css += '\n/* ---- settings（原版设置页，已加作用域）---- */\n' + '\n'.join(st_ff) + '\n' + st_css + '\n' + rd(os.path.join(SRC, 'settings', 'extra.css'))
 js = '\n'.join(f'/* ---- {os.path.basename(f)} ---- */\n' + rd(f) for f in sorted(glob.glob(os.path.join(SRC, 'js', '*.js'))) + [os.path.join(SRC, 'settings', 'settings.js')])
 js = '(()=>{"use strict";\n' + js + '\n})();'
-html = rd(os.path.join(SRC, 'index.html')).replace('{{EMPTY}}', rd(os.path.join(SRC, 'parts', 'empty.html'))).replace('{{CSS}}', css).replace('{{JS}}', js)
-assert not any(k in html for k in ('{{CSS}}', '{{JS}}', '{{EMPTY}}')), 'placeholder left'
+html = rd(os.path.join(SRC, 'index.html')).replace('{{EMPTY}}', rd(os.path.join(SRC, 'parts', 'empty.html'))).replace('{{MODEL}}', rd(os.path.join(SRC, 'parts', 'model.html'))).replace('{{CSS}}', css).replace('{{JS}}', js)
+assert not any(k in html for k in ('{{CSS}}', '{{JS}}', '{{EMPTY}}', '{{MODEL}}')), 'placeholder left'
 # 开场动画放进 <head>（在页面脚本之前运行，先接管输入、挡住页面）
 op = ('<style id="kOpCss">\n' + rd(os.path.join(SRC, 'opening', 'opening.css')) + '</style>\n<template id="kOpTpl">' + rd(os.path.join(SRC, 'opening', 'opening.html')).strip()
       + '</template>\n<script type="application/json" id="kOpMeta">{}</script>\n<script>\n' + rd(os.path.join(SRC, 'opening', 'opening.js')) + '\n</script>\n')

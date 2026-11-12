@@ -78,18 +78,23 @@ const turn = (() => {
       touch(m);
     }
     bus.emit('ui:turn');
-    return Object.assign({ turnId: id, chatId: S.chat.id, msgId: m ? m.id : null, stream: S.settings.stream,
-      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, characterId: S.char.id }, T.plume ? T.plume.payload() : {}, T.lore ? T.lore.payload() : {}, extra || {});
+    const req = Object.assign({ turnId: id, chatId: S.chat.id, msgId: m ? m.id : null, stream: S.settings.stream,
+      persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, characterId: S.char.id }, T.plume ? T.plume.payload() : {}, T.lore ? T.lore.payload() : {}, T.source ? T.source.payload() : {}, extra || {});
+    if (req.params && T.source) req.params = Object.assign({}, req.params, { reasoning: T.source.reasoning() });
+    return req;
   }
+  /* 外部来源锁着、没钥匙或没选模型时不发请求（会提示用户） */
+  const can = () => !T.source || T.source.ready();
   async function go(type, req) {
-    try { await bridge.request(type, req); }
-    catch (e) { fail(req.turnId, e.message || String(e)); }
+    try { const r = await bridge.request(type, req); if (r && r.ok === false) fail(req.turnId, r.message || r.error, r.code); }
+    catch (e) { fail(req.turnId, e.message || String(e), e.code); }
   }
 
   async function send(text, opt) {
     opt = opt || {};
     text = (text || '').trim();
     if (!text || busy()) return false;
+    if (!opt.noGen && !can()) return false;
     ensureStarted();
     text = macros(text, ctx());          /* 同 SillyTavern：发送时就把宏换掉再存 */
     const u = { id: uid('m'), role: 'user', name: persona().name, userName: persona().name, personaId: persona().id, text, time: Date.now(), state: 'done' };
@@ -105,7 +110,7 @@ const turn = (() => {
   /* 重新生成 = 给这条消息加一个新候选 */
   function regenerate(msgId) {
     const m = msg(msgId);
-    if (!m || m.role !== 'assistant' || busy()) return;
+    if (!m || m.role !== 'assistant' || busy() || !can()) return;
     if (m.text || m.state === 'done') { store1(m); m.swipes.push(snap(m)); m.sid = m.swipes.length - 1; }
     const req = begin(m, 'regen', { history: history(m.id) });
     go('turn.regenerate', req);
@@ -121,7 +126,7 @@ const turn = (() => {
   }
   function cont(msgId) {
     const m = msgId ? msg(msgId) : lastAssistant();
-    if (!m || m.role !== 'assistant' || busy() || !isLast(m) || !(m.text || '').trim()) return;
+    if (!m || m.role !== 'assistant' || busy() || !isLast(m) || !(m.text || '').trim() || !can()) return;
     const req = begin(m, 'continue', { history: history(m.id, true) });
     go('turn.continue', req);
   }
@@ -129,13 +134,13 @@ const turn = (() => {
   function narrate(text) { text = macros((text || '').trim(), ctx()); if (!text) return; ensureStarted(); S.chat.messages.push({ id: uid('m'), role: 'system', name: '', text, time: Date.now(), state: 'done' }); bus.emit('ui:chat'); save(); }
   /* /trigger：不发新消息，直接让角色接着说 */
   function trigger() {
-    if (busy()) return; ensureStarted();
+    if (busy() || !can()) return; ensureStarted();
     const a = { id: uid('m'), role: 'assistant', name: S.char.name, charName: S.char.name, userName: persona().name, text: '', time: Date.now(), state: 'pending' };
     S.chat.messages.push(a); bus.emit('ui:chat');
     go('chat.send', begin(a, 'new', { text: '', history: history(a.id) }));
   }
   function impersonate() {
-    if (busy()) return;
+    if (busy() || !can()) return;
     ensureStarted();
     const req = begin(null, 'impersonate', { history: history(null, true) });
     bus.emit('ui:impersonate', { reset: true });
@@ -156,8 +161,9 @@ const turn = (() => {
     touch(m); bus.emit('ui:turn');
     if (state !== 'error') save();
   }
-  function fail(turnId, message) {
+  function fail(turnId, message, code) {
     const t = cur(turnId); if (!t) return;
+    if (code && T.source) message = T.source.fail(code, message);
     t.state = 'error';
     if (!t.msgId) { bus.emit('ui:impersonate', { error: message }); bus.emit('ui:turn'); return; }
     const m = msg(t.msgId); if (m) m.error = message || '出错了'; finish(m, 'error');
@@ -212,11 +218,11 @@ const turn = (() => {
     if (p.usage) m.usage = p.usage;
     t.state = 'done'; finish(m, 'done');
   });
-  bus.on('be:turn.error', p => fail(p.turnId, p.message));
+  bus.on('be:turn.error', p => fail(p.turnId, p.message, p.code));
   bus.on('be:turn.stopped', p => { const t = cur(p.turnId); if (t && busy()) { t.state = 'stopped'; if (t.msgId) finish(msg(t.msgId), 'stopped'); else bus.emit('ui:turn'); } });
 
   addEventListener('keydown', e => { if (e.key === 'Escape' && busy()) { e.preventDefault(); stop(); } });
 
-  return { send, narrate, trigger, regenerate, swipe, cont, impersonate, stop, edit, remove, hide, prompt, save, history, disp, ensureStarted, lastAssistant, isLast };
+  return { send, can, narrate, trigger, regenerate, swipe, cont, impersonate, stop, edit, remove, hide, prompt, save, history, disp, ensureStarted, lastAssistant, isLast };
 })();
 T.turn = turn;

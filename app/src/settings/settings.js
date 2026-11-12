@@ -209,7 +209,7 @@ const SECS=[
  {k:'appearance',n:'ii',em:'Parure',zh:'外观',sub:'字号 · 动效 · 输出方式'},
  {k:'salon',n:'iii',em:'Salon',zh:'对话样式',sub:'气泡 · 头像 · 宽度 · CSS'},
  {k:'auto',n:'iv',em:'Automates',zh:'推理与自动化',sub:'推理块 · 回车 · 自动续写'},
- {k:'connection',n:'v',em:'Connexion',zh:'连接状态',sub:'后端 · 模型 · 日志'}];
+ {k:'connection',n:'v',em:'Connexion',zh:'连接',sub:'来源 · 钥匙 · 模型'}];
 const MODES=[
  {k:'manual',n:'i',zh:'始终询问',en:'Always Ask',was:'原 Manual · 默认',d:'只读操作自动放行；写文件、跑命令逐一向你确认。',risk:0},
  {k:'yolo',n:'ii',zh:'必要时询问',en:'Ask When Needed',was:'原 YOLO · /demo-ask',d:'普通调用自动批准；.env、私钥、rm -rf、退出 Plan 仍会问你。',risk:1},
@@ -510,23 +510,44 @@ const secAuto=()=>{const g='auto',A=Object.assign({},AUTODEF,APP.S.settings.auto
 
 /* V · connection（替换原「引擎」）：留声机 = 后端在转，沙漏 = 正在连接；日志是一张小票 */
 const CONN={ready:['En ligne','已连接','后端在线，可以写信了'],connecting:['Connexion…','正在连接','正在等后端回应'],reconnecting:['Reconnexion','连接断开','正在重连'],failed:['Hors ligne','连接失败','后端没有回应']};
-const connHTML=()=>{const A=APP.S,c=CONN[A.conn.state]||[A.conn.state,A.conn.state,''];const mock=window.__trianon.usingMock;
+const SRC=()=>window.Trianon.source;
+const connHTML=()=>{const A=APP.S,c=CONN[A.conn.state]||[A.conn.state,A.conn.state,''];const mock=window.__trianon.usingMock;const G=SRC().get(),ext=G.source==='external',K=SRC().key;
   const cap=(k,t)=>`<span class="cn-cap${A.caps[k]===false?' no':''}">${A.caps[k]===false?'✕':'✓'} ${t}</span>`;
   return `<div class="cn-st" data-s="${esc(A.conn.state)}"><em>${c[0]}</em><b>${c[1]}</b><small>${esc(c[2])}${A.conn.state==='reconnecting'&&A.conn.retryIn?`（${esc(A.conn.retryIn)} 秒后重试）`:''}</small></div>
-    <dl class="cn-dl"><dt>后端</dt><dd>${mock?'内置模拟后端 · 演示用':'宿主页面'}</dd><dt>模型</dt><dd>${esc(A.model||'—')}</dd><dt>角色</dt><dd>${esc(A.char.name||'—')}</dd></dl>
+    <div class="sf-r cn-src"><div class="sf-l"><b>生成来源</b><small>只影响之后生成的回复</small></div>${seg('gen.source',[['builtin','内置'],['external','外部 · DeepSeek']],G.source)}</div>
+    <dl class="cn-dl"><dt>后端</dt><dd>${mock?'内置模拟后端 · 演示用':'宿主页面'}</dd><dt>模型</dt><dd>${ext?(G.model?esc(G.model):'<i>还没选</i>')+(SRC().unlocked()?'':' · <i>已锁定</i>'):esc(A.model||'空间内置模型')}</dd><dt>角色</dt><dd>${esc(A.char.name||'—')}</dd></dl>
     <div class="cn-caps">${cap('streaming','流式')}${cap('reasoning','推理')}${cap('stop','停止')}${cap('regenerate','重新生成')}</div>`};
 const logHTML=()=>{const L=window.__trianon.log.slice(-15).reverse();const p=n=>String(n).padStart(2,'0');
   return `<div class="cn-lg"><div class="cn-lh">JOURNAL · 接口日志</div>${L.length?L.map(([t,d,e])=>{const x=new Date(t);return `<div class="cn-l"><i>${p(x.getHours())}:${p(x.getMinutes())}:${p(x.getSeconds())}</i><b>${d==='in'?'←':'→'}</b><span>${esc(e)}</span></div>`}).join(''):'<div class="cn-l"><span>还没有记录</span></div>'}<div class="cn-lf">— fin —</div></div>`};
+/* 钥匙卡：输入框只在这里建一次，之后的状态变化只改文字（drawKey），不重建输入框 */
+const keyHTML=()=>`<div class="kk" id="stKk"><div class="cv-hd"><em>Clef</em><b>DeepSeek 钥 匙</b><small id="stKs"></small></div>
+    <div class="kk-g"><label for="stKey">钥匙</label><input id="stKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="粘贴 DeepSeek 的 API Key">
+      <label for="stPass">口令</label><input id="stPass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="加密口令：只留在这个页面的内存里"></div>
+    <p class="kk-n">口令忘了，存的钥匙就作废，只能删除重存。</p>
+    <div class="kk-a">${tagBtn('保存','kSave','stKSave')}${tagBtn('删除','kDel','stKDel')}<i class="kk-gap"></i>${tagBtn('解锁','kUnlock')}${tagBtn('锁定','kLock')}</div>
+    <div class="kk-st" id="stKst" role="status" aria-live="polite"></div>
+    <div class="kk-g kk-m"><label for="stModel">模型</label><span class="kk-mr"><input id="stModel" list="stModelL" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="从列表选，或者手填"><datalist id="stModelL"></datalist>${tagBtn('刷新列表','kList')}</span></div>
+    <p class="kk-n kk-mn" id="stKm"></p></div>`;
+let kMsg='',kDelArm=0;
+const drawKey=()=>{const R=SRC();if(!R||!$('stKk'))return;const K=R.key,G=R.get(),ext=G.source==='external';
+  $('stKs').textContent=!K.checked?'正在查询…':K.saved?'已存 · 尾号 '+K.last4:'还没存';
+  const lock=K.saved?(R.unlocked()?'已解锁：外部来源可以生成':'已锁定：外部来源暂时不能生成，先输口令解锁'):'先保存钥匙';
+  const ms=R.mState==='loading'?'正在拉取模型列表…':R.mState==='error'?R.mErr:R.mState==='ok'?`模型列表 ${R.models.length} 个`:'';
+  $('stKst').innerHTML=`<b>${esc(kMsg||(R.busy?'正在交给宿主…':lock))}</b>${ms?`<small>${esc(ms)}</small>`:''}`;
+  const m=$('stModel');m.disabled=!ext;if(document.activeElement!==m)m.value=G.model||'';
+  $('stKm').textContent=ext?'也可以在输入栏的模型标签里切换。':'内置来源不使用这些参数。';$('stKk').classList.toggle('bi',!ext);
+  $('stModelL').innerHTML=R.models.map(x=>`<option value="${esc(x.id)}">`).join('');
+  const d=$('stKDel');if(d)d.querySelector('.tg-t').textContent=kDelArm>Date.now()?'确认删除':'删除'};
 const secConnection=()=>{const g='connection';let h='';
   h+=P(g,250,112,440,240,-1.2,'vellum','',{torn:'rb',cls:'deco'});
   h+=P(g,262,122,320,34,-2,null,dymo('连接 Connexion · 前端只认 window.__trianon','c2lt'),{cls:'c2-strip'});
-  h+=CD(g,262,168,380,300,-1,`<div class="cn" id="stCn">${connHTML()}</div><div class="cn-acts">${tagBtn('刷新','cnRefresh')}${window.__trianon.usingMock?tagBtn('模拟断线','cnDrop'):''}</div>`,{tone:'milk',band:0});
+  h+=CD(g,262,168,380,328,-1,`<div class="cn" id="stCn">${connHTML()}</div><div class="cn-acts">${tagBtn('刷新','cnRefresh')}${window.__trianon.usingMock?tagBtn('模拟断线','cnDrop'):''}</div>`,{tone:'milk',band:0});
+  h+=CD(g,262,512,404,356,.8,keyHTML(),{tone:'milk',band:0,cls:'kk-c'});
   h+=P(g,672,118,280,560,1.8,'receipt',`<div id="stLg">${logHTML()}</div>`,{torn:'tb',amp:2.4});
-  h+=OB(g,276,500,220,-2,O.gram,{sh:[12,70,4,16]});
-  h+=OB(g,548,560,86,6,O.hg,{sh:[14,72,2,10]});
-  h+=CD(g,486,764,330,84,-1.4,`<div class="c2nt s">接口文档在仓库的 <code>docs/BRIDGE.md</code>。没接后端时自动使用内置的模拟后端。</div>`,{tone:'silver',stitch:false});
+  h+=OB(g,700,668,150,-2,O.gram,{sh:[12,70,4,16]});
+  h+=OB(g,882,742,70,6,O.hg,{sh:[14,72,2,10]});
   return h};
-const drawConn=()=>{const a=$('stCn'),b=$('stLg');if(a)a.innerHTML=connHTML();if(b)b.innerHTML=logHTML()};
+const drawConn=()=>{const a=$('stCn'),b=$('stLg');if(a)a.innerHTML=connHTML();if(b)b.innerHTML=logHTML();drawKey()};
 
 /* ---------------------------------------------------------------- DOM */
 const defs=document.createElementNS('http://www.w3.org/2000/svg','svg');defs.setAttribute('width','0');defs.setAttribute('height','0');defs.style.position='absolute';
@@ -570,6 +591,7 @@ const save=(key,val)=>{const [grp,k]=key.split('.');
   else if(grp==='chat')APP.S.settings[k]=val;
   else if(grp==='ui'){APP.S.settings.ui=Object.assign({},APP.S.settings.ui||{},{[k]:val})}
   else if(grp==='auto'){APP.S.settings.auto=Object.assign({},APP.S.settings.auto||{},{[k]:val})}
+  else if(grp==='gen'){window.Trianon.source.set({[k]:val});showSaved();return}
   APP.saveSettings();APP.bus.emit('ui:settings',key);showSaved()};
 
 /* ---------------------------------------------------------------- open / close / switch */
@@ -654,6 +676,7 @@ const rebuild=sec=>{const keep=S.sec;const i=SECS.findIndex(x=>x.k===(sec||keep)
 APP.bus.on('ui:conn',()=>{if(S.open&&S.sec==='connection')drawConn()});
 APP.bus.on('ui:model',()=>{if(S.open&&S.sec==='connection')drawConn()});
 APP.bus.on('ui:caps',()=>{if(S.open&&S.sec==='connection')drawConn()});
+APP.bus.on('ui:source',()=>{if(S.open&&S.sec==='connection')drawConn()});
 
 /* ---------------------------------------------------------------- interaction */
 let drag=null;
@@ -672,17 +695,26 @@ root.addEventListener('click',e=>{const t=e.target;
   else if(act==='pnDef'){APP.setDefaultPersona(PE);rebuild('persona');showSaved()}
   else if(act==='pnNew'){const p={id:'p_'+Date.now().toString(36),name:'新的人设',desc:''};L.push(p);PE=p.id;APP.savePersonas();rebuild('persona');setTimeout(()=>{const i=$('stPnName');if(i){i.focus();i.select()}},60)}
   else if(act==='pnDel'){if(L.length<2)return;const i=L.findIndex(p=>p.id===PE);if(i<0)return;const was=L[i].id;L.splice(i,1);if(APP.S.personaId===was)APP.setPersona(L[0].id);PE=APP.S.personaId;APP.savePersonas();rebuild('persona');showSaved()}
-  else if(act==='cnRefresh')drawConn();
+  else if(act==='cnRefresh'){SRC().status();drawConn()}
+  else if(act==='kSave'){const k=$('stKey'),p=$('stPass');const kv=k.value,pv=p.value;k.value='';p.value='';kMsg='';   /* 先清空输入框，再交给宿主 */
+    if(!kv.trim()){kMsg='先填钥匙';drawKey();return}if(!pv){kMsg='先填加密口令';drawKey();return}
+    SRC().saveKey(kv,pv).then(r=>{kMsg=r.ok?'已保存：钥匙交给了宿主，这里不留原文':(r.message||'保存失败');drawKey();setTimeout(()=>{kMsg='';drawKey()},3200)});drawKey()}
+  else if(act==='kDel'){if(kDelArm<Date.now()){kDelArm=Date.now()+3000;drawKey();setTimeout(drawKey,3100);return}kDelArm=0;
+    SRC().delKey().then(r=>{kMsg=r.ok?'已删除':(r.message||'删除失败');drawKey();setTimeout(()=>{kMsg='';drawKey()},2400)})}
+  else if(act==='kUnlock'){const p=$('stPass');const v=p.value;p.value='';if(!v){kMsg='先在「加密口令」里输入口令';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400);return}kMsg='';SRC().unlock(v)}
+  else if(act==='kLock'){SRC().lock();kMsg='已锁定：内存里的口令清掉了';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400)}
+  else if(act==='kList'){if(!SRC().unlocked()){kMsg='先解锁才能拉模型列表';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400);return}SRC().fetchModels()}
   else if(act==='cnDrop'){window.__trianon.mock&&window.__trianon.mock.disconnect();later(.1,drawConn)}});
 const slVal=(el,x)=>{const r=el.getBoundingClientRect();const u=cl((x-r.left)/r.width);return 12+u*6};
 root.addEventListener('pointerdown',e=>{const sl=e.target.closest('.st-sl');if(!sl)return;drag=sl;sl.setPointerCapture&&sl.setPointerCapture(e.pointerId);setFont(slVal(sl,e.clientX))});
 root.addEventListener('pointermove',e=>{if(drag)setFont(slVal(drag,e.clientX))});
 root.addEventListener('pointerup',()=>{if(drag){drag=null;save('appearance.fontSize',V.appearance.fontSize)}});
-root.addEventListener('keydown',e=>{const sl=e.target.closest&&e.target.closest('.st-sl');if(sl&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();setFont(V.appearance.fontSize+(e.key==='ArrowRight'?.5:-.5),true)}});
+root.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='stKey'||e.target.id==='stPass')){e.preventDefault();const k=$('stKey');root.querySelector(k.value.trim()||!SRC().key.saved?'[data-a="kSave"]':'[data-a="kUnlock"]').click();return}
+  const sl=e.target.closest&&e.target.closest('.st-sl');if(sl&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){e.preventDefault();setFont(V.appearance.fontSize+(e.key==='ArrowRight'?.5:-.5),true)}});
 root.addEventListener('input',e=>{const id=e.target.id;const ak=e.target.dataset&&e.target.dataset.auto;if(ak){clearTimeout(S.auT);const v=e.target.type==='number'?(+e.target.value||0):e.target.value;S.auT=setTimeout(()=>save('auto.'+ak,v),300);return}if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
   if(id==='stPnName'){p.name=e.target.value;const av=root.querySelector('.c3av .av-ph');if(av){av.querySelector('b').textContent=[...(p.name||'?').trim()][0]||'?';av.querySelector('em').textContent=p.name}}else p.desc=e.target.value;
   clearTimeout(S.pnT);S.pnT=setTimeout(()=>{APP.savePersonas();if(p.id===APP.S.personaId)APP.bus.emit('ui:persona');showSaved()},500)});
-root.addEventListener('change',e=>{const id=e.target.id;const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});
+root.addEventListener('change',e=>{const id=e.target.id;if(id==='stModel'){const v=e.target.value.trim();SRC().set({model:v});return}const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});
 addEventListener('keydown',e=>{if(!S.open)return;
   if(e.key==='Tab'&&S.cf){const fs=[...cfL.querySelectorAll('button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length);
     if(fs.length){e.preventDefault();e.stopPropagation();const i=fs.indexOf(document.activeElement),n=e.shiftKey?(i<=0?fs.length-1:i-1):(i<0||i===fs.length-1?0:i+1);fs[n].focus({preventScroll:true})}return}

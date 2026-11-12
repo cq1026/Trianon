@@ -46,12 +46,15 @@ const plume = (() => {
   const summ = () => (S.chat.meta = S.chat.meta || {}, S.chat.meta.summary = Object.assign({ text: '', at: 0 }, S.chat.meta.summary || {}));
   let sumBusy = false;
   async function summarize(auto) {
-    if (sumBusy) return; sumBusy = true; if (open && tab === 'summary') render();
+    if (sumBusy) return;
+    if (T.source && !T.source.ready(auto)) return;
+    sumBusy = true; if (open && tab === 'summary') render();
     const C = sumCfg();
     try {
       const r = await bridge.request('turn.summarize', { chatId: S.chat.id, characterId: S.char.id, history: turn.history(null, true), prompt: macros(C.prompt, ctx()), previous: summ().text,
-        persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, params: Object.assign({}, S.gen.params) });
-      if (r && typeof r.text === 'string' && r.text.trim()) { const Sm = summ(); Sm.text = r.text.trim(); Sm.at = S.chat.messages.length; turn.save(); if (!auto) flash('总结好了'); }
+        persona: { id: persona().id, name: persona().name, desc: persona().desc || '' }, params: Object.assign({}, S.gen.params, T.source ? { reasoning: T.source.reasoning() } : {}), ...(T.source ? T.source.payload() : {}) });
+      if (r && r.ok === false && r.code && T.source) { const t = T.source.fail(r.code, r.message); if (!auto) flash('总结失败：' + t); }
+      else if (r && typeof r.text === 'string' && r.text.trim()) { const Sm = summ(); Sm.text = r.text.trim(); Sm.at = S.chat.messages.length; turn.save(); if (!auto) flash('总结好了'); }
       else if (!auto) flash('后端没有返回总结' + (r && r.error ? '：' + r.error : ''));
     } catch (e) { if (!auto) flash('总结失败：' + (e.message || e)); }
     sumBusy = false; if (open && tab === 'summary') render();
@@ -81,17 +84,18 @@ const plume = (() => {
 
   function render() {
     const g = S.gen.params, N = note(), ps = presets();
+    const off = !!T.source && !T.source.external();
     $('plCrumb').textContent = '· ' + S.gen.preset + (dirty() ? ' （已改动）' : '');
     const tabs = `<div class="pl-tabs">${[['params', '采样 · 预设 · 作者注释'], ['prompts', '提示词编排'], ['summary', '总结']].map(([k, t]) => `<button type="button" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>`;
     if (tab === 'prompts') { body.innerHTML = tabs + pmHTML(); return; }
     if (tab === 'summary') { body.innerHTML = tabs + sumHTML(); return; }
     body.innerHTML = tabs + `<div class="pl-grid">
-      <div class="pl-col"><div class="pl-cap"><em>Échantillonnage</em><b>采样</b><button type="button" class="lnk" data-a="reset">恢复这个预设</button></div>
+      <fieldset class="pl-col pl-fs${off ? ' off' : ''}"${off ? ' disabled' : ''}><div class="pl-cap"><em>Échantillonnage</em><b>采样</b>${off ? '<small class="pl-off">内置来源不使用这些参数</small>' : ''}<button type="button" class="lnk" data-a="reset">恢复这个预设</button></div>
         ${P.map(([k, t, mn, mx, st, , tip]) => `<label class="pl-row"><span class="pl-l"><b>${t}</b><small>${tip}</small></span>
           <input type="range" min="${mn}" max="${mx}" step="${st}" value="${g[k]}" data-k="${k}"><input class="pl-n" type="number" min="${mn}" max="${mx}" step="${st}" value="${fmtv(g[k], st)}" data-n="${k}"></label>`).join('')}
         <label class="pl-row"><span class="pl-l"><b>种子</b><small>-1 = 随机</small></span><span></span><input class="pl-n" type="number" step="1" value="${g.seed}" data-n="seed"></label>
         <label class="lb-f pl-stop"><span>停止序列 <small>一行一个</small></span><textarea rows="2" data-stop spellcheck="false">${esc((g.stop || []).join('\n'))}</textarea></label>
-      </div>
+      </fieldset>
       <div class="pl-col">
         <div class="pl-card"><div class="pl-cap"><em>Préréglages</em><b>预设</b></div>
           <div class="pl-ps">${Object.keys(ps).map(n => `<button type="button" class="pl-p${n === S.gen.preset ? ' on' : ''}" data-a="pick" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
@@ -208,6 +212,7 @@ const plume = (() => {
   /* 自动总结：每生成完一条检查一次 */
   bus.on('ui:turn', () => { const t = S.turn; if (!t || t.state !== 'done' || t._sumChecked) return; t._sumChecked = true;
     const C = sumCfg(); if (!C.every) return; const Sm = summ(); if (S.chat.messages.length - (Sm.at || 0) >= C.every) setTimeout(() => summarize(true), 400); });
+  bus.on('ui:source', () => { if (open && tab === 'params' && !body.contains(document.activeElement)) render(); });
   return { show, payload, summarize, get open() { return open; } };
 })();
 T.plume = plume;

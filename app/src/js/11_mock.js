@@ -1,6 +1,8 @@
 /* ===== 模拟后端：没接真实后端时演示用 =====
    行为与 docs/BRIDGE.md 一致：收到 chat.send 后按 turnId 依次发 turn.start → (turn.reasoning…) → turn.delta… → turn.done。
-   调试：__trianon.mock.set({ delay: 9, failNext: true, reasoning: false, cps: 30 }) */
+   调试：__trianon.mock.set({ delay: 9, failNext: true, reasoning: false, cps: 30 })
+   生成来源：回复第一行标出这次用的来源（内置 / 外部 DeepSeek · 模型 · 思考程度）。
+   钥匙：只记「存过没有」，不记钥匙本身；尾号固定用假数据 MOCK_LAST4。口令写 wrong 时按「口令不对」处理。 */
 (() => {
   const emit = (ev, p) => bridge.api.emit(ev, p);
   const opt = { delay: 1.6, cps: 16, reasoning: true, failNext: false };
@@ -32,11 +34,28 @@
   const THINK = ['先接住对方的话。', '语气放软一点，', '带一点花园和雾的意象，', '最后留个邀请。'];
   let k = 0;
 
+  /* 生成来源：外部来源先检查钥匙和口令，再在回复开头标明来源 */
+  const MOCK_LAST4 = '7c1e', MODELS = [{ id: 'deepseek-chat', owned_by: 'deepseek' }, { id: 'deepseek-reasoner', owned_by: 'deepseek' }];
+  const EFF = { low: 'Low', high: 'High', max: 'Max' };
+  const srcTag = p => {
+    if (p.source !== 'external') return '〔来源：内置〕';
+    const r = (p.params || {}).reasoning || {};
+    return `〔来源：外部 DeepSeek · ${p.model || '未指定模型'} · 思考 ${r.enabled ? EFF[r.effort] || r.effort : 'Off'}〕`;
+  };
+  const srcErr = p => {
+    if (p.source !== 'external') return null;
+    if (!db.get('keySaved', false)) return { code: 'no_key', message: '没有存好的钥匙（模拟）' };
+    if (!p.passphrase || p.passphrase === 'wrong') return { code: 'bad_passphrase', message: '口令不对（模拟）' };
+    return null;
+  };
   function run(turnId, payload) {
+    const se = srcErr(payload);
+    if (se) { later(turnId, .5, () => emit('turn.error', Object.assign({ turnId }, se))); return; }
     if (opt.failNext) { opt.failNext = false; later(turnId, opt.delay + .6, () => emit('turn.error', { turnId, message: '连接中断（模拟）' })); return; }
     let text = payload.textOverride || (payload.regenerate ? REPLIES[(k++ + 1) % REPLIES.length] : REPLIES[k++ % REPLIES.length]);
-    if (opt.thinkTags) text = '<think>先回应对方，再带一点花园的意象。</think>\n' + text;
     if (opt.short) text = '嗯。';
+    text = /^\n/.test(text) ? '\n\n' + srcTag(payload) + '\n' + text.replace(/^\n+/, '') : srcTag(payload) + '\n' + text;
+    if (opt.thinkTags) text = '<think>先回应对方，再带一点花园的意象。</think>\n' + text;
     const stream = payload.stream !== false;
     let t = opt.delay;
     if (opt.reasoning && stream) {
@@ -107,7 +126,16 @@
           if (p.params) out.push({ role: 'system', name: '参数（演示）', content: JSON.stringify(p.params) });
           return { ok: true, prompt: out, tokens: Math.round(JSON.stringify(out).length / 1.6) };
         }
-        case 'turn.summarize': { const h = p.history || []; await new Promise(r => setTimeout(r, 900)); return { ok: true, text: `${P0(p)}与 ${CHAR.name} 聊了 ${h.length} 条：从玫瑰园说到清晨的雾，约好了一起去散步。（模拟后端的示例总结）` }; }
+        case 'key.status': return db.get('keySaved', false) ? { ok: true, saved: true, last4: MOCK_LAST4 } : { ok: true, saved: false };
+        case 'key.save': await new Promise(r => setTimeout(r, 400));
+          if (!p.key || !p.passphrase) return { ok: false, code: 'invalid', message: '钥匙和口令都要填' };
+          db.set('keySaved', true); return { ok: true, last4: MOCK_LAST4 };   /* 假装存好：钥匙和口令都不留 */
+        case 'key.delete': db.del('keySaved'); return { ok: true };
+        case 'model.list': await new Promise(r => setTimeout(r, 500));
+          if (!db.get('keySaved', false)) return { ok: false, code: 'no_key', message: '没有存好的钥匙（模拟）' };
+          if (!p.passphrase || p.passphrase === 'wrong') return { ok: false, code: 'bad_passphrase', message: '口令不对（模拟）' };
+          return { ok: true, models: MODELS };
+        case 'turn.summarize': { const h = p.history || []; await new Promise(r => setTimeout(r, 900)); const se = srcErr(p); if (se) return Object.assign({ ok: false }, se); return { ok: true, text: `${srcTag(p)} ${P0(p)}与 ${CHAR.name} 聊了 ${h.length} 条：从玫瑰园说到清晨的雾，约好了一起去散步。（模拟后端的示例总结）` }; }
         case 'chat.save': {
           const ms = p.messages || [], last = ms.filter(m => (m.text || '').trim()).slice(-1)[0];
           const rec = { chatId: p.chatId, characterId: p.characterId, title: p.title || '', meta: p.meta || {}, messages: ms };
