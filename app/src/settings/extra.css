@@ -162,7 +162,7 @@
   #stSet.on .c3plq, #stSet.on .c3pvc { height: auto; min-height: 64px; flex: 1; }
 }
 /* 人设头像：点镜子换头像 */
-#stSet .c3av { cursor: var(--cu-pointer); }
+#stSet .c3av, #stSet .st-sec > .c3av { cursor: var(--cu-pointer); pointer-events: auto !important; }
 #stSet .c3av .av-ph img.av-img { position: absolute; inset: 0; width: 100% !important; height: 100% !important; border-radius: 50%; object-fit: cover; z-index: 1; }
 #stSet .c3av .av-ph:has(img.av-img) b, #stSet .c3av .av-ph:has(img.av-img) em, #stSet .c3av .av-ph:has(img.av-img)::before { display: none; }
 #stSet .c3av .av-tip { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%); z-index: 3; white-space: nowrap; font: italic 500 12px/1 CormI, var(--serif); color: #4C5D88; background: rgba(251, 249, 243, .9); padding: 4px 10px; border-radius: 10px; box-shadow: 0 0 0 1px rgba(76, 93, 136, .25); opacity: 0; transition: opacity .25s; pointer-events: none; }

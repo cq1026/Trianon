@@ -230,7 +230,7 @@ function finish(how){if(dead)return;dead=true;cancelAnimationFrame(raf);
 W.__opening={mode:MODE,state:'wait',T,dur:P.dur,t:()=>tNow,skip:()=>skip(),frames:FT,get held(){return held},get clear(){return clear}};
 /* start when the app has been parsed (its scripts ran), our fonts are in and the screenshots are decoded */
 const ready=new Promise(r=>D.readyState==='loading'?D.addEventListener('DOMContentLoaded',r,{once:true}):r());
-const fonts=['kopPinyon','kopCorm','kopPlay','kopBodoni','kopMono','kopFrak','kopElite'].map(f=>D.fonts.load(`${f==='kopCorm'?'italic ':''}400 40px ${f}`).catch(()=>0));
+const fonts=['Pinyon','CormI','kopPlay','kopBodoni','kopMono','kopFrak','kopElite'].map(f=>D.fonts.load(`${f==='CormI'?'italic ':''}400 40px ${f}`).catch(()=>0));
 const imgs=[...ov.querySelectorAll('img')].map(i=>i.decode?i.decode().catch(()=>0):0);
 Promise.all([ready,...fonts,...imgs]).then(()=>{if(dead||started)return;started=true;W.__opening.state='play';
   if(RM)renderRM(0);else render(SHORT?mapShort(0):0);loopStart()});

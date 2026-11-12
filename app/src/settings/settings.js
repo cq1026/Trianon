@@ -412,7 +412,7 @@ const secPersona=()=>{const g='persona';let h='';const L=pList();if(!PE||!L.find
   {const q=nd(g);const d=q.n*.055;q.n++;q.last=d;const W=172,H=Math.round(W*731/558);
    h+=`<div class="an c3ob c3av" data-g="${g}" data-d="${d.toFixed(3)}" data-k="o" data-r="-2" style="left:262px;top:168px;width:${W}px;height:${H}px">
     <div class="av-ph" style="left:${f1(W*.155)}px;top:${f1(H*.232)}px;width:${f1(W*.68)}px;height:${f1(H*.648)}px">${E.avatar?`<img class="av-img" src="${esc(E.avatar)}" alt="">`:''}<b>${esc(ini)}</b><em>${esc(E.name||'')}</em></div>
-    <img src="${O.frame}" alt="" style="width:${W}px"><span class="av-tip">${E.avatar?'点一下换头像':'点一下上传头像'}</span></div>`}
+    <img src="${O.frame}" alt="" style="width:${W}px"></div>`}
   h+=CD(g,276,410,150,52,1.6,`<div class="c3plq"><em>Persona</em><b>${E.id===pCur().id?'当前 · 正在使用':'备用人设'}</b></div>`,{r:7,stitch:false,spark:false});
   h+=CD(g,462,166,300,292,1.2,`<div class="pn-ed">
      <div class="pn-hd"><em>Carte de visite</em><b>${E.id===pCur().id?'当 前 人 设':'编 辑 人 设'}</b></div>

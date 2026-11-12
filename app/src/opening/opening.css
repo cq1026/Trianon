@@ -10,7 +10,7 @@ html.kop-hold body{content-visibility:hidden;visibility:hidden}
 #kOp #kop-vp{position:absolute}
 #kOp .kop-dlive{position:absolute;left:0;top:0;width:1440px;height:900px;overflow:visible;pointer-events:none}
 #kOp .kop-patch{position:absolute;display:block;max-width:none}
-@font-face{font-family:kopPinyon;src:url(asset:opening/pinyon.woff2) format('woff2')}
+
 
 @font-face{font-family:TrianonPlayfair;src:url(asset:opening/play.woff2) format('woff2');font-weight:400 900}
 @font-face{font-family:kopBodoni;src:url(asset:opening/bodoni.woff2) format('woff2');font-weight:400 900}
@@ -27,27 +27,27 @@ html.kop-hold body{content-visibility:hidden;visibility:hidden}
 #kOp #kop-tick{left:64px;top:56px;font:500 13px/1 TrianonPlexMono;letter-spacing:.32em;color:var(--ink);opacity:0}
 #kOp #kop-tick b{font-weight:500;color:var(--haze)}
 #kOp .kop-giant{white-space:nowrap;transform-origin:0 0}
-#kOp #kop-g1,#kOp #kop-g1s{font:400 700px/1 kopPinyon;}
+#kOp #kop-g1,#kOp #kop-g1s{font:400 700px/1 Pinyon;}
 #kOp #kop-g1{color:var(--ink)}
 #kOp #kop-g1s{color:var(--mist2)}
 #kOp #kop-g2{font:900 560px/1 kopBodoni;letter-spacing:-.02em}
 #kOp #kop-g2 span{display:inline-block;color:var(--mist2);-webkit-text-stroke:3px var(--ink);transform-origin:50% 80%}
-#kOp #kop-ghost{font:400 330px/1 kopPinyon;color:var(--mist);opacity:0}
+#kOp #kop-ghost{font:400 330px/1 Pinyon;color:var(--mist);opacity:0}
 #kOp #kop-badge{left:420px;top:298px;width:600px;height:264px;transform-origin:50% 50%}
 #kOp .kop-f{position:absolute;inset:0;display:none;white-space:nowrap;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;box-sizing:border-box}
 #kOp .kop-f.kop-on{display:flex}
 #kOp .kop-f svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 #kOp .kop-sh{box-shadow:0 2px 0 rgba(36,48,90,.10),0 14px 28px -12px rgba(36,48,90,.30)}
-#kOp #kop-f_pin{background:var(--iv);border:2px solid var(--ink);font:400 118px/1 kopPinyon;color:var(--ink);padding-top:18px}
+#kOp #kop-f_pin{background:var(--iv);border:2px solid var(--ink);font:400 118px/1 Pinyon;color:var(--ink);padding-top:18px}
 #kOp #kop-f_did{background:var(--mist2);border-radius:132px;font:900 96px/1 kopBodoni;font-variation-settings:'opsz' 11;color:var(--ink);letter-spacing:-.01em}
 #kOp #kop-f_frak{background:var(--iv);border:7px double var(--ink);font:400 112px/1 kopFrak;color:var(--ink)}
 #kOp #kop-f_type{background:#EEF1F6;border-radius:34px;font:400 86px/1 kopElite;color:var(--ink);text-shadow:0 0 1.2px rgba(36,48,90,.75),.6px .4px 0 rgba(36,48,90,.35);border:1.5px solid rgba(36,48,90,.25)}
 #kOp #kop-f_type i{position:absolute;left:30px;right:30px;bottom:46px;height:0;border-top:1.5px solid rgba(36,48,90,.35)}
 #kOp #kop-f_press{background:#F3F2EE;font:700 104px/1 TrianonPlayfair;font-style:normal;color:#E2E3E2;text-shadow:-1.5px -1.5px 0 #FFFFFF,1.6px 2.2px 1.4px rgba(36,48,90,.55);border:1px solid #E1E3E8}
-#kOp #kop-f_inv1{background:var(--ink);font:400 118px/1 kopPinyon;color:var(--iv);padding-top:18px}
+#kOp #kop-f_inv1{background:var(--ink);font:400 118px/1 Pinyon;color:var(--iv);padding-top:18px}
 #kOp #kop-f_wax{background:transparent;border-radius:0;overflow:visible}
 #kOp #kop-f_wax img{position:absolute;left:40px;top:-66px;width:520px;height:auto}
-#kOp #kop-f_wax span{position:relative;font:400 92px/1 kopPinyon;color:#7189B0;text-shadow:-1.5px -1.5px 1px rgba(226,234,246,.9),1.5px 2.5px 2px rgba(46,62,102,.55);padding-top:14px}
+#kOp #kop-f_wax span{position:relative;font:400 92px/1 Pinyon;color:#7189B0;text-shadow:-1.5px -1.5px 1px rgba(226,234,246,.9),1.5px 2.5px 2px rgba(46,62,102,.55);padding-top:14px}
 #kOp #kop-f_post{background:transparent;border-radius:0;overflow:visible}
 #kOp #kop-f_emb{background:linear-gradient(100deg,#93A7C7 0%,#C7D3E6 38%,#A9BAD4 62%,#93A7C7 100%);border-radius:132px;border:0}
 #kOp #kop-f_emb::after{content:"";position:absolute;inset:12px;border-radius:120px;border:2px dashed rgba(251,249,244,.85)}
@@ -56,9 +56,9 @@ html.kop-hold body{content-visibility:hidden;visibility:hidden}
 #kOp #kop-f_pen{background:var(--iv);border:1px solid var(--mist)}
 #kOp #kop-f_wc{background:transparent;border-radius:0;overflow:visible}
 #kOp #kop-f_wc img{position:absolute;left:-30px;top:-22px;width:660px;height:308px;mix-blend-mode:multiply;-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 78%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 78%,transparent 100%)}
-#kOp #kop-f_wc span{position:relative;font:400 118px/1 kopPinyon;color:var(--ink);padding-top:16px;mix-blend-mode:multiply}
+#kOp #kop-f_wc span{position:relative;font:400 118px/1 Pinyon;color:var(--ink);padding-top:16px;mix-blend-mode:multiply}
 #kOp #kop-f_vel{background:transparent;border:1px solid #C9CFDA}
-#kOp #kop-f_vel .kop-bk{position:absolute;font:400 124px/1 kopPinyon;color:var(--mist);filter:blur(3.5px);padding-top:20px;transform:translate(8px,6px)}
+#kOp #kop-f_vel .kop-bk{position:absolute;font:400 124px/1 Pinyon;color:var(--mist);filter:blur(3.5px);padding-top:20px;transform:translate(8px,6px)}
 #kOp #kop-f_vel .kop-vl{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.62)}
 #kOp #kop-f_vel .kop-fr{position:relative;font:500 30px/1 TrianonPlexMono;letter-spacing:.42em;color:var(--ink);margin-left:.42em}
 #kOp #kop-f_sil{background:var(--iv);border:1.5px solid #B9C1CE}
@@ -78,7 +78,7 @@ html.kop-hold body{content-visibility:hidden;visibility:hidden}
 #kOp #kop-num i{font-style:normal;color:var(--mist2);-webkit-text-stroke:0}
 #kOp #kop-slash{width:1440px;height:900px;opacity:0}
 #kOp .kop-band{white-space:nowrap;font:500 22px/1 TrianonPlexMono;letter-spacing:.5em;color:var(--haze);opacity:0;transform-origin:0 0}
-#kOp #kop-band2{font:400 64px/1 kopPinyon;letter-spacing:.04em;color:var(--mist)}
+#kOp #kop-band2{font:400 64px/1 Pinyon;letter-spacing:.04em;color:var(--mist)}
 #kOp #kop-rings{width:1440px;height:900px}
 #kOp #kop-reg{width:1440px;height:900px;opacity:0}
 #kOp .kop-pn{width:1440px;height:900px;opacity:0}
