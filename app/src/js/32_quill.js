@@ -1,26 +1,26 @@
 /* ===== 羽毛笔：等待时写 waiting，出字时沿着行滑过去，字在笔尖后面洇出来 =====
    字本身是真的 DOM 文字（可选中、可复制），笔的动作是装出来的。
-   平时笔就是输入栏右上角那支装饰羽毛笔；生成开始时它被拿起来，写完放回去。 */
+   平时看不见。生成开始时笔从这条回复右上角（推理框旁边）淡入，写 waiting；流式就接着写正文；
+   写完（非流式是整段到齐时）沿原路回到右上角淡出。 */
 const quill = (() => {
-  const PEN_TIP = [1 / 600, 110 / 200];          /* 图片里笔尖的位置（按宽高比例） */
-  const decor = document.querySelector('.field .fbow.quill');
-  const mk = cls => { const d = document.createElement('div'); d.className = 'qpen ' + cls; d.innerHTML = `<img alt="" src="${decor.getAttribute('src')}">`; document.body.appendChild(d); return d; };
+  const mk = cls => { const d = document.createElement('div'); d.className = 'qpen ' + cls; d.innerHTML = '<img alt="" src="asset:img/quill.webp">'; document.body.appendChild(d); return d; };
   const penSh = mk('sh'), pen = mk('main');
-  const P = { x: 0, y: 0, h: 0, rot: -24, op: 0, w: 150, mode: 'rest' };
+  const P = { x: 0, y: 0, h: 0, rot: -40, op: 0, w: 150, vis: false };
   const ek = (dt, tau) => 1 - Math.exp(-dt / tau);
   const sm = u => { u = clamp(u, 0, 1); return u * u * (3 - 2 * u); };
   const lerp = (a, b, t) => a + (b - a) * t;
   const enabled = () => S.settings.anim !== false && !document.body.classList.contains('rm');
-
-  /* 平时的位置：和装饰羽毛笔完全重合（用它的布局框和旋转角算笔尖） */
-  function restPose() {
-    const f = decor.offsetParent, fr = f.getBoundingClientRect();
-    const w = decor.offsetWidth, h = decor.offsetHeight;
-    const m = new DOMMatrixReadOnly(getComputedStyle(decor).transform === 'none' ? undefined : getComputedStyle(decor).transform);
-    const rot = Math.atan2(m.b, m.a) * 180 / Math.PI;
-    const ox = fr.left + decor.offsetLeft, oy = fr.top + decor.offsetTop + h / 2;       /* transform-origin: 0 50% */
-    const tx = w * PEN_TIP[0], ty = h * PEN_TIP[1] - h / 2, a = rot * Math.PI / 180;
-    return { x: ox + tx * Math.cos(a) - ty * Math.sin(a), y: oy + tx * Math.sin(a) + ty * Math.cos(a), rot, w };
+  const penW = () => innerWidth <= 760 ? 104 : 150;
+  /* 笔进出的地方：这条回复气泡的右上角外侧（推理框就在气泡顶上） */
+  const thread = document.getElementById('thread');
+  /* 进来时记住这个点相对气泡左上角的位置，回去时回到同一个点（气泡后来变宽也不跟着跑） */
+  let anchor = null;
+  function homeOf(n) {
+    const tr = thread.getBoundingClientRect();
+    if (!n || !n.b || !n.b.isConnected) return { x: P.x + 40, y: P.y - 40 };
+    const r = n.b.getBoundingClientRect();
+    if (!anchor || anchor.n !== n) anchor = { n, dx: Math.min(innerWidth - 14, r.right + 56) - r.left, dy: -34 };
+    return { x: Math.min(innerWidth - 14, r.left + anchor.dx), y: clamp(r.top + anchor.dy, tr.top + 6, tr.bottom - 20) };
   }
 
   /* ---------- 写入器：把文字逐字放进 DOM（先不可见），保持和 fmt() 一样的格式 ---------- */
@@ -127,6 +127,7 @@ const quill = (() => {
     if (how === 'flush') { s.main.flush(); }
     s.waitEl.remove();
     L.delete(s.m.id); if (cur === s) cur = null;
+    if (P.vis && !L.size) leave = { n: s.n, t: now() };       /* 笔沿原路回到右上角淡出 */
     bus.emit('ui:quill-end', s.m);
   }
 
@@ -156,19 +157,25 @@ const quill = (() => {
   function skip() { for (const s of [...L.values()]) { s.main.flush(); if (!['pending', 'reasoning', 'streaming'].includes(s.m.state)) finished(s); } }
 
   /* ---------- 每帧：决定笔在干什么 ---------- */
-  let last = now();
+  let last = now(), leave = null;
   const mult = w => clamp(1 + w.backlog() * .07, 1, 5);
   function frame() {
     const t = now(), dt = Math.min(.1, t - last); last = t;
     const on = enabled();
-    decor.style.visibility = on ? 'hidden' : '';
-    let pose = null, target = null, rotT = -56, hT = .3;
+    let pose = null, target = null, rotT = -56, hT = .3, want = 0;
     const s = cur && L.has(cur.m.id) ? cur : [...L.values()].pop() || null;
     if (on && s) {
+      want = 1; leave = null;
+      if (!P.vis) {            /* 刚开始：笔先出现在右上角，再滑过去 */
+        anchor = null; const h = homeOf(s.n); Object.assign(P, { x: h.x + 14, y: h.y - 12, h: .7, rot: -40, op: 0, w: penW(), vis: true, t0: t });
+        [...L.values()].forEach(x => { x.main.x = x.rw.x = x.wait.x = null; });
+      }
       const m = s.m, live = ['pending', 'reasoning', 'streaming'].includes(m.state);
       const hasMain = s.main.spans.length > (s.cont ? s.main.ri : 0) || (s.cont && m.state === 'streaming');
       const rsnOpen = s.n.rsn && s.n.rsn.classList.contains('open') && m.reasoning;
-      if (hasMain || m.state === 'streaming') {
+      if (t - P.t0 < .55) {     /* 先在右上角浮现一下，再过去写 */
+        const h = homeOf(s.n); target = { x: h.x, y: h.y }; hT = .7; rotT = -40;
+      } else if (hasMain || m.state === 'streaming') {
         /* 写正文：先让 waiting 淡掉 */
         if (s.wph !== 'gone') { s.waitEl.classList.add('fade'); s.wph = 'gone'; s.gone = t; }
         if (t - (s.gone || 0) > .3) pose = s.main.step(dt, mult(s.main), P);
@@ -187,27 +194,32 @@ const quill = (() => {
         else if (s.wph === 'hold') { s.wt += dt; target = s.wait.hover(); hT = .5; if (s.wt > .9) { s.waitEl.classList.add('fade'); s.wph = 'fade'; s.wt = 0; } }
         else if (s.wph === 'fade') { s.wt += dt; target = s.wait.start(); hT = .55; if (s.wt > .6) { s.wait.reset(); s.waitEl.classList.remove('fade'); s.wait.feed('waiting'); s.wph = 'write'; } }
         if (!pose && !target) target = s.wait.hover();
-      } else if (m.state === 'error') { target = { x: P.x, y: P.y }; hT = .35; rotT = -48; }
-      else finished(s);
+      } else finished(s);
     }
     if (pose) { P.mode = 'work'; P.x = pose.x; P.y = pose.y; P.h += (pose.h - P.h) * ek(dt, .04); rotT = -56 + 2.2 * pose.wob; }
     else if (target && on) {
       P.mode = 'work'; const k = ek(dt, .2);
       P.x += (target.x - P.x) * k; P.y += (target.y - P.y) * k; P.h += (hT - P.h) * k;
       [...L.values()].forEach(x => { x.main.x = x.rw.x = x.wait.x = null; });
-    } else {
-      P.mode = 'rest'; const g = restPose(), k = ek(dt, .22);
-      P.x += (g.x - P.x) * k; P.y += (g.y - P.y) * k; P.h += (0 - P.h) * k; rotT = g.rot; P.w = g.w;
-    }
+    } else if (leave && on && P.vis) {
+      /* 回去：朝右上角滑，越近越淡，到了就收起 */
+      const h = homeOf(leave.n), k = ek(dt, .16), el = t - leave.t;
+      P.x += (h.x - P.x) * k; P.y += (h.y - P.y) * k; P.h += (.7 - P.h) * k; rotT = -40;
+      const d = Math.hypot(h.x - P.x, h.y - P.y);
+      want = Math.min(clamp(d / 70, 0, 1), clamp((1.3 - el) / .5, 0, 1));
+      if (P.op < .02 && el > .2) { leave = null; P.vis = false; }
+    } else { P.vis = P.vis && P.op > .02; leave = null; }
     P.rot += (rotT - P.rot) * ek(dt, pose ? .06 : .2);
-    P.op += ((on && !document.body.classList.contains('st-open') ? 1 : 0) - P.op) * ek(dt, .2);
+    if (document.body.classList.contains('st-open') || !on) want = 0;
+    P.op += (want - P.op) * ek(dt, want < P.op && leave ? .08 : .2);
+    if (!want && P.op < .02) P.vis = !!(on && s);
     const tr = (x, y) => `translate(${x.toFixed(2)}px,${y.toFixed(2)}px) rotate(${P.rot.toFixed(2)}deg)`;
     pen.style.transform = tr(P.x, P.y - P.h * 9); penSh.style.transform = tr(P.x + 2 + P.h * 7, P.y + 3 + P.h * 6);
     pen.style.opacity = penSh.style.opacity = P.op.toFixed(3);
     pen.style.setProperty('--qw', P.w + 'px'); penSh.style.setProperty('--qw', P.w + 'px');
     requestAnimationFrame(frame);
   }
-  requestAnimationFrame(() => { const g = restPose(); Object.assign(P, g); frame(); });
+  requestAnimationFrame(frame);
 
   return { sync, writing, skip, enabled, sessions: L };
 })();
