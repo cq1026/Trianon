@@ -11,6 +11,10 @@ html { cursor: var(--cu-default); }
 :root { --ivory: #FBF8F1; --mid: #2E3A63; --slate: #5B6C93; --inkb: #55688F; --blush-ink: #9A7584; }
 @font-face { font-family: Pinyon; src: url("asset:fonts/pinyon.woff2") format("woff2"); }
 @font-face { font-family: CormI; src: url("asset:fonts/cormi.woff2") format("woff2"); font-style: italic; font-weight: 300 700; }
+/* 花体、斜体字里没有中文：中文改用系统里的楷体或宋体（都没有时退回下一个字体） */
+@font-face { font-family: Pinyon; src: local("Kaiti SC"), local("STKaiti"), local("KaiTi"), local("BiauKai"), local("Songti SC"), local("STSong"), local("Noto Serif CJK SC"), local("Source Han Serif SC"); unicode-range: U+2E80-2FFF, U+3000-303F, U+3040-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF; }
+@font-face { font-family: PinyonX; src: local("Kaiti SC"), local("STKaiti"), local("KaiTi"), local("BiauKai"), local("Songti SC"), local("STSong"), local("Noto Serif CJK SC"), local("Source Han Serif SC"); unicode-range: U+2E80-2FFF, U+3000-303F, U+3040-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF; }
+@font-face { font-family: CormI; font-style: italic; font-weight: 300 700; src: local("Kaiti SC"), local("STKaiti"), local("KaiTi"), local("BiauKai"), local("Songti SC"), local("STSong"), local("Noto Serif CJK SC"), local("Source Han Serif SC"); unicode-range: U+2E80-2FFF, U+3000-303F, U+3040-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF; }
 :where(a[href], button, select, summary, label[for], [role="button"], [role="tab"], [role="link"], [role="menuitem"], [role="option"], [role="checkbox"], [role="switch"], input[type="checkbox"], input[type="radio"], input[type="range"]) { cursor: var(--cu-pointer); }
 :where(input:not([type]), input[type="text"], input[type="search"], textarea, [contenteditable="true"]) { cursor: var(--cu-text); }
 :where(button:disabled, input:disabled, textarea:disabled, [aria-disabled="true"]) { cursor: var(--cu-not-allowed); }

@@ -165,8 +165,10 @@ const setName=name=>{
   nameTry=0;
   const groups=[...sc.querySelectorAll('.c5w.l2')];let w=0,size=78;
   groups.forEach((g,i)=>{g.textContent='';const t=document.createElementNS(NS,'text');t.setAttribute('x','0');t.setAttribute('y','0');
-    t.setAttribute('style',`font-family:Pinyon,serif;font-size:${size}px`);t.textContent=name;g.appendChild(t);
-    if(i===0){w=t.getComputedTextLength();if(w>360){size=Math.max(40,Math.floor(78*360/w));t.style.fontSize=size+'px';w=t.getComputedTextLength()}}
+    /* 名字里有中文：花体字没有中文字形，换成楷体/宋体，字号按中文缩小、笔画调细（系统没有楷体宋体时退回细体） */
+    const cjk=/[\u2e80-\u9fff\uf900-\ufaff]/.test(name);if(i===0&&cjk)size=54;
+    t.setAttribute('style',cjk?`font-family:Pinyon,"Kaiti SC","STKaiti","KaiTi","Songti SC","STSong",serif;font-weight:300;letter-spacing:.06em;font-size:${size}px`:`font-family:Pinyon,serif;font-size:${size}px`);t.textContent=name;g.appendChild(t);
+    if(i===0){w=t.getComputedTextLength();const mx=cjk?300:360;if(w>mx){size=Math.max(cjk?30:40,Math.floor(size*mx/w));t.style.fontSize=size+'px';w=t.getComputedTextLength()}}
     else t.style.fontSize=size+'px'});
   const xe=L2X+w,Y=L2Y,F=v=>v.toFixed(1);
   const d=`M${F(xe-6)},${Y-9} C${F(xe+4)},${Y+3} ${F(xe+20)},${Y+8} ${F(xe+34)},${Y+2} C${F(xe+44)},${Y-3} ${F(xe+44)},${Y-14} ${F(xe+37)},${Y-15} C${F(xe+30)},${Y-16} ${F(xe+32)},${Y-4} ${F(xe+41)},${Y-2} C${F(xe+47)},${Y-1} ${F(xe+51)},${Y-7} ${F(xe+54)},${Y-12}`;
@@ -178,6 +180,7 @@ window.__v11frame=window.__emptyFrame=frame;
 window.__emptyRest=()=>{t0=performance.now()-5700};
 frame(window.__emptyAtRest?5.7:0);
 const run=()=>{tod='';t0=performance.now()-(window.__emptyAtRest?5700:0);
-  const loop=()=>{if(vE.classList.contains('on')||vE.classList.contains('out'))frame(Math.max(0,(performance.now()-t0)/1000));requestAnimationFrame(loop)};requestAnimationFrame(loop)};
+  /* 省电：空白页不在显示时，每 0.25 秒看一次 */
+  const loop=()=>{if(vE.classList.contains('on')||vE.classList.contains('out')){frame(Math.max(0,(performance.now()-t0)/1000));requestAnimationFrame(loop)}else setTimeout(loop,250)};requestAnimationFrame(loop)};
 (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{setName(window.__emptyNameNow||'');run()});
 })();

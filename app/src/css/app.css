@@ -529,3 +529,5 @@ body.mdl-open .mdl, .mdl.anim { display: block; }
   .field .ci { padding-right: 50px !important; }
   .field .ph { right: 54px !important; }
 }
+
+.ppop .pp-av { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 1px rgba(76, 93, 136, .35); margin-right: 8px; vertical-align: middle; }

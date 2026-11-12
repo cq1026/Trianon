@@ -3,14 +3,14 @@
 const rail = (() => {
   const R = $('rail'), edge = $('edge'), btn = $('railBtn'), b = document.body;
   const ITEMS = [
-    [{ k: 'new', fr: 'Nouveau', zh: '新的对话', img: 'asset:img/tag_bow.png' },
-     { k: 'history', fr: 'Mémoire', zh: '聊天记录', img: 'asset:img/tag_notes.png' },
-     { k: 'chars', fr: 'Personnages', zh: '角色', img: 'asset:img/tag_cameo.png' },
-     { k: 'lore', fr: 'Grimoire', zh: '世界书', img: 'asset:img/tag_rose.png' },
-     { k: 'gen', fr: 'Plume', zh: '生成参数', img: 'asset:img/tag_inkwell.png' },
-     { k: 'look', fr: 'Parure', zh: '外观', img: 'asset:img/tag_fan.png' }],
-    [{ k: 'persona', fr: 'Persona', zh: '人设', img: 'asset:img/tag_heartkey.png' },
-     { k: 'settings', fr: 'Réglages', zh: '设置', img: 'asset:img/tag_harp.png' }]
+    [{ k: 'new', fr: 'Nouveau', zh: '新的对话', img: 'asset:img/tag_bow.webp' },
+     { k: 'history', fr: 'Mémoire', zh: '聊天记录', img: 'asset:img/tag_notes.webp' },
+     { k: 'chars', fr: 'Personnages', zh: '角色', img: 'asset:img/tag_cameo.webp' },
+     { k: 'lore', fr: 'Grimoire', zh: '世界书', img: 'asset:img/tag_rose.webp' },
+     { k: 'gen', fr: 'Plume', zh: '生成参数', img: 'asset:img/tag_inkwell.webp' },
+     { k: 'look', fr: 'Parure', zh: '外观', img: 'asset:img/tag_fan.webp' }],
+    [{ k: 'persona', fr: 'Persona', zh: '人设', img: 'asset:img/tag_heartkey.webp' },
+     { k: 'settings', fr: 'Réglages', zh: '设置', img: 'asset:img/tag_harp.webp' }]
   ];
   const grps = R.querySelectorAll('.grp');
   let i = 0;

@@ -119,7 +119,7 @@ const quill = (() => {
     if (m.contBase) {            /* 续写：已有的字直接显示，笔停在末尾等，不写 waiting */
       s.main.feed(turn.disp(m, m.text.slice(0, m.contBase))); s.main.flush(); s.cont = true; s.wph = 'gone'; wait.classList.add('fade');
     }
-    L.set(m.id, s); cur = s;
+    L.set(m.id, s); cur = s; wake();
     return s;
   }
   function end(s, how) {
@@ -157,7 +157,9 @@ const quill = (() => {
   function skip() { for (const s of [...L.values()]) { s.main.flush(); if (!['pending', 'reasoning', 'streaming'].includes(s.m.state)) finished(s); } }
 
   /* ---------- 每帧：决定笔在干什么 ---------- */
-  let last = now(), leave = null;
+  let last = now(), leave = null, sleeping = false;
+  /* 省电：没有在写、笔也收起来时停止逐帧刷新，有新会话再叫醒 */
+  const wake = () => { if (sleeping) { sleeping = false; last = now(); requestAnimationFrame(frame); } };
   const mult = w => clamp(1 + w.backlog() * .07, 1, 5);
   function frame() {
     const t = now(), dt = Math.min(.1, t - last); last = t;
@@ -218,6 +220,7 @@ const quill = (() => {
     pen.style.transform = tr(P.x, P.y - P.h * 9); penSh.style.transform = tr(P.x + 2 + P.h * 7, P.y + 3 + P.h * 6);
     pen.style.opacity = penSh.style.opacity = P.op.toFixed(3);
     pen.style.setProperty('--qw', P.w + 'px'); penSh.style.setProperty('--qw', P.w + 'px');
+    if (!L.size && !leave && P.op < .005) { sleeping = true; return; }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

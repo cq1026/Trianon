@@ -29,7 +29,9 @@ const uR=gl.getUniformLocation(pr,'uRes'),uT=gl.getUniformLocation(pr,'uT'),uD=g
 const rmF=matchMedia('(prefers-reduced-motion: reduce)');/* 夜间主题：body[data-theme=dark] 时雾慢慢变成深墨蓝 */
 const want=()=>document.body.dataset.theme==='dark'?1:0;
 const draw=n=>{gl.uniform2f(uR,cv.width,cv.height);gl.uniform1f(uT,(n-t0)/1000);gl.uniform1f(uD,dk);gl.drawArrays(gl.TRIANGLES,0,3)};
-(function loop(n){const w=want();dk+=(w-dk)*(rmF.matches?1:.06);if(Math.abs(w-dk)<.002)dk=w;draw(n);if(!rmF.matches)requestAnimationFrame(loop)})(performance.now());
+let lastF=0;
+/* 省电：雾本来就流得很慢，每秒画 30 帧就够了 */
+(function loop(n){if(n-lastF<32&&!rmF.matches){setTimeout(()=>requestAnimationFrame(loop),Math.max(1,30-(n-lastF)));return}lastF=n;const w=want();dk+=(w-dk)*(rmF.matches?1:.06);if(Math.abs(w-dk)<.002)dk=w;draw(n);if(!rmF.matches)requestAnimationFrame(loop)})(performance.now());
 window.__fogRedraw=()=>{dk=want();draw(performance.now())};}
 (function(){const n=document.createElement('canvas');n.width=n.height=128;const g=n.getContext('2d'),d=g.createImageData(128,128);let s=1387;
 for(let i=0;i<d.data.length;i+=4){s=(s*1664525+1013904223)>>>0;const v=s>>>24;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}

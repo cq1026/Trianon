@@ -11,7 +11,7 @@ html.kop-hold body{content-visibility:hidden;visibility:hidden}
 #kOp .kop-dlive{position:absolute;left:0;top:0;width:1440px;height:900px;overflow:visible;pointer-events:none}
 #kOp .kop-patch{position:absolute;display:block;max-width:none}
 @font-face{font-family:kopPinyon;src:url(asset:opening/pinyon.woff2) format('woff2')}
-@font-face{font-family:kopCorm;src:url(asset:opening/corm.woff2) format('woff2');font-weight:300 700;font-style:italic}
+
 @font-face{font-family:TrianonPlayfair;src:url(asset:opening/play.woff2) format('woff2');font-weight:400 900}
 @font-face{font-family:kopBodoni;src:url(asset:opening/bodoni.woff2) format('woff2');font-weight:400 900}
 @font-face{font-family:TrianonPlexMono;src:url(asset:opening/mono.woff2) format('woff2')}
@@ -66,7 +66,7 @@ html.kop-hold body{content-visibility:hidden;visibility:hidden}
 #kOp #kop-f_term{background:#EEF1F6;border-radius:132px;border:2px solid var(--ink);font:500 70px/1 TrianonPlexMono;color:var(--ink);letter-spacing:-.01em}
 #kOp #kop-f_term u{text-decoration:none;display:inline-block;width:.55em;height:.9em;background:var(--ink);margin-left:.08em;vertical-align:-.08em}
 #kOp #kop-f_cyan{background:#8FA4C6}
-#kOp #kop-f_corm{background:var(--iv);border:1px solid var(--mist);font:500 54px/1 kopCorm;font-style:italic;color:var(--ink);letter-spacing:.3em}
+#kOp #kop-f_corm{background:var(--iv);border:1px solid var(--mist);font:500 54px/1 CormI;font-style:italic;color:var(--ink);letter-spacing:.3em}
 #kOp #kop-f_corm span{margin-left:.32em}
 #kOp #kop-f_final{background:var(--iv)}
 #kOp #kop-cap{left:0;top:600px;width:1440px;text-align:center;font:500 13px/1 TrianonPlexMono;letter-spacing:.42em;color:var(--haze);opacity:0}

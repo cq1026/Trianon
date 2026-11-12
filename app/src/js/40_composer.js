@@ -68,7 +68,7 @@
   function drawPop() {
     const L = T.app.locks();
     pop.innerHTML = `<div class="pp-hd"><em>Persona</em><b>以谁的身份写信</b></div>
-      ${S.personas.map(p => `<button type="button" class="pp-it${p.id === S.personaId ? ' on' : ''}" data-id="${esc(p.id)}"><b>${esc(p.name || '未命名')}</b>${p.id === S.defaultPersonaId ? '<i>默认</i>' : ''}</button>`).join('')}
+      ${S.personas.map(p => `<button type="button" class="pp-it${p.id === S.personaId ? ' on' : ''}" data-id="${esc(p.id)}">${p.avatar ? `<img class="pp-av" src="${esc(p.avatar)}" alt="">` : ''}<b>${esc(p.name || '未命名')}</b>${p.id === S.defaultPersonaId ? '<i>默认</i>' : ''}</button>`).join('')}
       <div class="pp-lk"><label><input type="checkbox" data-lk="chat"${L.chat ? ' checked' : ''}> 锁定到这段对话</label>
       <label><input type="checkbox" data-lk="char"${L.char ? ' checked' : ''}${S.char.id ? '' : ' disabled'}> 锁定到 ${esc(S.char.name || '这位角色')}</label>
       <label><input type="checkbox" data-lk="def"${L.isDefault ? ' checked disabled' : ''}> 设为默认</label></div>
@@ -118,7 +118,10 @@
     }
     am %= 360; ah %= 360;
     wMH.setAttribute('transform', `rotate(${am.toFixed(2)} 24 32)`); wHH.setAttribute('transform', `rotate(${ah.toFixed(2)} 24 32)`);
-    requestAnimationFrame(hands);
+    /* 省电：空闲且指针已经走到真实时间时，每 0.25 秒看一次就够了 */
+    const [tm2] = realAng();
+    const off = fwd(am, tm2); if (!send.classList.contains('busy') && (off < .3 || off > 359.5)) setTimeout(() => { last = now(); requestAnimationFrame(hands); }, 250);
+    else requestAnimationFrame(hands);
   })();
   send.addEventListener('pointerdown', () => { send.classList.remove('press'); void send.offsetWidth; send.classList.add('press'); });
   send.addEventListener('animationend', () => send.classList.remove('press'));

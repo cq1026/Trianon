@@ -164,7 +164,7 @@ const source = (() => {
     if (e.target.closest('#mpMore')) { setPop(false, true); setMdl(true); return; }
     if (e.target.closest('#mpKey')) openKeys();
   });
-  pop.addEventListener('submit', e => { e.preventDefault(); const i = $('mpPass'); const v = i ? i.value : ''; if (i) i.value = ''; if (unlock(v)) flash('已解锁：口令只留在这个页面的内存里'); });
+  pop.addEventListener('submit', e => { e.preventDefault(); const i = $('mpPass'); const v = i ? i.value : ''; if (i) { i.value = ''; i.blur(); } if (unlock(v)) flash('已解锁：口令只留在这个页面的内存里'); });
   pop.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.mp-more')) { e.preventDefault(); e.target.click(); } });
 
   /* ---- 模型目录 ---- */
@@ -217,7 +217,7 @@ const source = (() => {
   list.addEventListener('click', e => { const a = e.target.closest('button[data-a]'); if (!a) return; if (a.dataset.a === 'key') { setMdl(false); if (T.settings) T.settings.open('connection'); } else if (a.dataset.a === 'retry') fetchModels(); });
   list.addEventListener('submit', e => {
     e.preventDefault(); const f = e.target;
-    if (f.dataset.a === 'unlock') { const i = $('mdPass'); const v = i ? i.value : ''; if (i) i.value = ''; if (unlock(v)) flash('已解锁：口令只留在这个页面的内存里'); }
+    if (f.dataset.a === 'unlock') { const i = $('mdPass'); const v = i ? i.value : ''; if (i) { i.value = ''; i.blur(); } if (unlock(v)) flash('已解锁：口令只留在这个页面的内存里'); }
     else if (f.dataset.a === 'manual') { const v = ($('mdMan').value || '').trim(); if (v) { set({ source: 'external', model: v }); setTimeout(() => setMdl(false), RM() ? 0 : 260); } }
   });
   function setMdl(v) {

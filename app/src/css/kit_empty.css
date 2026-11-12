@@ -104,4 +104,4 @@
 #vEmpty .hall .dsep::before { background: linear-gradient(90deg, transparent, rgba(141, 151, 180, 0.6)); }
 #vEmpty .hall .dsep::after { background: linear-gradient(90deg, rgba(141, 151, 180, 0.6), transparent); }
 #vEmpty .hall .dsep { color: rgba(30, 39, 72, 0.5); }
-@font-face { font-family: CormI; src: url("asset:kit/bae1234f6f.woff2") format("woff2"); font-style: italic; font-weight: 300 700; }
+/* （原版这里还有一份 CormI 字体，数据是坏的，会盖掉 base.css 里好的那份，已删除） */

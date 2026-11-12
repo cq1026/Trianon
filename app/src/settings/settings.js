@@ -312,7 +312,7 @@ const STK=(g,x,y,w,r,img,o={})=>DC(g,x,y,r,`<img src="${img}" alt="" style="widt
 const dymo=(txt,cls='')=>`<span class="c2dy ${cls}">${txt}</span>`;
 
 /* ---------------------------------------------------------------- the common desk: board, masthead, index */
-const IMG={lily:'asset:settings/sk_lily.png',fmn:'asset:settings/sk_fmn.png',bfly:'asset:settings/sk_bfly.png',moon:'asset:settings/sk_moon.png',key:'asset:settings/sk_key.png',wlily:'asset:settings/wl_lily.png'};
+const IMG={lily:'asset:settings/sk_lily.webp',fmn:'asset:settings/sk_fmn.webp',bfly:'asset:settings/sk_bfly.webp',moon:'asset:settings/sk_moon.webp',key:'asset:settings/sk_key.webp',wlily:'asset:settings/wl_lily.webp'};
 const scratches=(W,H,seed)=>{const r=RNG(seed);let o='';for(let i=0;i<34;i++){const x=r()*W,y=r()*H,l=40+r()*220,a=(-.5+r()*.5)+(r()<.3?1.6:0),cx=x+Math.cos(a)*l*.5+(r()-.5)*40,cy=y+Math.sin(a)*l*.5+(r()-.5)*40;
   o+=`<path d="M${f1(x)},${f1(y)} Q${f1(cx)},${f1(cy)} ${f1(x+Math.cos(a)*l)},${f1(y+Math.sin(a)*l)}" stroke="rgba(255,255,255,${(.10+r()*.16).toFixed(2)})" stroke-width="${(.5+r()*.9).toFixed(2)}" fill="none" stroke-linecap="round"/>`}
   for(let i=0;i<10;i++){const x=r()*W,y=r()*H,l=60+r()*160,a=r()*3.14;o+=`<path d="M${f1(x)},${f1(y)} l${f1(Math.cos(a)*l)},${f1(Math.sin(a)*l)}" stroke="rgba(52,66,112,.07)" stroke-width=".7"/>`}return o};
@@ -411,17 +411,17 @@ const secPersona=()=>{const g='persona';let h='';const L=pList();if(!PE||!L.find
   h+=P(g,264,122,300,34,-2,null,dymo('人设 Persona · 你在故事里是谁','c2lt'),{cls:'c2-strip'});
   {const q=nd(g);const d=q.n*.055;q.n++;q.last=d;const W=172,H=Math.round(W*731/558);
    h+=`<div class="an c3ob c3av" data-g="${g}" data-d="${d.toFixed(3)}" data-k="o" data-r="-2" style="left:262px;top:168px;width:${W}px;height:${H}px">
-    <div class="av-ph" style="left:${f1(W*.155)}px;top:${f1(H*.232)}px;width:${f1(W*.68)}px;height:${f1(H*.648)}px"><b>${esc(ini)}</b><em>${esc(E.name||'')}</em></div>
-    <img src="${O.frame}" alt="" style="width:${W}px"></div>`}
+    <div class="av-ph" style="left:${f1(W*.155)}px;top:${f1(H*.232)}px;width:${f1(W*.68)}px;height:${f1(H*.648)}px">${E.avatar?`<img class="av-img" src="${esc(E.avatar)}" alt="">`:''}<b>${esc(ini)}</b><em>${esc(E.name||'')}</em></div>
+    <img src="${O.frame}" alt="" style="width:${W}px"><span class="av-tip">${E.avatar?'点一下换头像':'点一下上传头像'}</span></div>`}
   h+=CD(g,276,410,150,52,1.6,`<div class="c3plq"><em>Persona</em><b>${E.id===pCur().id?'当前 · 正在使用':'备用人设'}</b></div>`,{r:7,stitch:false,spark:false});
   h+=CD(g,462,166,300,292,1.2,`<div class="pn-ed">
      <div class="pn-hd"><em>Carte de visite</em><b>${E.id===pCur().id?'当 前 人 设':'编 辑 人 设'}</b></div>
      <label class="pn-f"><span>名字 <small>替换 {{user}}</small></span><input id="stPnName" type="text" maxlength="40" value="${esc(E.name)}" autocomplete="off" spellcheck="false"></label>
      <label class="pn-f"><span>描述 <small>交给后端拼进提示词</small></span><textarea id="stPnDesc" rows="4" maxlength="2000" spellcheck="false" placeholder="外貌、身份、和角色的关系……">${esc(E.desc||'')}</textarea></label>
-     <div class="pn-acts">${E.id===pCur().id?'<span class="pn-on">✦ 正在使用</span>':tagBtn('设为当前','pnUse')}${APP.S.defaultPersonaId===E.id?'<span class="pn-on">默认</span>':tagBtn('设为默认','pnDef')}${tagBtn('新建','pnNew')}${L.length>1?tagBtn('删除','pnDel'):''}</div></div>`,{tone:'milk',band:40});
+     <div class="pn-acts">${E.id===pCur().id?'<span class="pn-on">✦ 正在使用</span>':tagBtn('设为当前','pnUse')}${APP.S.defaultPersonaId===E.id?'<span class="pn-on">默认</span>':tagBtn('设为默认','pnDef')}${tagBtn('新建','pnNew')}${E.avatar?tagBtn('移除头像','pnAvDel'):''}${L.length>1?tagBtn('删除','pnDel'):''}</div></div>`,{tone:'milk',band:40});
   h+=TP(g,560,152,74,22,6,'blue');
   h+=CD(g,262,484,520,286,-.8,`<div class="pn-ls"><div class="pn-lh"><em>Tous</em><b>全部人设</b><small>${L.length} 位 · 点一下编辑</small></div>
-     ${L.map(p=>`<button type="button" class="pn-row${p.id===PE?' sel':''}${p.id===pCur().id?' cur':''}" data-a="pnPick" data-id="${esc(p.id)}"><b>${esc(p.name||'未命名')}</b><span>${esc((p.desc||'还没有描述').slice(0,46))}</span>${p.id===pCur().id?'<i>当前</i>':''}</button>`).join('')}</div>`,{tone:'cream',rule:{y0:58,gap:34}});
+     ${L.map(p=>`<button type="button" class="pn-row${p.id===PE?' sel':''}${p.id===pCur().id?' cur':''}" data-a="pnPick" data-id="${esc(p.id)}">${p.avatar?`<img class="pn-av" src="${esc(p.avatar)}" alt="">`:''}<b>${esc(p.name||'未命名')}</b><span>${esc((p.desc||'还没有描述').slice(0,46))}</span>${p.id===pCur().id?'<i>当前</i>':''}</button>`).join('')}</div>`,{tone:'cream',rule:{y0:58,gap:34}});
   h+=OB(g,800,418,150,8,O.quills,{sh:[20,60,6,12]});
   h+=OB(g,806,140,150,-6,O.dove,{dec:1});
   h+=CD(g,792,640,180,120,2,`<div class="c2nt s">人设存在本机浏览器里。发送时把当前人设的名字和描述交给后端，替换提示词里的 <code>{{user}}</code>。</div>`,{tone:'silver',stitch:false});
@@ -453,7 +453,7 @@ const secAppearance=()=>{const P_=V.appearance,g='appearance';let h='';
   {const q=nd(g);const d=q.n*.055;q.n++;q.last=d;const W=262,H=Math.round(W*701/402);
    h+=`<div class="an c3ob c3mir" data-g="${g}" data-d="${d.toFixed(3)}" data-k="o" data-r="0" style="left:716px;top:96px;width:${W}px;height:${H}px">
     <i class="c3sh" style="left:24%;width:52%;bottom:2px;height:14px"></i><img src="${O.mirror}" alt="" style="width:${W}px">
-    <div class="mir-gl" style="left:${f1(W*.142)}px;top:${f1(H*.096)}px;width:${f1(W*.716)}px;height:${f1(H*.552)}px"><div class="st-pv" id="stPv"><div class="pv-win"><img class="pv-st" src="asset:settings/bow.png" alt="" aria-hidden="true">
+    <div class="mir-gl" style="left:${f1(W*.142)}px;top:${f1(H*.096)}px;width:${f1(W*.716)}px;height:${f1(H*.552)}px"><div class="st-pv" id="stPv"><div class="pv-win"><img class="pv-st" src="asset:settings/bow.webp" alt="" aria-hidden="true">
      <div class="pv-th"><div class="pv-u">明早去玫瑰园吗？</div><div class="pv-who">${esc((APP.S.char.name||'MUSE').toUpperCase().split('').join(' '))}</div><div class="pv-k">好，雾散之前出发。</div></div>
      <div class="pv-cmp"><span><em>Écrivez-moi</em> 说一句话…</span><i></i></div></div></div><i class="mir-sheen"></i></div></div>`}
   h+=CD(g,734,568,232,64,-1,`<div class="c3pvc"><span class="pv-cl"><em>aperçu</em><b>镜 中 预 览</b></span><span class="pv-ft" id="stPvF">雾蓝日间 · 14.5 px · 标准</span></div>`,{r:8,stitch:false,spark:false,z:4});
@@ -526,17 +526,16 @@ const keyHTML=()=>`<div class="kk" id="stKk"><div class="cv-hd"><em>Clef</em><b>
     <p class="kk-n">口令忘了，存的钥匙就作废，只能删除重存。</p>
     <div class="kk-a">${tagBtn('保存','kSave','stKSave')}${tagBtn('删除','kDel','stKDel')}<i class="kk-gap"></i>${tagBtn('解锁','kUnlock')}${tagBtn('锁定','kLock')}</div>
     <div class="kk-st" id="stKst" role="status" aria-live="polite"></div>
-    <div class="kk-g kk-m"><label for="stModel">模型</label><span class="kk-mr"><input id="stModel" list="stModelL" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="从列表选，或者手填"><datalist id="stModelL"></datalist>${tagBtn('刷新列表','kList')}</span></div>
+    <div class="kk-g kk-m"><label for="stModel">模型</label><span class="kk-mr"><button type="button" class="kk-pick" id="stModel" data-a="kPick" aria-haspopup="dialog"><b id="stModelV"></b><i aria-hidden="true">⌄</i></button>${tagBtn('刷新列表','kList')}</span></div>
     <p class="kk-n kk-mn" id="stKm"></p></div>`;
 let kMsg='',kDelArm=0;
 const drawKey=()=>{const R=SRC();if(!R||!$('stKk'))return;const K=R.key,G=R.get(),ext=G.source==='external';
   $('stKs').textContent=!K.checked?'正在查询…':K.saved?'已存 · 尾号 '+K.last4:'还没存';
   const lock=K.saved?(R.unlocked()?'已解锁：外部来源可以生成':'已锁定：外部来源暂时不能生成，先输口令解锁'):'先保存钥匙';
   const ms=R.mState==='loading'?'正在拉取模型列表…':R.mState==='error'?R.mErr:R.mState==='ok'?`模型列表 ${R.models.length} 个`:'';
-  $('stKst').innerHTML=`<b>${esc(kMsg||(R.busy?'正在交给宿主…':lock))}</b>${ms?`<small>${esc(ms)}</small>`:''}`;
-  const m=$('stModel');m.disabled=!ext;if(document.activeElement!==m)m.value=G.model||'';
+  $('stKst').innerHTML=`<b>${esc(kMsg||(R.busy?'正在交给宿主…':lock))}</b>${ms?(R.mState==='ok'&&ext?`<button type="button" class="kk-ms" data-a="kPick">${esc(ms)} · 点开选择</button>`:`<small>${esc(ms)}</small>`):''}`;
+  const m=$('stModel');m.disabled=!ext;$('stModelV').textContent=ext?(G.model||'选择模型'):'内置来源不使用';$('stModelV').classList.toggle('ph',!ext||!G.model);
   $('stKm').textContent=ext?'也可以在输入栏的模型标签里切换。':'内置来源不使用这些参数。';$('stKk').classList.toggle('bi',!ext);
-  $('stModelL').innerHTML=R.models.map(x=>`<option value="${esc(x.id)}">`).join('');
   const d=$('stKDel');if(d)d.querySelector('.tg-t').textContent=kDelArm>Date.now()?'确认删除':'删除'};
 const secConnection=()=>{const g='connection';let h='';
   h+=P(g,250,112,440,240,-1.2,'vellum','',{torn:'rb',cls:'deco'});
@@ -552,7 +551,7 @@ const drawConn=()=>{const a=$('stCn'),b=$('stLg');if(a)a.innerHTML=connHTML();if
 /* ---------------------------------------------------------------- DOM */
 const defs=document.createElementNS('http://www.w3.org/2000/svg','svg');defs.setAttribute('width','0');defs.setAttribute('height','0');defs.style.position='absolute';
 defs.innerHTML=`<defs><linearGradient id="stPaperG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FDFBF7"/><stop offset="1" stop-color="#F7F3EC"/></linearGradient><linearGradient id="stPaperR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FDF9F8"/><stop offset="1" stop-color="#F8F0F1"/></linearGradient>
- <pattern id="c2Grain" patternUnits="userSpaceOnUse" width="256" height="256"><image href="asset:settings/grain.png" width="256" height="256"/></pattern>
+ <pattern id="c2Grain" patternUnits="userSpaceOnUse" width="256" height="256"><image href="asset:settings/grain.webp" width="256" height="256"/></pattern>
  <radialGradient id="c2Stain"><stop offset="0" stop-color="rgba(196,170,120,.10)"/><stop offset=".7" stop-color="rgba(196,170,120,.05)"/><stop offset="1" stop-color="rgba(196,170,120,0)"/></radialGradient>
  <clipPath id="c2TagC"><path d="${tagShape(156,266,22)}"/></clipPath></defs>`;b.appendChild(defs);
 const root=document.createElement('div');root.id='stSet';root.setAttribute('role','dialog');root.setAttribute('aria-label','设置');root.setAttribute('aria-hidden','true');
@@ -598,7 +597,7 @@ const save=(key,val)=>{const [grp,k]=key.split('.');
 const fitSheet=()=>{const mob=innerWidth<=760;const z=mob?1:Math.min(1,(innerWidth-6)/1000,(innerHeight-6)/890),W=innerWidth/z,H=innerHeight/z;
   root.style.setProperty('--stz',z.toFixed(3));root.style.setProperty('--stl',(W>=1124?124:Math.max(0,(W-980)/2)).toFixed(1)+'px');root.style.setProperty('--stt',Math.max(0,Math.min(18,(H-864)/2)).toFixed(1)+'px')};
 addEventListener('resize',fitSheet);
-const open=(sec)=>{const t=sT();fitSheet();if(!S.open){clearTimeout(S.lyT);b.classList.add('ly-st');S.open=true;S.oT=t;root.classList.add('on');root.setAttribute('aria-hidden','false');b.classList.add('st-open');
+const open=(sec)=>{const t=sT();stWake();fitSheet();if(!S.open){clearTimeout(S.lyT);b.classList.add('ly-st');S.open=true;S.oT=t;root.classList.add('on');root.setAttribute('aria-hidden','false');b.classList.add('st-open');
     go(sec||S.lastSec,true);S.secT=t+.42;S.marks.open=t}
   else if(sec)go(sec)};
 const close=()=>{if(!S.open)return;const t=sT();S.open=false;S.cT=t;root.setAttribute('aria-hidden','true');b.classList.remove('st-open');S.marks.close=t;
@@ -692,6 +691,7 @@ root.addEventListener('click',e=>{const t=e.target;
   const L=APP.S.personas;
   if(act==='pnPick'){PE=a.dataset.id;rebuild('persona')}
   else if(act==='pnUse'){APP.setPersona(PE);rebuild('persona');showSaved()}
+  else if(act==='pnAvDel'){const p=pList().find(x=>x.id===PE);if(p){delete p.avatar;APP.savePersonas();APP.bus.emit('ui:persona');rebuild('persona');showSaved()}}
   else if(act==='pnDef'){APP.setDefaultPersona(PE);rebuild('persona');showSaved()}
   else if(act==='pnNew'){const p={id:'p_'+Date.now().toString(36),name:'新的人设',desc:''};L.push(p);PE=p.id;APP.savePersonas();rebuild('persona');setTimeout(()=>{const i=$('stPnName');if(i){i.focus();i.select()}},60)}
   else if(act==='pnDel'){if(L.length<2)return;const i=L.findIndex(p=>p.id===PE);if(i<0)return;const was=L[i].id;L.splice(i,1);if(APP.S.personaId===was)APP.setPersona(L[0].id);PE=APP.S.personaId;APP.savePersonas();rebuild('persona');showSaved()}
@@ -703,6 +703,7 @@ root.addEventListener('click',e=>{const t=e.target;
     SRC().delKey().then(r=>{kMsg=r.ok?'已删除':(r.message||'删除失败');drawKey();setTimeout(()=>{kMsg='';drawKey()},2400)})}
   else if(act==='kUnlock'){const p=$('stPass');const v=p.value;p.value='';if(!v){kMsg='先在「加密口令」里输入口令';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400);return}kMsg='';SRC().unlock(v)}
   else if(act==='kLock'){SRC().lock();kMsg='已锁定：内存里的口令清掉了';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400)}
+  else if(act==='kPick'){if(SRC().external())SRC().openCatalogue()}
   else if(act==='kList'){if(!SRC().unlocked()){kMsg='先解锁才能拉模型列表';drawKey();setTimeout(()=>{kMsg='';drawKey()},2400);return}SRC().fetchModels()}
   else if(act==='cnDrop'){window.__trianon.mock&&window.__trianon.mock.disconnect();later(.1,drawConn)}});
 const slVal=(el,x)=>{const r=el.getBoundingClientRect();const u=cl((x-r.left)/r.width);return 12+u*6};
@@ -714,7 +715,16 @@ root.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='stKey'||
 root.addEventListener('input',e=>{const id=e.target.id;const ak=e.target.dataset&&e.target.dataset.auto;if(ak){clearTimeout(S.auT);const v=e.target.type==='number'?(+e.target.value||0):e.target.value;S.auT=setTimeout(()=>save('auto.'+ak,v),300);return}if(id==='stCss'){clearTimeout(S.cssT);const v=e.target.value;S.cssT=setTimeout(()=>save('ui.css',v),300);return}if(id!=='stPnName'&&id!=='stPnDesc')return;const p=APP.S.personas.find(x=>x.id===PE);if(!p)return;
   if(id==='stPnName'){p.name=e.target.value;const av=root.querySelector('.c3av .av-ph');if(av){av.querySelector('b').textContent=[...(p.name||'?').trim()][0]||'?';av.querySelector('em').textContent=p.name}}else p.desc=e.target.value;
   clearTimeout(S.pnT);S.pnT=setTimeout(()=>{APP.savePersonas();if(p.id===APP.S.personaId)APP.bus.emit('ui:persona');showSaved()},500)});
-root.addEventListener('change',e=>{const id=e.target.id;if(id==='stModel'){const v=e.target.value.trim();SRC().set({model:v});return}const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});
+/* 人设头像：点镜子选图，裁成正方形、缩到 256px，存在本机（跟人设一起） */
+const avIn=document.createElement('input');avIn.type='file';avIn.accept='image/*';avIn.hidden=true;document.body.appendChild(avIn);
+root.addEventListener('click',e=>{if(S.sec==='persona'&&e.target.closest('.c3av')){avIn.value='';avIn.click()}});
+avIn.addEventListener('change',()=>{const f=avIn.files&&avIn.files[0];if(!f)return;const url=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{const N=256,c=document.createElement('canvas');c.width=c.height=N;const s=Math.min(im.naturalWidth,im.naturalHeight),x=c.getContext('2d');
+    x.imageSmoothingQuality='high';x.drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,N,N);URL.revokeObjectURL(url);
+    let d=c.toDataURL('image/webp',.86);if(!d.startsWith('data:image/webp'))d=c.toDataURL('image/jpeg',.86);
+    const p=pList().find(q=>q.id===PE);if(!p)return;p.avatar=d;APP.savePersonas();APP.bus.emit('ui:persona');rebuild('persona');showSaved()};
+  im.onerror=()=>URL.revokeObjectURL(url);im.src=url});
+root.addEventListener('change',e=>{const id=e.target.id;const m={}[id];if(m)save(m,id==='stPort'?(+e.target.value||58627):e.target.value)});
 addEventListener('keydown',e=>{if(!S.open)return;
   if(e.key==='Tab'&&S.cf){const fs=[...cfL.querySelectorAll('button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length);
     if(fs.length){e.preventDefault();e.stopPropagation();const i=fs.indexOf(document.activeElement),n=e.shiftKey?(i<=0?fs.length-1:i-1):(i<0||i===fs.length-1?0:i+1);fs[n].focus({preventScroll:true})}return}
@@ -772,7 +782,10 @@ const frame=()=>{const t=sT(),k=motionK();
     /* postmark: thumped down (only on the engine page) */
     pm.style.visibility=S.sec==='engine'?'':'hidden';
     const pa=t-S.pmT;if(pm.innerHTML){const u=k?cl(pa/.16):1;pm.style.opacity=(cl(pa/.04)*(S.health.state==='fail'?.86:.84)).toFixed(3);pm.style.transform=`rotate(${S.health.state==='fail'?8:-11}deg) scale(${(k?1.6-.6*eo(u):1).toFixed(3)})`}}
+  /* 省电：设置页关着、收场动画也放完时停止逐帧刷新，打开时再叫醒 */
+  if(!anyVis){stSleep=true;return}
   requestAnimationFrame(frame)};
+let stSleep=false;const stWake=()=>{if(stSleep){stSleep=false;requestAnimationFrame(frame)}};
 
 /* ---------------------------------------------------------------- boot */
 const boot=()=>{applyPreview();requestAnimationFrame(frame)};

@@ -5,8 +5,8 @@ const chatView = (() => {
   const TH = $('thread'), SC = $('vChat');
   const nodes = new Map();          /* msgId -> { row, b, tx, who, st, rsn, rsnH, rsnB, meta } */
   const dirty = new Set();
-  const STK = ['asset:stickers/s00.png', 'asset:stickers/s01.png', 'asset:stickers/s02.png', 'asset:stickers/s03.png',
-               'asset:stickers/s04.webp', 'asset:stickers/s05.png', 'asset:stickers/s06.png', 'asset:stickers/s07.png'];
+  const STK = ['asset:stickers/s00.webp', 'asset:stickers/s01.webp', 'asset:stickers/s02.webp', 'asset:stickers/s03.png',
+               'asset:stickers/s04.webp', 'asset:stickers/s05.webp', 'asset:stickers/s06.webp', 'asset:stickers/s07.webp'];
   const hash = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
   let stick = true;                 /* 用户没往上翻时，新内容自动滚到底 */
 
@@ -47,7 +47,8 @@ const chatView = (() => {
     n.b = row.querySelector('.b'); n.tx = row.querySelector('.tx'); n.meta = row.querySelector('.meta');
     /* 头像（外观里打开才显示）：角色用角色卡头像，人设用首字 */
     const av = document.createElement('span'); av.className = 'av'; av.setAttribute('aria-hidden', 'true');
-    const src = m.role === 'assistant' ? S.char.avatar : '';
+    const pa = m.role === 'user' ? (S.personas.find(p => p.id === m.personaId) || T.app.persona() || {}) : null;
+    const src = m.role === 'assistant' ? S.char.avatar : (pa && pa.avatar) || '';
     av.innerHTML = src ? `<img src="${esc(src)}" alt="">` : `<b>${esc([...((m.role === 'user' ? m.userName || m.name : m.charName || m.name || S.char.name) || '?')][0] || '?')}</b>`;
     row.insertBefore(av, row.firstChild);
     row.dataset.name = m.role === 'user' ? (m.userName || m.name || '') : (m.charName || m.name || '');
@@ -206,7 +207,8 @@ const chatView = (() => {
       if (n && e >= 8) { const s = `<em>—</em>还在等… ${Math.floor(e)} 秒<i class="dots"><b>·</b><b>·</b><b>·</b></i>`; if (n.st.innerHTML !== s) n.st.innerHTML = s; }
     }
     if (t && t.state === 'reasoning') { const n = nodes.get(t.msgId), m = S.chat.messages.find(x => x.id === t.msgId); if (n && m) n.rsnT.textContent = (now() - m.tReason).toFixed(1) + ' s'; }
-    requestAnimationFrame(loop);
+    /* 省电：不在生成时改成每 0.1 秒看一次有没有要重绘的 */
+    if (t && ['pending', 'reasoning', 'streaming'].includes(t.state)) requestAnimationFrame(loop); else setTimeout(loop, 100);
   })();
 
   document.addEventListener('click', e => { if (!e.target.closest('.more')) document.querySelectorAll('.meta .more.open').forEach(x => x.classList.remove('open')); });
