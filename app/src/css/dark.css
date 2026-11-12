@@ -55,3 +55,8 @@ body[data-theme="dark"] #stSet .cf-scrim { background: rgba(10, 14, 32, .55); }
 @media (max-width: 760px) {
   body[data-theme="dark"] #stSet.on { background: linear-gradient(#262F52, #1E2645); }
 }
+
+/* 空白页「新的信笺」：kit_empty 不参与自动换算，单独调亮 */
+body[data-theme="dark"] #vEmpty .hall .dsep { color: rgba(214, 222, 242, .62); }
+body[data-theme="dark"] #vEmpty .hall .dsep::before { background: linear-gradient(90deg, transparent, rgba(176, 190, 228, .55)); }
+body[data-theme="dark"] #vEmpty .hall .dsep::after { background: linear-gradient(90deg, rgba(176, 190, 228, .55), transparent); }

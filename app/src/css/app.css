@@ -483,3 +483,17 @@ body.mdl-open .mdl, .mdl.anim { display: block; }
 @media (max-width: 760px) {
   input:not([type=range]):not([type=checkbox]):not([type=radio]), textarea, select { font-size: 16px !important; }
 }
+/* ===== 手机：侧栏两组接着排（不再贴底，免得和下面一组隔开、被宿主底栏挡住）；文字标签也能点 ===== */
+@media (max-width: 760px) {
+  .rail { justify-content: flex-start !important; bottom: auto !important; }
+  .rail .grp + .grp { position: relative; margin-top: 26px; padding-top: 22px; }
+  .rail .grp + .grp::before { content: ""; position: absolute; top: 0; left: 50%; width: 40px; margin-left: -20px; height: 1px; background: linear-gradient(90deg, transparent, rgba(141, 151, 180, .7), transparent); }
+  .rail .grp + .grp .orn2 { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); }
+  body.rail-open .rail .it:not(.ttip) > span { pointer-events: auto !important; cursor: var(--cu-pointer); }
+  /* 输入栏底部一行不换行：模型标签放不下就缩短，内置来源省掉后面的 intégré */
+  .field .bar { flex-wrap: nowrap !important; min-width: 0; }
+  .field .bar .pill { flex: none; }
+  .field .bar .mchip { flex: 0 1 auto; min-width: 0; }
+  .mchip .mc-m { flex: 0 1 auto; min-width: 0; max-width: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mchip.bi .mc-d, .mchip.bi .mc-t { display: none; }
+}
