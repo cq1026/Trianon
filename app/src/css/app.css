@@ -22,8 +22,26 @@ body { font-family: var(--serif); color: var(--inktext); overflow: hidden; -webk
 
 /* 外观设置 */
 .b { font-size: var(--fs, 14.5px) !important; }
-body[data-density="airy"] .row { margin-top: 34px; } body[data-density="compact"] .row { margin-top: 14px; }
-body[data-density="compact"] .b { line-height: 1.65 !important; }
+/* 界面密度：舒展 / 标准 / 紧凑 —— 行距、气泡内边距、消息间距、输入栏和各面板的留白一起变 */
+body[data-density="airy"] .row { margin-top: 38px; } body[data-density="compact"] .row { margin-top: 12px; }
+body[data-density="airy"] .dsep + .row, body[data-density="compact"] .dsep + .row { margin-top: 0; }
+body[data-density="airy"] .b { line-height: 2.02; padding: 17px 30px 18px; }
+body[data-density="airy"] .in .b { padding-bottom: 24px; }
+body[data-density="compact"] .b { line-height: 1.6; padding: 8px 18px 9px; }
+body[data-density="compact"] .in .b { padding-bottom: 12px; }
+body[data-density="airy"] .b .tx p + p { margin-top: 1em; } body[data-density="compact"] .b .tx p + p { margin-top: .4em; }
+body[data-density="airy"] .who { margin-bottom: 12px; } body[data-density="compact"] .who { margin-bottom: 4px; }
+body[data-density="airy"] .meta { margin-top: 10px; } body[data-density="compact"] .meta { margin-top: 4px; }
+body[data-density="airy"] .rsn { margin-bottom: 12px; } body[data-density="compact"] .rsn { margin-bottom: 4px; }
+body[data-density="airy"] .field { padding: 16px 20px 12px !important; } body[data-density="compact"] .field { padding: 8px 14px 6px !important; }
+body[data-density="airy"] :is(.hs-open, .lr-eh) { padding-top: 16px; padding-bottom: 16px; }
+body[data-density="compact"] :is(.hs-open, .lr-eh) { padding-top: 7px; padding-bottom: 7px; }
+body[data-density="airy"] :is(.pp-it, .slp-it, .meta .mm .lnk) { padding-top: 10px; padding-bottom: 10px; }
+body[data-density="compact"] :is(.pp-it, .slp-it, .meta .mm .lnk) { padding-top: 4px; padding-bottom: 4px; }
+body[data-density="airy"] .pl-row { min-height: 50px; } body[data-density="compact"] .pl-row { min-height: 32px; }
+body[data-density="airy"] :is(.lr-e, .pm-it) { margin-bottom: 12px; } body[data-density="compact"] :is(.lr-e, .pm-it) { margin-bottom: 4px; }
+body[data-density="airy"] .md-row { padding-top: 14px; padding-bottom: 15px; } body[data-density="compact"] .md-row { padding-top: 6px; padding-bottom: 7px; }
+body[data-density="airy"] .mp-row { min-height: 40px; } body[data-density="compact"] .mp-row { min-height: 27px; }
 body.nost .rnd, body.nost .c5-stk { display: none !important; }
 
 /* 消息 */

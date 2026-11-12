@@ -75,8 +75,12 @@
   });
 
   /* 设置生效：字号、密度、动效、贴纸 */
+  const DARKQ = matchMedia('(prefers-color-scheme: dark)');
+  DARKQ.addEventListener && DARKQ.addEventListener('change', () => applySettings());
   function applySettings() {
     const A = S.settings.appearance || {};
+    const th = A.theme === 'dark' || (A.theme === 'auto' && DARKQ.matches) ? 'dark' : 'light';
+    if (b.dataset.theme !== th) { b.dataset.theme = th; if (window.__fogRedraw && (RMQ.matches || A.motion === 'reduce')) window.__fogRedraw(); }
     root.style.setProperty('--fs', (A.fontSize || 14.5) + 'px');
     b.dataset.density = A.density || 'standard';
     b.classList.toggle('rm', RMQ.matches || A.motion === 'reduce');

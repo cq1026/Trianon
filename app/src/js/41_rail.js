@@ -31,7 +31,7 @@ const rail = (() => {
     tipS.innerHTML = it.querySelector('span').innerHTML;
     const r = it.getBoundingClientRect(), rr = R.getBoundingClientRect();
     tip.style.setProperty('--ty', (r.top - rr.top) + 'px');
-    tipS.style.transition = 'opacity .18s, transform .42s cubic-bezier(.18,1.5,.3,1)';
+    tipS.style.transition = motionK() < 1 ? 'opacity .13s, transform .3s cubic-bezier(.22,1,.36,1)' : 'opacity .18s, transform .42s cubic-bezier(.18,1.5,.3,1)';
     tipS.style.opacity = 1; tipS.style.transform = 'translate(0,-50%) scale(1)';
   };
   R.addEventListener('mouseover', e => showTip(e.target.closest('.it')));

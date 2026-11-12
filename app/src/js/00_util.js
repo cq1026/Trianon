@@ -75,3 +75,23 @@ const dayLabel = t => {
   const part = H < 5 ? '夜' : H < 11 ? '晨' : H < 14 ? '午' : H < 18 ? '午后' : H < 22 ? '晚' : '夜';
   return '今日 · ' + (d.getMonth() + 1) + '月' + d.getDate() + '日 · ' + part;
 };
+
+/* ===== 动效档位：完整 1 · 柔和 .5 · 减少 0 =====
+   柔和：动画都保留，回弹去掉、改成直接缓停，摆幅减半，时长缩短约三成。
+   CSS 里的过渡由构建脚本生成 body.soft 版本；JS 里的 Web Animations 在这里统一改。 */
+const motionK = () => document.body.classList.contains('rm') ? 0 : document.body.classList.contains('soft') ? .5 : 1;
+const SOFT_EO = 'cubic-bezier(.22,1,.36,1)';
+const softEase = e => typeof e === 'string' ? e.replace(/cubic-bezier\(([^)]*)\)/g, (m, a) => { const n = a.split(',').map(Number); return (n[1] > 1 || n[3] > 1 || n[1] < 0 || n[3] < 0) ? SOFT_EO : m; }) : e;
+{
+  const raw = Element.prototype.animate;
+  Element.prototype.animate = function (k, o) {
+    if (o && typeof o === 'object' && document.body && document.body.classList.contains('soft')) {
+      o = Object.assign({}, o);
+      if (typeof o.duration === 'number') o.duration *= .7;
+      if (o.delay) o.delay *= .7;
+      if (o.easing) o.easing = softEase(o.easing);
+      if (Array.isArray(k)) k = k.map(f => f && f.easing ? Object.assign({}, f, { easing: softEase(f.easing) }) : f);
+    }
+    return raw.call(this, k, o);
+  };
+}

@@ -88,7 +88,7 @@ const quill = (() => {
         if (dist <= v * dt) { this.x = Math.max(this.x, tx); dt -= Math.max(0, dist) / v; this.ph += Math.max(0, dist) * .32; this.reveal(); }
         else { this.x += v * dt; this.ph += v * dt * .32; dt = 0; }
       }
-      return { x: this.x, y: this.y + 1.1 * Math.sin(this.ph), h: .06, wob: Math.sin(this.ph * .7) };
+      return { x: this.x, y: this.y + (motionK() < 1 ? .55 : 1.1) * Math.sin(this.ph), h: .06, wob: Math.sin(this.ph * .7) };
     }
     hover() {
       const s = this.spans[this.ri - 1];
@@ -196,7 +196,8 @@ const quill = (() => {
         if (!pose && !target) target = s.wait.hover();
       } else finished(s);
     }
-    if (pose) { P.mode = 'work'; P.x = pose.x; P.y = pose.y; P.h += (pose.h - P.h) * ek(dt, .04); rotT = -56 + 2.2 * pose.wob; }
+    const mk = motionK() < 1 ? .5 : 1;     /* 柔和：笔尖起伏和抬笔高度减半 */
+    if (pose) { P.mode = 'work'; P.x = pose.x; P.y = pose.y; P.h += (pose.h * mk - P.h) * ek(dt, .04); rotT = -56 + 2.2 * pose.wob * mk; }
     else if (target && on) {
       P.mode = 'work'; const k = ek(dt, .2);
       P.x += (target.x - P.x) * k; P.y += (target.y - P.y) * k; P.h += (hT - P.h) * k;

@@ -1,0 +1,57 @@
+/* ===== 夜间墨蓝：人工微调（放在自动换算结果后面） =====
+   配色取自设置页镜子预览：角色气泡 #3E4A76→#37436E，用户气泡 #5A6A96→#4F5F8B，浅色字。
+   纸质素材（吊牌、怀表、拼贴卡片、贴纸、设置页纸卡）保持原样，摆在深色底上。 */
+body[data-theme="dark"] { color-scheme: dark; }
+body[data-theme="dark"] .grain { opacity: .14; }
+
+/* 气泡 */
+body[data-theme="dark"] .b, body[data-theme="dark"] .field {
+  border-color: rgba(176, 190, 228, .5) !important;
+  box-shadow: inset 0 0 0 1px rgba(214, 222, 240, .14), inset 0 0 0 4px rgba(16, 22, 44, .42), 0 16px 32px -18px rgba(0, 0, 12, .75) !important;
+}
+body[data-theme="dark"] .in .b { background: linear-gradient(180deg, #3E4A76, #37436E) !important; color: #ECEFF6 !important; }
+body[data-theme="dark"] .out .b { background: linear-gradient(180deg, #5A6A96, #4F5F8B) !important; color: #F4F1EA !important; }
+body[data-theme="dark"] .out .b::before { border-left-color: rgba(176, 190, 228, .55) !important; }
+body[data-theme="dark"] .b .tx .act { color: #B9C4E2; }
+body[data-theme="dark"] .row.out .b .tx .act { color: #DCE2F2; }
+body[data-theme="dark"] .b .say { color: inherit; }
+body[data-theme="dark"] .in code { color: #E3CF98 !important; background: rgba(255, 255, 255, .08) !important; }
+body[data-theme="dark"][data-tint="rose"] .in .b { background: linear-gradient(180deg, #5A4560, #4C3A55) !important; color: #F3E8EE !important; }
+body[data-theme="dark"][data-tint="rose"] .out .b { background: linear-gradient(180deg, #46557F, #3C4A73) !important; color: #EEF1F8 !important; }
+body[data-theme="dark"][data-tint="sauge"] .in .b { background: linear-gradient(180deg, #3E4F4A, #354540) !important; color: #E8F0EA !important; }
+body[data-theme="dark"][data-tint="sauge"] .out .b { background: linear-gradient(180deg, #57554A, #4B4940) !important; color: #F2EEE4 !important; }
+body[data-theme="dark"][data-chatstyle="document"] .thread { background: linear-gradient(#232C4B, #1E2643); }
+body[data-theme="dark"][data-chatstyle="flat"] .in .b, body[data-theme="dark"][data-chatstyle="flat"] .out .b,
+body[data-theme="dark"][data-chatstyle="document"] .in .b, body[data-theme="dark"][data-chatstyle="document"] .out .b { background: none !important; box-shadow: none !important; }
+body[data-theme="dark"] .qwait { color: rgba(220, 228, 246, .72); }
+
+/* 羽毛笔：黑色鸵鸟毛在深色底上看不清，换成月白色 */
+body[data-theme="dark"] .qpen.main img { filter: invert(.88) sepia(.18) saturate(.7) hue-rotate(180deg) brightness(1.08) drop-shadow(0 0 1px rgba(255, 255, 255, .25)); }
+body[data-theme="dark"] .qpen.sh img { opacity: .45; }
+
+/* 输入栏 */
+body[data-theme="dark"] .field { background: rgba(30, 38, 66, .82) !important; }
+body[data-theme="dark"] .field .lb2 { background: linear-gradient(rgba(42, 52, 86, .7), rgba(34, 43, 74, .7)) !important; border-color: rgba(150, 168, 214, .35) !important; }
+body[data-theme="dark"] .field::before { opacity: .16; }
+body[data-theme="dark"] .send .ci, body[data-theme="dark"] #ci { color: #ECEFF6; }
+
+/* 遮罩：白纱换成深色纱 */
+body[data-theme="dark"]::before { background: rgba(8, 12, 28, .5); }
+body[data-theme="dark"] .hist .hs-scrim, body[data-theme="dark"] .lib .lb-scrim, body[data-theme="dark"] .pvm, body[data-theme="dark"] .mscrim { background: rgba(8, 12, 28, .5) !important; }
+
+/* 提示条 */
+body[data-theme="dark"] .soon { background: #26304F; color: #E3E8F4; box-shadow: 0 10px 26px -10px rgba(0, 0, 10, .8), inset 0 0 0 1px rgba(176, 190, 228, .3); }
+
+/* 设置页：桌面换成深色，纸卡保持原样 */
+body[data-theme="dark"] #c2BoardG stop:nth-child(1) { stop-color: #2B3459; }
+body[data-theme="dark"] #c2BoardG stop:nth-child(2) { stop-color: #222A4B; }
+body[data-theme="dark"] #c2BoardG stop:nth-child(3) { stop-color: #283155; }
+body[data-theme="dark"] #stSet svg:has(#c2BoardG) > path:first-of-type { fill: rgba(176, 190, 228, .22); }
+body[data-theme="dark"] #stSet svg:has(#c2BoardG) rect[fill="url(#c2Grain)"] { opacity: .18; mix-blend-mode: soft-light; }
+body[data-theme="dark"] #stSet svg:has(#c2BoardG) text { fill: rgba(200, 212, 245, .08); }
+body[data-theme="dark"] #stSet svg:has(#c2BoardG) image { opacity: .12; }
+body[data-theme="dark"] #stSet svg:has(#c2BoardG) path[stroke^="rgba(255"] { opacity: .35; }
+body[data-theme="dark"] #stSet .cf-scrim { background: rgba(10, 14, 32, .55); }
+@media (max-width: 760px) {
+  body[data-theme="dark"] #stSet.on { background: linear-gradient(#262F52, #1E2645); }
+}

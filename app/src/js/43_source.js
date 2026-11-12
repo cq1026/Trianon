@@ -132,7 +132,7 @@ const source = (() => {
     pop.style.top = Math.round(Math.max(8, Math.min(r.top, f.top) - H - 8)) + 'px';
   };
   const pstop = () => { pAn.forEach(a => a.cancel()); pAn = []; };
-  const popFrames = () => { const f = [], N = 24, D = .5; for (let i = 0; i <= N; i++) { const t = i / N * D, u = i / N; const y = spring(.62, 15, t), r = spring(.45, 16, t);
+  const popFrames = () => { const f = [], N = 24, D = .5, sf = motionK() < 1; for (let i = 0; i <= N; i++) { const t = i / N * D, u = i / N; const y = spring(sf ? 1 : .62, 15, t) * (sf ? .5 : 1), r = spring(sf ? 1 : .45, 16, t) * (sf ? .5 : 1);
     f.push({ offset: u, opacity: Math.min(1, u * 4), transform: `translateY(${(22 * y).toFixed(2)}px) rotate(${(2.2 * r).toFixed(3)}deg) scale(${(1 - .06 * y).toFixed(4)})` }); } f[N].transform = 'none'; return f; };
   function setPop(v, fast) {
     if (v === popOpen) return; popOpen = v; pstop(); chip.classList.toggle('on', v); chip.setAttribute('aria-expanded', v); pop.setAttribute('aria-hidden', !v);
@@ -211,7 +211,7 @@ const source = (() => {
     $$('.md-star', list).forEach(s => s.addEventListener('click', e => {
       e.stopPropagation(); const r = s.closest('.md-row'), k = r.dataset.p + ':' + r.dataset.m, L = stars(), on = !L.includes(k);
       store.set('modelStars', on ? L.concat(k) : L.filter(x => x !== k)); s.setAttribute('aria-pressed', on);
-      if (on && !RM()) s.querySelector('.onn').animate([{ transform: 'scale(.3) rotate(-40deg)', opacity: 0 }, { transform: 'scale(1.42) rotate(-6deg)', opacity: 1, offset: .55 }, { transform: 'scale(1.1) rotate(-14deg)', offset: .8 }, { transform: 'rotate(-12deg) scale(1.18)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.3,.8,.4,1)' });
+      if (on && !RM()) s.querySelector('.onn').animate([{ transform: 'scale(.3) rotate(-40deg)', opacity: 0 }, { transform: motionK() < 1 ? 'scale(1.18) rotate(-12deg)' : 'scale(1.42) rotate(-6deg)', opacity: 1, offset: .55 }, { transform: motionK() < 1 ? 'scale(1.18) rotate(-12deg)' : 'scale(1.1) rotate(-14deg)', offset: .8 }, { transform: 'rotate(-12deg) scale(1.18)', opacity: 1 }], { duration: 520, easing: 'cubic-bezier(.3,.8,.4,1)' });
     }));
   }
   list.addEventListener('click', e => { const a = e.target.closest('button[data-a]'); if (!a) return; if (a.dataset.a === 'key') { setMdl(false); if (T.settings) T.settings.open('connection'); } else if (a.dataset.a === 'retry') fetchModels(); });
@@ -226,7 +226,7 @@ const source = (() => {
       setTab(external() ? 'external' : 'all'); inp.value = ''; drawList(); b.classList.add('mdl-open');
       if (external() && pass && mState === 'idle') fetchModels();
       if (RM()) { inp.focus({ preventScroll: true }); return; } mdl.classList.add('anim');
-      const f = [], N = 26, D = .55; for (let i = 0; i <= N; i++) { const t = i / N * D, u = i / N, y = spring(.7, 13, t), r = spring(.5, 14, t);
+      const f = [], N = 26, D = .55, sf = motionK() < 1; for (let i = 0; i <= N; i++) { const t = i / N * D, u = i / N, y = spring(sf ? 1 : .7, 13, t) * (sf ? .5 : 1), r = spring(sf ? 1 : .5, 14, t) * (sf ? .5 : 1);
         f.push({ offset: u, opacity: Math.min(1, u * 3.5), transform: `translateY(${(26 * y).toFixed(2)}px) rotate(${(-1.1 * r).toFixed(3)}deg) scale(${(1 - .035 * y).toFixed(4)})` }); } f[N].transform = 'none';
       mAn.push(msc.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' }));
       mAn.push(mmv.animate(f, { duration: 560, easing: 'linear' }));

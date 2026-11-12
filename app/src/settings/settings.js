@@ -434,7 +434,7 @@ const sunMoon=`<svg width="74" height="74" viewBox="-37 -37 74 74" aria-hidden="
  <path d="M17,-2 A16,16 0 1 1 1,20 A12.5,12.5 0 1 0 17,-2 Z" fill="#DCE2F1" stroke-width="1.3"/></g><g fill="#9AA8C6">${star4(24,-22,3.2)}${star4(-26,22,2.4)}</g></svg>`;
 const secAppearance=()=>{const P_=V.appearance,g='appearance';let h='';
   h+=P(g,246,114,470,262,1.6,'vellum','',{torn:'lb',cls:'deco'});
-  h+=P(g,262,124,250,34,-2,null,dymo('主题 Thème · 夜间与跟随系统即将推出','c2lt'),{cls:'c2-strip'});
+  h+=P(g,262,124,250,34,-2,null,dymo('主题 Thème · 日间 · 夜间 · 跟随系统','c2lt'),{cls:'c2-strip'});
   const TH=[['light','雾蓝日间','Brume','I',`<img class="sw-ob" src="${O.lamp}" alt="" style="width:72px">`],
             ['dark','夜间墨蓝','Encre','II',`<img class="sw-ob" src="${O.candle}" alt="" style="width:94px">`],
             ['auto','跟随系统','Système','III',`<img class="sw-ob sw-fo" src="${O.follow}" alt="" style="width:52px">`]];

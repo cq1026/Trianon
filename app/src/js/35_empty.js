@@ -136,6 +136,7 @@ function frame(t){
   const tp=peel(t,.5,.24);
   let th=0;if(t>=.74){const u=t-.74;th=14*Math.exp(-u/.62)*Math.sin(2*Math.PI*u/.86)}
   if(t>2.6){const k=Math.floor((t-2.6)/8.5),u=(t-2.6)-8.5*k;if(u<3)th+=2.4*Math.exp(-u/.8)*Math.sin(2*Math.PI*u/1.05)*(k%2?-1:1)*par}
+  th*=motionK()<1?.5:1;
   drawTag(H,th+(tp.u<1?lerp(-10,0,FLAT(tp.u)):0),tp.op,par,exu);
   tagIn.style.transform=tp.u<1?`perspective(620px) rotateX(${f(tp.rx)}deg) rotateY(${f(tp.ry)}deg) scale(${tp.sc.toFixed(4)})`:'';
   tagIn.style.filter=tp.u<1?deep(FLAT(tp.u)):HARD;
