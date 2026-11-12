@@ -48,7 +48,6 @@
   const click = () => busy() ? turn.stop() : quill.writing() ? quill.skip() : go();
   addEventListener('keydown', e => { if (e.key === 'Escape' && !busy() && quill.writing()) { e.preventDefault(); quill.skip(); } });
   send.addEventListener('click', click);
-  send.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); click(); } });
 
   function sync() {
     const b = busy() || quill.writing();
@@ -95,13 +94,33 @@
   /* 输入栏高度变化时，聊天区底边跟着走 */
   new ResizeObserver(() => stage.style.setProperty('--cH', comp.offsetHeight + 'px')).observe(comp);
 
-  /* 停止环的旋转 */
-  const arc = send.querySelector('.arc');
-  let a = 0, last = now();
-  (function spin() {
+  /* 怀表：平时指针走真实时间；生成中指针狂转，这时点它就停止；停下后指针一路往前转回真实时间 */
+  const NS = 'http://www.w3.org/2000/svg', ticks = send.querySelector('.w-ticks');
+  for (let k = 0; k < 60; k++) {
+    const big = k % 15 === 0, hr = k % 5 === 0, ln = document.createElementNS(NS, 'line'), r1 = big ? 12.2 : hr ? 13 : 14.4, r2 = 14.9, th = k * 6 * Math.PI / 180;
+    ln.setAttribute('x1', (24 + r1 * Math.sin(th)).toFixed(2)); ln.setAttribute('y1', (32 - r1 * Math.cos(th)).toFixed(2));
+    ln.setAttribute('x2', (24 + r2 * Math.sin(th)).toFixed(2)); ln.setAttribute('y2', (32 - r2 * Math.cos(th)).toFixed(2));
+    ln.setAttribute('class', big ? 'tk b' : hr ? 'tk h' : 'tk'); ticks.appendChild(ln);
+  }
+  const wMH = $('wMH'), wHH = $('wHH');
+  const realAng = () => { const d = new Date(), m = d.getMinutes() + d.getSeconds() / 60; return [m * 6, (d.getHours() % 12 + m / 60) * 30]; };
+  let [am, ah] = realAng(), last = now();
+  const fwd = (a, t) => ((t - a) % 360 + 360) % 360;          /* 只往前转到目标的角度差 */
+  (function hands() {
     const t = now(), dt = Math.min(.1, t - last); last = t;
-    if (send.classList.contains('busy') && !RMQ.matches) { a = (a + dt * 200) % 360; arc.setAttribute('transform', `rotate(${a.toFixed(1)})`); }
-    requestAnimationFrame(spin);
+    const k = motionK();
+    if (send.classList.contains('busy') && k) { am += dt * 1500 * k; ah += dt * 125 * k; }
+    else {
+      const [tm, th] = realAng(), dm = fwd(am, tm), dh = fwd(ah, th);
+      am += dm < .05 || dm > 359.9 ? 0 : dm * Math.min(1, dt * 3.2) + (dm > 2 ? dt * 40 : 0);
+      ah += dh < .05 || dh > 359.9 ? 0 : dh * Math.min(1, dt * 3.2);
+      if (fwd(am, tm) > 358) am = tm;
+    }
+    am %= 360; ah %= 360;
+    wMH.setAttribute('transform', `rotate(${am.toFixed(2)} 24 32)`); wHH.setAttribute('transform', `rotate(${ah.toFixed(2)} 24 32)`);
+    requestAnimationFrame(hands);
   })();
+  send.addEventListener('pointerdown', () => { send.classList.remove('press'); void send.offsetWidth; send.classList.add('press'); });
+  send.addEventListener('animationend', () => send.classList.remove('press'));
   fit();
 })();

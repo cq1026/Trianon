@@ -25,7 +25,7 @@ from darkgen import generate as darkgen
 DARK_FROM = ['base.css', 'kit_thread.css', 'kit_composer.css', 'kit_model.css', 'app.css']
 from softgen import generate as softgen
 css += '\n/* ---- 动效「柔和」（自动生成：时长 ×0.7、去掉回弹）---- */\n' + softgen('\n'.join(rd(os.path.join(SRC, 'css', f)) for f in CSS) + rd(os.path.join(SRC, 'settings', 'extra.css')))
-css += '\n/* ---- 夜间主题（自动换算）---- */\n' + darkgen('\n'.join(rd(os.path.join(SRC, 'css', f)) for f in DARK_FROM), skip=('#vEmpty', '.rail', '.rnd', '.qpen', 'body::before', '.send'))
+css += '\n/* ---- 夜间主题（自动换算）---- */\n' + darkgen('\n'.join(rd(os.path.join(SRC, 'css', f)) for f in DARK_FROM), skip=('#vEmpty', '.rail', '.rnd', '.qpen', 'body::before', '.send', '.watch'))
 css += '\n/* ---- 夜间主题（人工微调）---- */\n' + rd(os.path.join(SRC, 'css', 'dark.css'))
 js = '\n'.join(f'/* ---- {os.path.basename(f)} ---- */\n' + rd(f) for f in sorted(glob.glob(os.path.join(SRC, 'js', '*.js'))) + [os.path.join(SRC, 'settings', 'settings.js')])
 js = '(()=>{"use strict";\n' + js + '\n})();'

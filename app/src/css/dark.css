@@ -60,3 +60,15 @@ body[data-theme="dark"] #stSet .cf-scrim { background: rgba(10, 14, 32, .55); }
 body[data-theme="dark"] #vEmpty .hall .dsep { color: rgba(214, 222, 242, .62); }
 body[data-theme="dark"] #vEmpty .hall .dsep::before { background: linear-gradient(90deg, transparent, rgba(176, 190, 228, .55)); }
 body[data-theme="dark"] #vEmpty .hall .dsep::after { background: linear-gradient(90deg, rgba(176, 190, 228, .55), transparent); }
+
+/* 怀表：表壳银色压暗，表盘换成深墨蓝，刻度和指针换成浅色 */
+body[data-theme="dark"] .watch .w-s1 { stop-color: #C9D0DE; } body[data-theme="dark"] .watch .w-s2 { stop-color: #7D879E; }
+body[data-theme="dark"] .watch .w-s3 { stop-color: #B5BDCD; } body[data-theme="dark"] .watch .w-s4 { stop-color: #59627A; }
+body[data-theme="dark"] .watch .w-f1 { stop-color: #34406A; } body[data-theme="dark"] .watch .w-f2 { stop-color: #222B4A; }
+body[data-theme="dark"] .watch .w-bezel { stroke: rgba(255, 255, 255, .35); }
+body[data-theme="dark"] .watch .tk { stroke: rgba(214, 222, 242, .4); }
+body[data-theme="dark"] .watch .tk.h { stroke: rgba(214, 222, 242, .75); }
+body[data-theme="dark"] .watch .tk.b { stroke: #E6EBF6; }
+body[data-theme="dark"] .watch .w-hh, body[data-theme="dark"] .watch .w-mh, body[data-theme="dark"] .watch .w-cap { fill: #E9EDF7; }
+body[data-theme="dark"] .watch .w-glint { stroke: rgba(255, 255, 255, .35); }
+body[data-theme="dark"] .watch svg { filter: drop-shadow(0 3px 5px rgba(0, 0, 12, .55)); }
